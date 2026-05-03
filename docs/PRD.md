@@ -3504,6 +3504,11 @@ Docker Compose supports a full local demo stack:
 * Administrator scan and approved-version catalog guide.
 * Architecture overview.
 * Contributing guide.
+* Agent / contributor invariants (`AGENTS.md`).
+* Architecture Decision Records (`docs/adr/`).
+* Repository layout reference (`docs/dev/repo-layout.md`).
+* Versioning policy reference (`docs/dev/versioning.md`).
+* Commit conventions reference (`docs/dev/commit-conventions.md`).
 * Compatibility matrix.
 * Changelog.
 
@@ -3530,6 +3535,26 @@ Generated docs include:
 * artifact manifest
 * generation provenance
 * review summary
+
+## 19.4 Repository and contributor documentation
+
+Beyond the user-facing reference in §19.1, the repository maintains a small set of contributor and maintainer documents at well-known locations so that humans and AI assistants can orient quickly without re-reading the PRD.
+
+* `README.md` (repository root): project overview, status, and entry-point links.
+* `AGENTS.md` (repository root): invariants and conventions for humans and AI agents working in the repo. Lists architecture invariants derived from §4, §8, §9, and §17.6, banned dependencies, and the workflow rules used by maintainers (Beads issue tracking, BMAD Dev Story Workflow).
+* `CONTRIBUTING.md` (repository root): human contributor guide covering setup, build/test/lint commands, commit conventions, and PR expectations.
+* `docs/README.md`: documentation index.
+* `docs/adr/` — Architecture Decision Records. Significant architectural choices are recorded as ADRs with status, context, alternatives, and consequences. The ADR process is documented in `docs/adr/README.md`. The PRD §24 decisions table summarizes high-level decisions; ADRs explain them and record supersession.
+* `docs/dev/repo-layout.md`: the **repository** layout (distinct from the **generated consumer project** layout in §9.1).
+* `docs/dev/versioning.md`: maintainer reference for the multiple versioned compatibility surfaces in this product (engine, metadata schema, generator contract, local API contract, lockfile schema, renderer profile, policy pack, template pack).
+* `docs/dev/commit-conventions.md`: Conventional Commits guide tailored to this repo, including breaking-change marking and footer fields.
+
+Repository-conventions rules:
+
+* The PRD remains the single source of truth. Where another document conflicts with the PRD, the PRD wins, and the conflicting document is updated in the same change.
+* New architectural decisions are recorded as ADRs before they become load-bearing in code. The PRD §24 table is updated when a decision is durable enough to affect product or scope.
+* Commit messages follow Conventional Commits. Breaking changes to versioned compatibility surfaces use the `!` marker and a `BREAKING CHANGE:` footer.
+* `AGENTS.md` is kept aligned with the architecture invariants enforced by the architecture fitness tests in §17.6. If a fitness test is added or changed, `AGENTS.md` is updated in the same PR.
 
 ---
 
