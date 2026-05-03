@@ -194,16 +194,16 @@ Day-to-day work in this repo follows the **Core Flywheel** ([agent-flywheel.com/
 | Tool | Role | Skip it and… |
 | ---- | ---- | ------------ |
 | `br` (beads) | Make work **explicit** as self-contained beads with dependencies and acceptance criteria. | …work stays vague and hidden in chat. |
-| `bv` (beads viewer) | Make task choice **graph-aware** — picks the highest-leverage *ready* bead for you. | …agents pick by convenience, not impact. |
+| `bv` (beads viewer) | Make task choice **graph-aware** — use `bv --robot-plan` for graph context around the `br ready --json` ready set. | …agents pick by convenience, not impact. |
 | `mcp-agent-mail` MCP | **Externalize coordination** — agent identities, threads anchored to bead IDs, file reservations, status signals. | …agents overlap, duplicate work, and lose history. |
 
-The repeating cycle is: **route → claim → reserve → implement → fresh-eyes review → close → ask `bv` what's next**. Every step has a concrete action, and most of them are agent automatic once configured. Read the agent-flywheel page once at session start; this section is the project-specific instantiation.
+The repeating cycle is: **route → claim → reserve → implement → fresh-eyes review → close → ask `br` what's ready**. Every step has a concrete action, and most of them are agent automatic once configured. Read the agent-flywheel page once at session start; this section is the project-specific instantiation.
 
 Three properties drive the value:
 
 1. Work is **explicit** (in beads, not in chat).
 2. Coordination is **externalized** (in mcp-agent-mail, not in your head).
-3. Task choice is **graph-aware** (via `bv`, not vibes).
+3. Task choice is **graph-aware** (ready set from `br ready --json`, graph context from `bv --robot-plan`, not vibes).
 
 ### 7.3 Working a bead — the full lifecycle
 
@@ -213,10 +213,11 @@ When you start work in this repo:
 
 ```bash
 bv --robot-triage    # sanity-check the graph; surfaces orphaned/blocked beads
-bv --robot-next      # returns the highest-leverage ready bead
+br ready --json      # authoritative ready set; safe workaround for bv --robot-next
+bv --robot-plan      # optional graph context and parallel tracks
 ```
 
-If `bv --robot-next` is empty or its top recommendation doesn't match the user's request, stop and clarify before improvising.
+Use `br ready --json` as the source of truth for claimable beads. As of `bv` v0.16.0, `bv --robot-next` treats `parent-child` rollup edges as blockers and can return "No actionable items available" even when `br ready --json` lists ready beads. Until that is fixed in the pinned viewer, do not use `bv --robot-next` for routing. If `br ready --json` is empty or its ready set doesn't match the user's request, stop and clarify before improvising.
 
 **2. Open a thread and claim the bead**
 
@@ -240,7 +241,7 @@ br update know-now-42 --status in_progress
 
 Reserve before editing — a reservation is a coordination lock that prevents collision with other agents. Use `mcp__mcp-agent-mail__macro_file_reservation_cycle` (preferred) or `mcp__mcp-agent-mail__file_reservation_paths` directly. Reserve the **full** set of paths you expect to touch (source, tests, fixtures, snapshots, docs).
 
-If a reservation conflicts with another agent's, do **not** force-release. Send a thread message asking how they want to coordinate, and pick another bead in the meantime via `bv --robot-next`.
+If a reservation conflicts with another agent's, do **not** force-release. Send a thread message asking how they want to coordinate, and pick another bead in the meantime via `br ready --json`.
 
 `renew_file_reservations` extends the lock for long work. `release_file_reservations` releases on completion. `force_release_file_reservation` exists only for recovery (see §7.4).
 
@@ -300,13 +301,13 @@ Post the completion message:
 
 ```
 [know-now-42] Completed
-Commit <sha> pushed to main. Reservations released. Next: bv --robot-next.
+Commit <sha> pushed to main. Reservations released. Next: br ready --json.
 ```
 
-**9. Ask `bv` what's next**
+**9. Ask `br` what's ready**
 
 ```bash
-bv --robot-next
+br ready --json
 ```
 
 Then loop back to step 2.
@@ -381,7 +382,8 @@ message in the bead's thread addressed to the reviewer agent
 reviewer has posted `Approved` in the thread. Track progress via beads
 (br update) and per-bead agent-mail threads ([know-now-NN]). Don't get
 stuck in communication purgatory. When unsure what to work on next,
-run `bv --robot-triage` and `bv --robot-next` to prioritize. Use ultrathink.
+run `bv --robot-triage`, then use `br ready --json` as the authoritative
+ready set. Use `bv --robot-plan` for graph context. Use ultrathink.
 ```
 
 **Reviewer marching orders** — use this prompt verbatim when launching a reviewer agent.
@@ -487,7 +489,7 @@ The reviewer must not be the same agent process as the implementer. The reviewer
 2. **Implementer** runs `git pull --rebase` to absorb anything that landed on `main` in the meantime, then `git push origin main`. There is no PR — the reviewer-agent verdict in the thread is the review of record.
 3. **Implementer** closes the bead (`br close know-now-NN`) and releases file reservations (`release_file_reservations`).
 4. **Implementer** posts a Completion message in the thread (`[know-now-NN] Completed`) including the resulting commit SHA.
-5. **Implementer** asks `bv --robot-next` for the next bead.
+5. **Implementer** asks `br ready --json` for the next ready bead.
 
 #### Recovery
 
@@ -537,7 +539,7 @@ If your change requires any of these, stop and find a different approach.
 - ❌ Self-approving (issuing your own `Approved` verdict on your own implementation), or impersonating the reviewer identity.
 - ❌ Editing files without a current reservation through mcp-agent-mail (§7.3 step 3, §7.4).
 - ❌ Using `force_release_file_reservation` to win a conflict instead of coordinating in the bead's thread.
-- ❌ Picking the next bead by convenience instead of asking `bv --robot-next`.
+- ❌ Picking the next bead by convenience instead of asking `br ready --json`.
 - ❌ Using ad-hoc chat / scrollback for coordination that belongs in a `[know-now-NN]` agent-mail thread.
 - ❌ Creating a feature branch. All work lands on `main`; conflicts are prevented by mcp-agent-mail reservations (§7.6).
 - ❌ Opening a pull request. There are no PRs in this repo; the reviewer-agent verdict in the bead thread is the review of record (§7.6, §7.8).

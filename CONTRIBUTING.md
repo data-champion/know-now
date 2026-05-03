@@ -8,7 +8,7 @@ Thanks for considering a contribution. This guide focuses on **how** to contribu
 
 1. Read [`AGENTS.md`](AGENTS.md) §4 (architecture invariants) and §8 (hard "don'ts"). These are non-negotiable.
 2. Skim the PRD section relevant to your change. The PRD section index is in [`AGENTS.md`](AGENTS.md#3-where-to-find-canonical-information).
-3. Check open issues (`br q` / `br ready`) and the [decisions table](docs/PRD.md) (PRD §24) so you don't duplicate work or revisit a decided question.
+3. Check open issues (`br q` / `br ready --json`) and the [decisions table](docs/PRD.md) (PRD §24) so you don't duplicate work or revisit a decided question.
 4. For anything beyond a typo or a docs fix, open a beads issue first describing scope, intent, and PRD section. Linking the issue from your PR makes review faster.
 
 ---
@@ -158,7 +158,7 @@ The end-to-end sequence is:
    git push origin main  # never --force
    ```
 5. **Close the bead** (`br close know-now-NN`), release file reservations, and post a Completion message including the resulting commit SHA.
-6. **Pick the next bead** with `bv --robot-next`.
+6. **Pick the next bead** with `br ready --json`. Use `bv --robot-plan` for graph context while `bv --robot-next` treats `parent-child` rollup edges as blockers.
 
 Each commit must include in its body or footer:
 
