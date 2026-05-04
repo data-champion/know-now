@@ -4,4 +4,7 @@
 #![allow(clippy::missing_errors_doc)]
 
 pub mod dc_standard;
+pub mod declarative;
+pub mod discovery;
 pub mod engine;
+pub mod manifest;
