@@ -328,11 +328,11 @@ mod tests {
         assert_eq!(artifacts[0].path, ARTIFACT_PATH);
 
         let sql = &artifacts[0].content;
-        assert!(sql.contains("CREATE TABLE \"customer\""));
-        assert!(sql.contains("\"id\" INTEGER NOT NULL"));
-        assert!(sql.contains("\"email\" TEXT"));
-        assert!(sql.contains("\"active\" BOOLEAN NOT NULL"));
-        assert!(sql.contains("PRIMARY KEY (\"id\")"));
+        assert!(sql.contains("CREATE TABLE customer"));
+        assert!(sql.contains("id INTEGER NOT NULL"));
+        assert!(sql.contains("email TEXT"));
+        assert!(sql.contains("active BOOLEAN NOT NULL"));
+        assert!(sql.contains("PRIMARY KEY (id)"));
     }
 
     #[test]
@@ -470,8 +470,8 @@ mod tests {
         });
         let artifacts = gen.generate(&contract).unwrap();
         let sql = &artifacts[0].content;
-        let account_pos = sql.find("\"account\"").unwrap();
-        let customer_pos = sql.find("\"customer\"").unwrap();
+        let account_pos = sql.find("account").unwrap();
+        let customer_pos = sql.find("customer").unwrap();
         assert!(account_pos < customer_pos, "tables must be sorted");
     }
 

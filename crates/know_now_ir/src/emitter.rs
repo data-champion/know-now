@@ -59,10 +59,7 @@ fn emit_header(header: &OwnershipHeader, lines: &mut Vec<String>) {
 }
 
 fn qualified_name(schema: Option<&Identifier>, name: &Identifier) -> String {
-    schema.map_or_else(
-        || name.quoted(),
-        |s| format!("{}.{}", s.quoted(), name.quoted()),
-    )
+    schema.map_or_else(|| name.sql(), |s| format!("{}.{}", s.sql(), name.sql()))
 }
 
 fn emit_create_table(
@@ -116,7 +113,7 @@ fn emit_columns(
 ) {
     for col in &table.columns {
         let col_line = (base_line + parts.len() + 1) as u32;
-        let mut def = format!("    {} {}", col.name.quoted(), col.sql_type.sql_fragment());
+        let mut def = format!("    {} {}", col.name.sql(), col.sql_type.sql_fragment());
         if !col.nullable {
             def.push_str(" NOT NULL");
         }
@@ -136,23 +133,29 @@ fn emit_columns(
 
 fn emit_inline_constraints(table: &TableDef, parts: &mut Vec<String>) {
     if let Some(pk) = &table.primary_key {
-        let cols = join_quoted(&pk.columns);
-        parts.push(named_constraint(pk.name.as_ref(), &format!("PRIMARY KEY ({cols})")));
+        let cols = join_sql(&pk.columns);
+        parts.push(named_constraint(
+            pk.name.as_ref(),
+            &format!("PRIMARY KEY ({cols})"),
+        ));
     }
 
     for uq in &table.unique_constraints {
-        let cols = join_quoted(&uq.columns);
-        parts.push(named_constraint(uq.name.as_ref(), &format!("UNIQUE ({cols})")));
+        let cols = join_sql(&uq.columns);
+        parts.push(named_constraint(
+            uq.name.as_ref(),
+            &format!("UNIQUE ({cols})"),
+        ));
     }
 
     for fk in &table.foreign_keys {
-        let cols = join_quoted(&fk.columns);
-        let ref_cols = join_quoted(&fk.referenced_columns);
+        let cols = join_sql(&fk.columns);
+        let ref_cols = join_sql(&fk.referenced_columns);
         let ref_table = qualified_name(fk.referenced_schema.as_ref(), &fk.referenced_table);
 
         let mut constraint = String::from("    ");
         if let Some(name) = &fk.name {
-            let _ = write!(constraint, "CONSTRAINT {} ", name.quoted());
+            let _ = write!(constraint, "CONSTRAINT {} ", name.sql());
         }
         let _ = write!(
             constraint,
@@ -170,16 +173,16 @@ fn emit_inline_constraints(table: &TableDef, parts: &mut Vec<String>) {
     for ck in &table.check_constraints {
         let mut constraint = String::from("    ");
         if let Some(name) = &ck.name {
-            let _ = write!(constraint, "CONSTRAINT {} ", name.quoted());
+            let _ = write!(constraint, "CONSTRAINT {} ", name.sql());
         }
         let _ = write!(constraint, "CHECK ({})", ck.expression);
         parts.push(constraint);
     }
 }
 
-fn join_quoted(ids: &[Identifier]) -> String {
+fn join_sql(ids: &[Identifier]) -> String {
     ids.iter()
-        .map(Identifier::quoted)
+        .map(Identifier::sql)
         .collect::<Vec<_>>()
         .join(", ")
 }
@@ -187,7 +190,7 @@ fn join_quoted(ids: &[Identifier]) -> String {
 fn named_constraint(name: Option<&Identifier>, body: &str) -> String {
     name.map_or_else(
         || format!("    {body}"),
-        |n| format!("    CONSTRAINT {} {body}", n.quoted()),
+        |n| format!("    CONSTRAINT {} {body}", n.sql()),
     )
 }
 
@@ -200,12 +203,12 @@ fn emit_indexes(
     for idx in &table.indexes {
         lines.push(String::new());
         let idx_start = lines.len() as u32 + 1;
-        let cols = join_quoted(&idx.columns);
+        let cols = join_sql(&idx.columns);
         let unique_kw = if idx.unique { "UNIQUE " } else { "" };
         let on_table = qualified_name(schema, &table.name);
         lines.push(format!(
             "CREATE {unique_kw}INDEX {} ON {on_table} ({cols});",
-            idx.name.quoted(),
+            idx.name.sql(),
         ));
         let idx_end = lines.len() as u32;
         traces.push(LineTrace {
@@ -231,7 +234,7 @@ fn emit_comments(table: &TableDef, schema: Option<&Identifier>, lines: &mut Vec<
             lines.push(format!(
                 "COMMENT ON COLUMN {}.{} IS '{}';",
                 qname,
-                col.name.quoted(),
+                col.name.sql(),
                 doc.as_str().replace('\'', "''")
             ));
         }
@@ -311,10 +314,10 @@ mod tests {
     fn emits_create_table() {
         let mut stmts = vec![sample_table()];
         let result = emit_document(&mut stmts, None, &sample_header());
-        assert!(result.sql.contains("CREATE TABLE \"customer\" ("));
-        assert!(result.sql.contains("    \"id\" INTEGER NOT NULL,"));
-        assert!(result.sql.contains("    \"email\" TEXT,"));
-        assert!(result.sql.contains("    PRIMARY KEY (\"id\")"));
+        assert!(result.sql.contains("CREATE TABLE customer ("));
+        assert!(result.sql.contains("    id INTEGER NOT NULL,"));
+        assert!(result.sql.contains("    email TEXT,"));
+        assert!(result.sql.contains("    PRIMARY KEY (id)"));
         assert!(result.sql.contains(");"));
     }
 
@@ -345,8 +348,8 @@ mod tests {
             },
         ];
         let result = emit_document(&mut stmts, None, &sample_header());
-        let alpha_pos = result.sql.find("\"alpha\"").unwrap();
-        let zebra_pos = result.sql.find("\"zebra\"").unwrap();
+        let alpha_pos = result.sql.find("alpha").unwrap();
+        let zebra_pos = result.sql.find("zebra").unwrap();
         assert!(alpha_pos < zebra_pos);
     }
 
@@ -425,7 +428,7 @@ mod tests {
             metadata_entity_id: "ent_staging".into(),
         }];
         let result = emit_document(&mut stmts, None, &sample_header());
-        assert!(result.sql.contains("\"payload\" JSONB"));
+        assert!(result.sql.contains("payload JSONB"));
         assert!(!result.sql.contains("PRIMARY KEY"));
     }
 
@@ -444,7 +447,49 @@ mod tests {
             metadata_entity_id: "ent_events".into(),
         }];
         let result = emit_document(&mut stmts, Some(&schema), &sample_header());
-        assert!(result.sql.contains("CREATE TABLE \"analytics\".\"events\""));
+        assert!(result.sql.contains("CREATE TABLE analytics.events"));
+    }
+
+    #[test]
+    fn reserved_word_table_is_quoted() {
+        let mut stmts = vec![TableDef {
+            name: Identifier::new("order").unwrap(),
+            columns: vec![],
+            primary_key: None,
+            unique_constraints: vec![],
+            foreign_keys: vec![],
+            check_constraints: vec![],
+            indexes: vec![],
+            comment: None,
+            metadata_entity_id: "ent_order".into(),
+        }];
+        let result = emit_document(&mut stmts, None, &sample_header());
+        assert!(result.sql.contains("CREATE TABLE \"order\""));
+    }
+
+    #[test]
+    fn mixed_case_identifier_is_quoted() {
+        let mut stmts = vec![TableDef {
+            name: Identifier::new("Customer").unwrap(),
+            columns: vec![ColumnDef {
+                name: Identifier::new("EmailAddress").unwrap(),
+                sql_type: SqlType::Text,
+                nullable: true,
+                default: None,
+                comment: None,
+                metadata_object_id: "attr_email".into(),
+            }],
+            primary_key: None,
+            unique_constraints: vec![],
+            foreign_keys: vec![],
+            check_constraints: vec![],
+            indexes: vec![],
+            comment: None,
+            metadata_entity_id: "ent_customer".into(),
+        }];
+        let result = emit_document(&mut stmts, None, &sample_header());
+        assert!(result.sql.contains("CREATE TABLE \"Customer\""));
+        assert!(result.sql.contains("\"EmailAddress\" TEXT"));
     }
 
     #[test]
@@ -471,9 +516,7 @@ mod tests {
             metadata_entity_id: "ent_user".into(),
         }];
         let result = emit_document(&mut stmts, None, &sample_header());
-        assert!(result
-            .sql
-            .contains("CONSTRAINT \"uq_email\" UNIQUE (\"email\")"));
+        assert!(result.sql.contains("CONSTRAINT uq_email UNIQUE (email)"));
     }
 
     #[test]
@@ -506,7 +549,7 @@ mod tests {
         }];
         let result = emit_document(&mut stmts, None, &sample_header());
         assert!(result.sql.contains(
-            "CONSTRAINT \"fk_order\" FOREIGN KEY (\"order_id\") REFERENCES \"order_header\" (\"id\") ON DELETE CASCADE"
+            "CONSTRAINT fk_order FOREIGN KEY (order_id) REFERENCES order_header (id) ON DELETE CASCADE"
         ));
     }
 
@@ -539,7 +582,7 @@ mod tests {
         let result = emit_document(&mut stmts, None, &sample_header());
         assert!(result
             .sql
-            .contains("CONSTRAINT \"ck_positive_price\" CHECK (price >= 0)"));
+            .contains("CONSTRAINT ck_positive_price CHECK (price >= 0)"));
     }
 
     #[test]
@@ -569,7 +612,7 @@ mod tests {
         let result = emit_document(&mut stmts, None, &sample_header());
         assert!(result
             .sql
-            .contains("CREATE INDEX \"idx_event_created_at\" ON \"event\" (\"created_at\");"));
+            .contains("CREATE INDEX idx_event_created_at ON event (created_at);"));
     }
 
     #[test]
@@ -609,7 +652,7 @@ mod tests {
         let result = emit_document(&mut stmts, None, &sample_header());
         assert!(result
             .sql
-            .contains("COMMENT ON TABLE \"customer\" IS 'Customer master data';"));
+            .contains("COMMENT ON TABLE customer IS 'Customer master data';"));
     }
 
     #[test]
@@ -635,7 +678,7 @@ mod tests {
         let result = emit_document(&mut stmts, None, &sample_header());
         assert!(result
             .sql
-            .contains("COMMENT ON COLUMN \"customer\".\"email\" IS 'Primary contact email';"));
+            .contains("COMMENT ON COLUMN customer.email IS 'Primary contact email';"));
     }
 
     #[test]
@@ -659,9 +702,7 @@ mod tests {
             metadata_entity_id: "ent_task".into(),
         }];
         let result = emit_document(&mut stmts, None, &sample_header());
-        assert!(result
-            .sql
-            .contains("\"active\" BOOLEAN NOT NULL DEFAULT TRUE"));
+        assert!(result.sql.contains("active BOOLEAN NOT NULL DEFAULT TRUE"));
     }
 
     #[test]
@@ -690,6 +731,6 @@ mod tests {
         let result = emit_document(&mut stmts, None, &sample_header());
         assert!(result
             .sql
-            .contains("CONSTRAINT \"pk_customer\" PRIMARY KEY (\"id\")"));
+            .contains("CONSTRAINT pk_customer PRIMARY KEY (id)"));
     }
 }

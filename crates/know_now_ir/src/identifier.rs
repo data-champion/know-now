@@ -69,12 +69,114 @@ impl Identifier {
     pub fn quoted(&self) -> String {
         format!("\"{}\"", self.value)
     }
+
+    #[must_use]
+    pub fn sql(&self) -> String {
+        if needs_quoting_for_postgres(&self.value) {
+            self.quoted()
+        } else {
+            self.value.clone()
+        }
+    }
 }
 
 impl fmt::Display for Identifier {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.value)
     }
+}
+
+fn needs_quoting_for_postgres(value: &str) -> bool {
+    let is_simple_unquoted = value
+        .chars()
+        .all(|ch| ch.is_ascii_lowercase() || ch.is_ascii_digit() || ch == '_');
+
+    !is_simple_unquoted || is_reserved_keyword(value)
+}
+
+fn is_reserved_keyword(value: &str) -> bool {
+    matches!(
+        value,
+        "all"
+            | "analyse"
+            | "analyze"
+            | "and"
+            | "any"
+            | "array"
+            | "as"
+            | "asc"
+            | "asymmetric"
+            | "authorization"
+            | "between"
+            | "binary"
+            | "both"
+            | "case"
+            | "cast"
+            | "check"
+            | "collate"
+            | "column"
+            | "constraint"
+            | "create"
+            | "current_catalog"
+            | "current_date"
+            | "current_role"
+            | "current_time"
+            | "current_timestamp"
+            | "current_user"
+            | "default"
+            | "deferrable"
+            | "desc"
+            | "distinct"
+            | "do"
+            | "else"
+            | "end"
+            | "except"
+            | "false"
+            | "fetch"
+            | "for"
+            | "foreign"
+            | "from"
+            | "grant"
+            | "group"
+            | "having"
+            | "in"
+            | "initially"
+            | "intersect"
+            | "into"
+            | "leading"
+            | "limit"
+            | "localtime"
+            | "localtimestamp"
+            | "not"
+            | "null"
+            | "offset"
+            | "on"
+            | "only"
+            | "or"
+            | "order"
+            | "placing"
+            | "primary"
+            | "references"
+            | "returning"
+            | "select"
+            | "session_user"
+            | "some"
+            | "symmetric"
+            | "table"
+            | "then"
+            | "to"
+            | "trailing"
+            | "true"
+            | "union"
+            | "unique"
+            | "user"
+            | "using"
+            | "variadic"
+            | "when"
+            | "where"
+            | "window"
+            | "with"
+    )
 }
 
 #[cfg(test)]
@@ -128,6 +230,24 @@ mod tests {
     fn quoted_output() {
         let id = Identifier::new("customer").unwrap();
         assert_eq!(id.quoted(), "\"customer\"");
+    }
+
+    #[test]
+    fn sql_unquoted_for_simple_identifier() {
+        let id = Identifier::new("customer_01").unwrap();
+        assert_eq!(id.sql(), "customer_01");
+    }
+
+    #[test]
+    fn sql_quotes_reserved_keyword() {
+        let id = Identifier::new("order").unwrap();
+        assert_eq!(id.sql(), "\"order\"");
+    }
+
+    #[test]
+    fn sql_quotes_mixed_case() {
+        let id = Identifier::new("Customer").unwrap();
+        assert_eq!(id.sql(), "\"Customer\"");
     }
 
     #[test]
