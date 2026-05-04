@@ -203,6 +203,31 @@ jobs:
           npx --yes markdown-link-check README.md -c /tmp/mlc.json -q
           npx --yes markdown-link-check docs/PRD.md -c /tmp/mlc.json -q
 
+      - name: Install instructions consistency (NFR-SS5..SS7, bsf.8)
+        run: |
+          set -euo pipefail
+          missing=0
+
+          if ! grep -q 'cargo binstall' README.md; then
+            echo "README.md missing 'cargo binstall' install path (NFR-SS5)"
+            missing=1
+          fi
+
+          if ! grep -q 'cargo install --locked' README.md; then
+            echo "README.md missing 'cargo install --locked' fallback (NFR-SS6)"
+            missing=1
+          fi
+
+          if ! grep -qi 'github releases\|direct.*download\|binary download' README.md; then
+            echo "README.md missing direct binary download reference (NFR-SS7)"
+            missing=1
+          fi
+
+          if [ "$missing" -ne 0 ]; then
+            echo "Install instructions in README.md are incomplete."
+            exit 1
+          fi
+
       - name: Docs Job Summary
         if: always()
         run: |
@@ -210,6 +235,7 @@ jobs:
             echo "## Docs and Links"
             echo "- ADR index sync checked via \`cargo xtask docs check\`."
             echo "- Internal markdown links checked for AGENTS.md, README.md, and docs/PRD.md."
+            echo "- Install instructions consistency verified (NFR-SS5..SS7)."
           } >> "$GITHUB_STEP_SUMMARY"
 
   beads-hygiene:
