@@ -2,3 +2,7 @@
 name = "know_now_toolchain"
 version = "0.1.0"
 edition = "2021"
+license.workspace = true
+
+[lints]
+workspace = true
