@@ -269,7 +269,7 @@ pub fn run(ctx: &CommandContext, args: &GenerateArgs) -> anyhow::Result<()> {
         content: new_manifest.to_json_pretty().into_bytes(),
     })?;
 
-    session.validate(|_, _| Ok(()))?;
+    session.validate(validate_artifact)?;
     session.promote()?;
 
     persist_run_record(ctx, &run_id, &new_manifest)?;
@@ -692,6 +692,269 @@ fn emit_success(ctx: &CommandContext, outcome: &GenerateOutcome) -> anyhow::Resu
                 println!("  warning: {warning}");
             }
         }
+    }
+
+    Ok(())
+}
+
+fn validate_artifact(path: &Path, content: &[u8]) -> Result<(), String> {
+    let path_str = path.to_string_lossy();
+
+    if path_str == "manifest.json" {
+        return Ok(());
+    }
+
+    let text = std::str::from_utf8(content).map_err(|e| format!("invalid UTF-8: {e}"))?;
+
+    if path_str.ends_with(".sql") {
+        validate_sql(text, &path_str)?;
+    } else if path_str.ends_with(".yml") || path_str.ends_with(".yaml") {
+        validate_yaml(text, &path_str)?;
+    } else if path_str.ends_with(".json") {
+        validate_json(text, &path_str)?;
+    } else if path_str.ends_with(".mmd") {
+        validate_mermaid(text, &path_str)?;
+    } else if path_str.ends_with(".md") {
+        validate_markdown_links(text, &path_str)?;
+    }
+
+    Ok(())
+}
+
+fn validate_sql(text: &str, path: &str) -> Result<(), String> {
+    let cleaned = strip_ownership_comment(text);
+
+    if cleaned.trim().is_empty() {
+        return Ok(());
+    }
+
+    if cleaned.contains("{%") || cleaned.contains("{{") {
+        return validate_dbt_sql(cleaned, path);
+    }
+
+    let dialect = sqlparser::dialect::PostgreSqlDialect {};
+    sqlparser::parser::Parser::parse_sql(&dialect, cleaned)
+        .map_err(|e| format!("{path}: SQL parse error: {e}"))?;
+    Ok(())
+}
+
+fn validate_dbt_sql(text: &str, path: &str) -> Result<(), String> {
+    let stripped = strip_jinja(text);
+
+    if stripped.trim().is_empty() || stripped.trim() == "select" || stripped.trim() == "select *" {
+        return Ok(());
+    }
+
+    let dialect = sqlparser::dialect::PostgreSqlDialect {};
+    match sqlparser::parser::Parser::parse_sql(&dialect, &stripped) {
+        Ok(_) => Ok(()),
+        Err(_) => {
+            if has_balanced_jinja(text) {
+                Ok(())
+            } else {
+                Err(format!("{path}: unbalanced Jinja blocks"))
+            }
+        }
+    }
+}
+
+fn strip_jinja(text: &str) -> String {
+    let mut result = String::with_capacity(text.len());
+    let mut chars = text.chars().peekable();
+    while let Some(c) = chars.next() {
+        if c == '{' && matches!(chars.peek(), Some('%' | '{')) {
+            let close = if chars.peek() == Some(&'%') {
+                "%}"
+            } else {
+                "}}"
+            };
+            chars.next();
+            let mut block = String::new();
+            let mut found_close = false;
+            for ch in chars.by_ref() {
+                block.push(ch);
+                if block.ends_with(close) {
+                    found_close = true;
+                    break;
+                }
+            }
+            if !found_close {
+                result.push_str("__jinja__");
+                continue;
+            }
+            if close == "}}" {
+                result.push_str("__placeholder__");
+            }
+        } else {
+            result.push(c);
+        }
+    }
+    result
+}
+
+fn has_balanced_jinja(text: &str) -> bool {
+    let open_expr = text.matches("{{").count();
+    let close_expr = text.matches("}}").count();
+    let open_block = text.matches("{%").count();
+    let close_block = text.matches("%}").count();
+    open_expr == close_expr && open_block == close_block
+}
+
+fn strip_ownership_comment(text: &str) -> &str {
+    let trimmed = text.trim_start();
+    if trimmed.starts_with("--") {
+        trimmed
+            .find('\n')
+            .map_or("", |pos| &trimmed[pos + 1..])
+    } else {
+        text
+    }
+}
+
+fn validate_yaml(text: &str, path: &str) -> Result<(), String> {
+    let cleaned = strip_yaml_ownership_comment(text);
+    if cleaned.trim().is_empty() {
+        return Ok(());
+    }
+
+    let mut valid_lines = 0;
+    let mut in_multiline = false;
+    for line in cleaned.lines() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() || trimmed.starts_with('#') {
+            continue;
+        }
+        if in_multiline {
+            if !line.starts_with(' ') && !line.starts_with('\t') {
+                in_multiline = false;
+            } else {
+                valid_lines += 1;
+                continue;
+            }
+        }
+        if trimmed.ends_with(": |") || trimmed.ends_with(": >") {
+            in_multiline = true;
+        }
+        if trimmed.starts_with("- ") || trimmed.contains(": ") || trimmed.ends_with(':') {
+            valid_lines += 1;
+        }
+    }
+
+    if valid_lines == 0 && !cleaned.trim().is_empty() {
+        return Err(format!("{path}: YAML appears to have no valid entries"));
+    }
+
+    Ok(())
+}
+
+fn strip_yaml_ownership_comment(text: &str) -> &str {
+    let trimmed = text.trim_start();
+    if trimmed.starts_with('#') {
+        trimmed
+            .find('\n')
+            .map_or("", |pos| &trimmed[pos + 1..])
+    } else {
+        text
+    }
+}
+
+fn validate_json(text: &str, path: &str) -> Result<(), String> {
+    serde_json::from_str::<serde_json::Value>(text)
+        .map_err(|e| format!("{path}: JSON parse error: {e}"))?;
+    Ok(())
+}
+
+fn validate_mermaid(text: &str, path: &str) -> Result<(), String> {
+    let cleaned = text.trim();
+    if cleaned.is_empty() {
+        return Ok(());
+    }
+
+    let first_line = cleaned.lines().next().unwrap_or("").trim();
+
+    let valid_starts = [
+        "erDiagram",
+        "flowchart",
+        "graph",
+        "sequenceDiagram",
+        "classDiagram",
+        "stateDiagram",
+        "gantt",
+        "pie",
+        "gitgraph",
+    ];
+
+    if !valid_starts.iter().any(|s| first_line.starts_with(s)) {
+        return Err(format!(
+            "{path}: Mermaid diagram must start with a valid diagram type, found: '{first_line}'"
+        ));
+    }
+
+    let mut brace_depth: i32 = 0;
+    for line in cleaned.lines() {
+        let trimmed_line = line.trim();
+        let is_relationship = trimmed_line.contains("--")
+            && (trimmed_line.starts_with('}') || trimmed_line.contains("||") || trimmed_line.contains("o{"));
+        if is_relationship {
+            continue;
+        }
+        for c in trimmed_line.chars() {
+            match c {
+                '{' => brace_depth += 1,
+                '}' => brace_depth -= 1,
+                _ => {}
+            }
+        }
+        if brace_depth < 0 {
+            return Err(format!("{path}: unbalanced braces in Mermaid diagram"));
+        }
+    }
+    if brace_depth != 0 {
+        return Err(format!(
+            "{path}: unbalanced braces in Mermaid diagram (depth: {brace_depth})"
+        ));
+    }
+
+    Ok(())
+}
+
+fn validate_markdown_links(text: &str, path: &str) -> Result<(), String> {
+    let mut warnings = Vec::new();
+    for (line_no, line) in text.lines().enumerate() {
+        let mut chars = line.chars().peekable();
+        while let Some(c) = chars.next() {
+            if c == '[' {
+                let mut link_text = String::new();
+                let mut found_close = false;
+                for ch in chars.by_ref() {
+                    if ch == ']' {
+                        found_close = true;
+                        break;
+                    }
+                    link_text.push(ch);
+                }
+                if found_close && chars.peek() == Some(&'(') {
+                    chars.next();
+                    let mut url = String::new();
+                    for ch in chars.by_ref() {
+                        if ch == ')' {
+                            break;
+                        }
+                        url.push(ch);
+                    }
+                    if url.is_empty() {
+                        warnings.push(format!(
+                            "{path}:{}: empty link target for [{link_text}]",
+                            line_no + 1
+                        ));
+                    }
+                }
+            }
+        }
+    }
+
+    if !warnings.is_empty() {
+        return Err(warnings.join("; "));
     }
 
     Ok(())
