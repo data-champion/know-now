@@ -90,7 +90,7 @@ export class ApiError extends Error {
   readonly path: string;
 
   constructor(status: number, path: string) {
-    super(`API request failed: ${path} returned ${status}`);
+    super(`API request failed: ${path} returned ${String(status)}`);
     this.name = "ApiError";
     this.status = status;
     this.path = path;
