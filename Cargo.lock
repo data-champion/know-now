@@ -693,6 +693,7 @@ dependencies = [
  "know_now_contract",
  "know_now_core",
  "know_now_diagnostics",
+ "know_now_diff",
  "know_now_gen_dbt",
  "know_now_gen_docs",
  "know_now_gen_er",
@@ -763,6 +764,11 @@ dependencies = [
 [[package]]
 name = "know_now_diff"
 version = "0.1.0"
+dependencies = [
+ "know_now_contract",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "know_now_fitness"

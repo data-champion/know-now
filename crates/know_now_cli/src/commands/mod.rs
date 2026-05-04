@@ -1,5 +1,6 @@
 pub mod check;
 pub mod config;
+pub mod diff;
 pub mod examples;
 pub mod generate;
 pub mod id;

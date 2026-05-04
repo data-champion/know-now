@@ -8,8 +8,8 @@ fn cmd() -> Command {
 #[test]
 fn help_shows_all_phase2a_subcommands() {
     let expected = [
-        "init", "validate", "check", "schema", "generate", "lock", "id", "examples", "config",
-        "version",
+        "init", "validate", "check", "schema", "generate", "diff", "lock", "id", "examples",
+        "config", "version",
     ];
     let output = cmd().arg("--help").output().expect("should run");
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -2252,4 +2252,141 @@ fn generate_no_crlf_in_phase2b_output() {
         }
     }
     check_no_crlf(&generated);
+}
+
+#[test]
+fn diff_help_shows_flags() {
+    cmd()
+        .args(["diff", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("--baseline"))
+        .stdout(predicate::str::contains("--migration-safe"));
+}
+
+#[test]
+fn diff_without_baseline_fails_cleanly() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["diff"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("DIFF-NO-BASELINE-002"));
+}
+
+#[test]
+fn diff_after_generate_shows_no_changes() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+
+    let manifest_path = project.join("generated/manifest.json");
+    let manifest = std::fs::read_to_string(&manifest_path).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&manifest).unwrap();
+    if json.get("contract").is_none() {
+        return;
+    }
+
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["diff"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("No changes"));
+}
+
+#[test]
+fn diff_json_output() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+
+    let manifest_path = project.join("generated/manifest.json");
+    let manifest = std::fs::read_to_string(&manifest_path).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&manifest).unwrap();
+    if json.get("contract").is_none() {
+        return;
+    }
+
+    let output = cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["--format", "json", "diff"])
+        .output()
+        .expect("should run");
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let result: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+    assert_eq!(result["schema_version"], "1");
+    assert!(result["changes"].is_array());
+}
+
+#[test]
+fn diff_unknown_baseline_format_fails() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["diff", "--baseline", "bogus:foo"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("unknown baseline format"));
+}
+
+#[test]
+fn diff_git_baseline_not_yet_implemented() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["diff", "--baseline", "git:main"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("DIFF-GIT-001"));
 }

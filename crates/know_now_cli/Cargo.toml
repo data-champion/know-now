@@ -26,6 +26,7 @@ clap = { version = "4.5.51", features = ["derive"] }
 know_now_codegen = { version = "0.1.0", path = "../know_now_codegen" }
 know_now_contract = { version = "0.1.0", path = "../know_now_contract" }
 know_now_core = { version = "0.1.0", path = "../know_now_core" }
+know_now_diff = { version = "0.1.0", path = "../know_now_diff" }
 know_now_diagnostics = { version = "0.1.0", path = "../know_now_diagnostics" }
 know_now_gen_dbt = { version = "0.1.0", path = "../know_now_gen_dbt" }
 know_now_gen_docs = { version = "0.1.0", path = "../know_now_gen_docs" }

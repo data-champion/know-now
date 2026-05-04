@@ -5,7 +5,7 @@ use std::time::Duration;
 use clap::{Parser, Subcommand};
 
 use know_now_cli::commands::{
-    check, config, examples, generate, id, init, lock, schema, validate, version,
+    check, config, diff, examples, generate, id, init, lock, schema, validate, version,
 };
 use know_now_cli::context::CommandContext;
 use know_now_cli::exit_code;
@@ -60,6 +60,9 @@ enum Command {
 
     /// Generate artifacts from validated metadata
     Generate(generate::GenerateArgs),
+
+    /// Compare current metadata against a baseline
+    Diff(diff::DiffArgs),
 
     /// Lockfile operations
     #[command(subcommand)]
@@ -121,6 +124,7 @@ fn main() {
         Command::Check(args) => check::run(&ctx, args),
         Command::Schema(args) => schema::run(&ctx, args),
         Command::Generate(args) => generate::run(&ctx, args),
+        Command::Diff(args) => diff::run(&ctx, args),
         Command::Lock(cmd) => lock::run(&ctx, cmd),
         Command::Id(cmd) => id::run(&ctx, cmd),
         Command::Examples(cmd) => examples::run(&ctx, cmd),
