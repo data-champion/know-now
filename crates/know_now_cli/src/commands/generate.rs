@@ -102,11 +102,6 @@ pub fn run(ctx: &CommandContext, args: &GenerateArgs) -> anyhow::Result<()> {
             "Phase 3 feature: --migration-safe is not available in Phase 2A (track via S_P3_DIFF / S_P3_MIGRATIONS)",
         );
     }
-    if args.changed {
-        usage_error(
-            "Phase 3 feature: --changed is not available in Phase 2A (track via S_P3_DIFF / S_P3_MIGRATIONS)",
-        );
-    }
 
     let targets = resolve_targets(args);
 
@@ -144,6 +139,43 @@ pub fn run(ctx: &CommandContext, args: &GenerateArgs) -> anyhow::Result<()> {
         .ok_or_else(|| anyhow::anyhow!("project graph unavailable after validation"))?;
     let contract = know_now_core::projection::project_graph_to_contract(&graph);
 
+    let knownow_dir = ctx.project_root.join(".knownow");
+    let cache_store = know_now_toolchain::cache::CacheStore::new(&knownow_dir);
+    let metadata_hash =
+        know_now_toolchain::cache::sha256_bytes(&serde_json::to_vec(&metadata)?);
+    let contract_hash =
+        know_now_toolchain::cache::sha256_bytes(&serde_json::to_vec(&contract)?);
+    let graph_hash = contract_hash.clone();
+
+    let cache_decision = if args.no_cache {
+        None
+    } else {
+        cache_store.load().map(|cache| {
+            if args.changed {
+                let changed_ids = compute_changed_object_ids(ctx, &contract);
+                know_now_toolchain::cache::evaluate_incremental_cache(&cache, &changed_ids)
+            } else {
+                know_now_toolchain::cache::evaluate_cache(
+                    &cache,
+                    &metadata_hash,
+                    &graph_hash,
+                    &contract_hash,
+                )
+            }
+        })
+    };
+
+    let cache_hit = cache_decision
+        .as_ref()
+        .is_some_and(|d| d.reason == know_now_toolchain::cache::CacheHitReason::FullHit);
+
+    if cache_hit && !args.changed {
+        if ctx.verbose {
+            eprintln!("Cache hit: all artifacts up-to-date, skipping generation");
+        }
+        return Ok(());
+    }
+
     let generated_artifacts = run_generators(&contract, &targets)?;
     let planned_artifacts = build_plan(&generated_artifacts);
 
@@ -165,7 +197,6 @@ pub fn run(ctx: &CommandContext, args: &GenerateArgs) -> anyhow::Result<()> {
     }
 
     let target_dir = ctx.project_root.join("generated");
-    let knownow_dir = ctx.project_root.join(".knownow");
 
     let mut warnings = diagnostics_to_warnings(&diagnostics);
     match check_for_manual_edits(&target_dir, args.accept_generated_overwrite) {
@@ -274,6 +305,16 @@ pub fn run(ctx: &CommandContext, args: &GenerateArgs) -> anyhow::Result<()> {
 
     persist_run_record(ctx, &run_id, &new_manifest)?;
 
+    if !args.no_cache {
+        save_generation_cache(
+            &cache_store,
+            &metadata_hash,
+            &graph_hash,
+            &contract_hash,
+            &generated_artifacts,
+        );
+    }
+
     emit_success(
         ctx,
         &GenerateOutcome {
@@ -294,6 +335,57 @@ pub fn run(ctx: &CommandContext, args: &GenerateArgs) -> anyhow::Result<()> {
 fn usage_error(message: &str) -> ! {
     eprintln!("error: {message}");
     std::process::exit(crate::exit_code::USAGE_ERROR);
+}
+
+fn save_generation_cache(
+    cache_store: &know_now_toolchain::cache::CacheStore,
+    metadata_hash: &str,
+    graph_hash: &str,
+    contract_hash: &str,
+    artifacts: &[CodegenArtifact],
+) {
+    use std::collections::BTreeMap;
+    use know_now_toolchain::cache::{build_cache, sha256_bytes, CachedArtifact};
+
+    let mut cached_artifacts = BTreeMap::new();
+    for artifact in artifacts {
+        let output_hash = sha256_bytes(artifact.content.as_bytes());
+        cached_artifacts.insert(
+            artifact.artifact_id.clone(),
+            CachedArtifact {
+                generator: artifact.generator.clone(),
+                input_hash: contract_hash.to_owned(),
+                output_hash,
+                metadata_object_ids: artifact.metadata_object_ids.clone(),
+            },
+        );
+    }
+
+    let cache = build_cache(metadata_hash, graph_hash, contract_hash, cached_artifacts);
+    let _ = cache_store.save(&cache);
+}
+
+fn compute_changed_object_ids(
+    ctx: &CommandContext,
+    _contract: &GeneratorContract,
+) -> Vec<String> {
+    let manifest_path = ctx.project_root.join("generated/manifest.json");
+    if !manifest_path.exists() {
+        return vec![];
+    }
+
+    let Ok(content) = std::fs::read_to_string(&manifest_path) else {
+        return vec![];
+    };
+    let Ok(manifest) = ManifestV1::from_json(&content) else {
+        return vec![];
+    };
+
+    manifest
+        .artifacts
+        .iter()
+        .flat_map(|a| a.metadata_object_ids.iter().cloned())
+        .collect()
 }
 
 fn resolve_targets(args: &GenerateArgs) -> Vec<GenerateTarget> {

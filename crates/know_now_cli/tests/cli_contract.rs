@@ -1622,7 +1622,7 @@ fn version_capabilities_quiet_produces_no_output() {
 // ── generate command tests ───────────────────────────────────
 
 #[test]
-fn generate_phase3_changed_flag_rejected() {
+fn generate_changed_flag_accepted() {
     let tmp = tempfile::tempdir().expect("tempdir");
     cmd()
         .args(["--project"])
@@ -1635,8 +1635,7 @@ fn generate_phase3_changed_flag_rejected() {
         .arg(tmp.path().join("demo-project"))
         .args(["generate", "--changed"])
         .assert()
-        .code(predicate::eq(2))
-        .stderr(predicate::str::contains("Phase 3 feature"));
+        .success();
 }
 
 #[test]
