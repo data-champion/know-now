@@ -2,8 +2,10 @@
 //!
 //! Responsibility is defined in PRD section 8.2 (workspace layout).
 
+pub mod edit_detection;
 pub mod generation;
 pub mod manifest;
 pub mod manifest_builder;
+pub mod ownership;
 pub mod path_safety;
 pub mod staging;
