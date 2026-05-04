@@ -9,7 +9,7 @@ use know_now_codegen::generator::{GenerationError, Generator};
 use know_now_contract::contract::GeneratorContract;
 use know_now_ir::ddl::{ColumnDef, OwnershipHeader, PrimaryKeyConstraint, TableDef};
 use know_now_ir::emitter;
-use know_now_ir::identifier::Identifier;
+use know_now_ir::identifier::{Identifier, IdentifierError};
 use sqlparser::dialect::PostgreSqlDialect;
 use sqlparser::parser::Parser;
 
@@ -112,7 +112,7 @@ fn build_table(
         Ok(id) => id,
         Err(e) => {
             return Err(vec![GenerationError {
-                code: "GEN-PG-IDENT".into(),
+                code: identifier_error_code(&e).into(),
                 message: format!("invalid table name '{}': {e}", entity.name),
             }]);
         }
@@ -124,7 +124,7 @@ fn build_table(
             Ok(id) => id,
             Err(e) => {
                 errors.push(GenerationError {
-                    code: "GEN-PG-IDENT".into(),
+                    code: identifier_error_code(&e).into(),
                     message: format!(
                         "invalid column name '{}' on entity '{}': {e}",
                         attr.name, entity.name
@@ -190,7 +190,7 @@ fn build_primary_key(
             match Identifier::new(key) {
                 Ok(id) => pk_cols.push(id),
                 Err(e) => errors.push(GenerationError {
-                    code: "GEN-PG-IDENT".into(),
+                    code: identifier_error_code(&e).into(),
                     message: format!(
                         "invalid business key column '{key}' on entity '{entity_name}': {e}"
                     ),
@@ -212,6 +212,10 @@ fn build_primary_key(
         name: None,
         columns: pk_cols,
     }))
+}
+
+fn identifier_error_code(error: &IdentifierError) -> &'static str {
+    error.code()
 }
 
 fn validate_sql(sql: &str) -> Result<(), String> {
@@ -384,7 +388,7 @@ mod tests {
         let mut contract = minimal_contract();
         contract.entities[0].name = "invalid-name".into();
         let err = gen.generate(&contract).unwrap_err();
-        assert!(err[0].code.contains("GEN-PG-IDENT"));
+        assert!(err[0].code.starts_with("META-IDENT-"));
     }
 
     #[test]
@@ -530,7 +534,7 @@ mod tests {
         contract.entities[0].name = "invalid-name".into();
         let err = gen.generate(&contract).unwrap_err();
         assert!(
-            err.iter().any(|e| e.code.contains("GEN-PG-IDENT")),
+            err.iter().any(|e| e.code.starts_with("META-IDENT-")),
             "should reject invalid identifier before it reaches the writer"
         );
     }

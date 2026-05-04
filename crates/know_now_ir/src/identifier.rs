@@ -1,6 +1,7 @@
 use std::fmt;
 
 use serde::{Deserialize, Serialize};
+use unicode_normalization::UnicodeNormalization;
 
 const MAX_PG_IDENTIFIER_LEN: usize = 63;
 
@@ -15,6 +16,7 @@ pub enum IdentifierError {
     TooLong { len: usize },
     ContainsNul,
     PathTraversal,
+    NonNfc { normalized: String },
     ContainsNewline { pos: usize },
     ContainsControlChar { ch: char, pos: usize },
     NonAscii { ch: char, pos: usize },
@@ -30,6 +32,7 @@ impl IdentifierError {
             Self::TooLong { .. } => "META-IDENT-TOO-LONG",
             Self::ContainsNul => "META-IDENT-NUL",
             Self::PathTraversal => "META-IDENT-PATH-TRAVERSAL",
+            Self::NonNfc { .. } => "META-IDENT-NON-NFC",
             Self::ContainsNewline { .. } => "META-IDENT-NEWLINE",
             Self::ContainsControlChar { .. } => "META-IDENT-CONTROL-CHAR",
             Self::NonAscii { .. } => "META-IDENT-NON-ASCII",
@@ -51,6 +54,10 @@ impl fmt::Display for IdentifierError {
             Self::PathTraversal => {
                 write!(f, "identifier contains path-traversal segment '..'")
             }
+            Self::NonNfc { normalized } => write!(
+                f,
+                "identifier must be NFC-normalized (normalized form: '{normalized}')"
+            ),
             Self::ContainsNewline { pos } => {
                 write!(f, "identifier contains newline at position {pos}")
             }
@@ -99,6 +106,10 @@ impl Identifier {
         }
         if value.contains("..") {
             return Err(IdentifierError::PathTraversal);
+        }
+        let normalized = value.nfc().collect::<String>();
+        if normalized != value {
+            return Err(IdentifierError::NonNfc { normalized });
         }
         for (pos, ch) in value.chars().enumerate() {
             if ch == '\n' || ch == '\r' {
@@ -337,7 +348,8 @@ mod tests {
         // NFD form: 'e' + combining acute accent (U+0301)
         let nfd = "caf\u{0065}\u{0301}";
         let err = Identifier::new(nfd).unwrap_err();
-        assert!(matches!(err, IdentifierError::NonAscii { .. }));
+        assert!(matches!(err, IdentifierError::NonNfc { .. }));
+        assert_eq!(err.code(), "META-IDENT-NON-NFC");
     }
 
     #[test]
@@ -423,6 +435,12 @@ mod tests {
                 "META-IDENT-NEWLINE",
             ),
             (
+                IdentifierError::NonNfc {
+                    normalized: "café".into(),
+                },
+                "META-IDENT-NON-NFC",
+            ),
+            (
                 IdentifierError::ContainsControlChar { ch: '\x07', pos: 0 },
                 "META-IDENT-CONTROL-CHAR",
             ),
@@ -451,6 +469,11 @@ mod tests {
         assert!(IdentifierError::PathTraversal
             .to_string()
             .contains("path-traversal"));
+        assert!(IdentifierError::NonNfc {
+            normalized: "café".into()
+        }
+        .to_string()
+        .contains("NFC-normalized"));
         assert!(IdentifierError::ContainsNewline { pos: 5 }
             .to_string()
             .contains("newline"));
