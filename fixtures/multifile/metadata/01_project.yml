@@ -1,0 +1,19 @@
+version: "1.0"
+project:
+  name: multifile_demo
+  description: Multi-file fixture for discovery testing
+  owner: data-team
+  tags:
+    - demo
+    - multifile
+target_database:
+  kind: postgres
+  version: "16"
+domains:
+  - id: sales
+    name: Sales
+    description: Sales domain
+modules:
+  - id: core
+    name: Core
+    description: Core module

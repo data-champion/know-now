@@ -1,0 +1,19 @@
+version: "1.0"
+relationships:
+  - from_entity: order
+    to_entity: customer
+    cardinality: many_to_one
+    from_key: customer_id
+    to_key: id
+    description: Order belongs to customer
+sources:
+  - name: crm
+    kind: postgres
+    description: CRM database
+    entities:
+      - customer
+      - order
+governance:
+  data_owner: data-team
+  data_steward: jane
+  classification_default: internal

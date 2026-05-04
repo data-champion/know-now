@@ -90,6 +90,11 @@ impl SourceSpanIndex {
     pub fn yaml_path_count(&self) -> usize {
         self.by_yaml_path.len()
     }
+
+    pub fn merge_from(&mut self, other: Self) {
+        self.by_object_id.extend(other.by_object_id);
+        self.by_yaml_path.extend(other.by_yaml_path);
+    }
 }
 
 #[cfg(test)]

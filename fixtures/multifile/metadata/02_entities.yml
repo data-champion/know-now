@@ -1,0 +1,38 @@
+version: "1.0"
+entities:
+  - name: customer
+    domain: sales
+    module: core
+    description: Customer entity
+    business_key:
+      - email
+    attributes:
+      - name: id
+        logical_type: integer
+        required: true
+        unique: true
+      - name: email
+        logical_type: string
+        semantic_type: email
+        required: true
+      - name: name
+        logical_type: string
+  - name: order
+    domain: sales
+    module: core
+    description: Order entity
+    business_key:
+      - order_number
+    attributes:
+      - name: id
+        logical_type: integer
+        required: true
+        unique: true
+      - name: order_number
+        logical_type: string
+        required: true
+      - name: customer_id
+        logical_type: integer
+        required: true
+      - name: total
+        logical_type: decimal

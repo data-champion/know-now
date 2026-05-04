@@ -7,6 +7,7 @@ license.workspace = true
 [dependencies]
 know_now_codegen = { version = "0.1.0", path = "../know_now_codegen" }
 know_now_contract = { version = "0.1.0", path = "../know_now_contract" }
+know_now_metadata = { version = "0.1.0", path = "../know_now_metadata" }
 know_now_validate = { version = "0.1.0", path = "../know_now_validate" }
 
 [dev-dependencies]
