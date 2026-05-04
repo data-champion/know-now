@@ -10,6 +10,7 @@ pub mod init;
 pub mod issues;
 pub mod lock;
 pub mod schema;
+pub mod support;
 pub mod validate;
 pub mod version;
 

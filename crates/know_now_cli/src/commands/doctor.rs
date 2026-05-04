@@ -14,7 +14,7 @@ pub struct DoctorArgs {
 }
 
 #[derive(Debug, Clone, Serialize)]
-struct DoctorReport {
+pub struct DoctorReport {
     doctor_schema_version: String,
     engine: EngineInfo,
     project: ProjectInfo,
@@ -101,24 +101,22 @@ struct SecurityWarning {
 }
 
 #[derive(Debug, Clone, Serialize)]
-struct Finding {
+pub struct Finding {
     severity: String,
     code: String,
     message: String,
 }
 
-pub fn run(ctx: &CommandContext, _args: &DoctorArgs) -> anyhow::Result<()> {
-    let mut findings = Vec::new();
-
+pub fn collect_report(ctx: &CommandContext, _args: &DoctorArgs, findings: &mut Vec<Finding>) -> DoctorReport {
     let engine = EngineInfo {
         version: env!("CARGO_PKG_VERSION").into(),
         os: std::env::consts::OS.into(),
         arch: std::env::consts::ARCH.into(),
     };
 
-    let project = check_project(ctx, &mut findings);
-    let lockfile = check_lockfile(ctx, &mut findings);
-    let policy = check_policy(ctx, &mut findings);
+    let project = check_project(ctx, findings);
+    let lockfile = check_lockfile(ctx, findings);
+    let policy = check_policy(ctx, findings);
     let target_database = check_target_database(ctx);
     let dbt_validation = check_dbt_validation(ctx);
     let generators = check_generators();
@@ -126,7 +124,7 @@ pub fn run(ctx: &CommandContext, _args: &DoctorArgs) -> anyhow::Result<()> {
     let last_generation = check_last_generation(ctx);
     let security_warnings = check_security(ctx);
 
-    let report = DoctorReport {
+    DoctorReport {
         doctor_schema_version: "1.0".into(),
         engine,
         project,
@@ -143,7 +141,12 @@ pub fn run(ctx: &CommandContext, _args: &DoctorArgs) -> anyhow::Result<()> {
         last_generation,
         security_warnings,
         findings: findings.clone(),
-    };
+    }
+}
+
+pub fn run(ctx: &CommandContext, args: &DoctorArgs) -> anyhow::Result<()> {
+    let mut findings = Vec::new();
+    let report = collect_report(ctx, args, &mut findings);
 
     let error_count = findings.iter().filter(|f| f.severity == "error").count();
     let warning_count = findings

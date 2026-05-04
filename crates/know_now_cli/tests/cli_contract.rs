@@ -9,7 +9,7 @@ fn cmd() -> Command {
 fn help_shows_all_phase2a_subcommands() {
     let expected = [
         "init", "validate", "check", "schema", "generate", "diff", "doctor", "explain", "issues",
-        "lock", "id", "examples", "config", "version",
+        "lock", "id", "examples", "support", "config", "version",
     ];
     let output = cmd().arg("--help").output().expect("should run");
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -2784,4 +2784,159 @@ fn issues_roundtrip_snooze() {
         .success()
         .stdout(predicate::str::contains("test-002"))
         .stdout(predicate::str::contains("waiting for review"));
+}
+
+// ── support ──────────────────────────────────────────────────────────
+
+#[test]
+fn support_help_shows_flags() {
+    cmd()
+        .args(["support", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("--dry-run"))
+        .stdout(predicate::str::contains("--include-metadata"))
+        .stdout(predicate::str::contains("--output"));
+}
+
+#[test]
+fn support_dry_run_lists_sections() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["support", "--dry-run"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Support bundle would include"))
+        .stdout(predicate::str::contains("doctor.json"))
+        .stdout(predicate::str::contains("engine.json"));
+}
+
+#[test]
+fn support_dry_run_json_output() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    let output = cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["--format", "json", "support", "--dry-run"])
+        .output()
+        .expect("should run");
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let json: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+    assert_eq!(json["result"], "success");
+    assert!(json["payload"].is_array());
+}
+
+#[test]
+fn support_creates_bundle_file() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["support", "--output"])
+        .arg(tmp.path())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Support bundle written to"));
+
+    let entries: Vec<_> = std::fs::read_dir(tmp.path())
+        .unwrap()
+        .flatten()
+        .filter(|e| {
+            e.file_name()
+                .to_string_lossy()
+                .starts_with("know-now-support-")
+        })
+        .collect();
+    assert_eq!(entries.len(), 1, "should create exactly one bundle file");
+
+    let content = std::fs::read_to_string(entries[0].path()).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&content).expect("valid JSON bundle");
+    assert_eq!(json["bundle_version"], "1.0");
+    assert!(json["engine"]["version"].is_string());
+    assert!(json["environment"].is_object());
+}
+
+#[test]
+fn support_bundle_on_demo_project() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+
+    let output_dir = tmp.path().join("output");
+    std::fs::create_dir_all(&output_dir).unwrap();
+
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["support", "--output"])
+        .arg(&output_dir)
+        .assert()
+        .success();
+
+    let entries: Vec<_> = std::fs::read_dir(&output_dir)
+        .unwrap()
+        .flatten()
+        .filter(|e| {
+            e.file_name()
+                .to_string_lossy()
+                .starts_with("know-now-support-")
+        })
+        .collect();
+    assert_eq!(entries.len(), 1);
+
+    let content = std::fs::read_to_string(entries[0].path()).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&content).expect("valid JSON bundle");
+    assert!(json["manifest_summary"].is_object());
+    assert!(json["manifest_summary"]["artifact_count"].as_u64().unwrap() > 0);
+    assert!(json["generators"].is_array());
+    assert!(json["doctor"].is_object());
+}
+
+#[test]
+fn support_bundle_redacts_env() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+
+    let output = cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["--format", "json", "support", "--output"])
+        .arg(tmp.path())
+        .output()
+        .expect("should run");
+    assert!(output.status.success());
+
+    let entries: Vec<_> = std::fs::read_dir(tmp.path())
+        .unwrap()
+        .flatten()
+        .filter(|e| {
+            e.file_name()
+                .to_string_lossy()
+                .starts_with("know-now-support-")
+        })
+        .collect();
+    let content = std::fs::read_to_string(entries[0].path()).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&content).unwrap();
+    let env = json["environment"].as_object().unwrap();
+    for (key, _) in env {
+        assert!(
+            ["USER", "LOGNAME", "SHELL", "TERM", "LANG", "LC_ALL", "HOME", "PATH",
+             "EDITOR", "VISUAL", "CARGO_PKG_VERSION", "RUST_LOG", "NO_COLOR", "FORCE_COLOR"]
+                .contains(&key.as_str()),
+            "unexpected env var in bundle: {key}"
+        );
+    }
 }

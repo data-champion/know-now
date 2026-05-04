@@ -6,7 +6,7 @@ use clap::{Parser, Subcommand};
 
 use know_now_cli::commands::{
     check, config, diff, doctor, examples, explain, generate, id, init, issues, lock, schema,
-    validate, version,
+    support, validate, version,
 };
 use know_now_cli::context::CommandContext;
 use know_now_cli::exit_code;
@@ -87,6 +87,9 @@ enum Command {
     #[command(subcommand)]
     Examples(examples::ExamplesCommand),
 
+    /// Create a sanitized support bundle for diagnostics
+    Support(support::SupportBundleArgs),
+
     /// Configuration operations
     #[command(subcommand)]
     Config(config::ConfigCommand),
@@ -142,6 +145,7 @@ fn main() {
         Command::Lock(cmd) => lock::run(&ctx, cmd),
         Command::Id(cmd) => id::run(&ctx, cmd),
         Command::Examples(cmd) => examples::run(&ctx, cmd),
+        Command::Support(args) => support::run(&ctx, args),
         Command::Config(cmd) => config::run(&ctx, cmd),
         Command::Version(args) => version::run(&ctx, args),
     };
