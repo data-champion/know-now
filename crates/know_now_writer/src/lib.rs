@@ -4,3 +4,4 @@
 
 pub mod manifest;
 pub mod path_safety;
+pub mod staging;
