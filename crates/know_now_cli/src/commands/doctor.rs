@@ -159,56 +159,7 @@ pub fn run(ctx: &CommandContext, _args: &DoctorArgs) -> anyhow::Result<()> {
             );
         }
         OutputFormat::Text | OutputFormat::Quiet => {
-            println!("know-now doctor");
-            println!("  engine: v{} ({}/{})", report.engine.version, report.engine.os, report.engine.arch);
-            println!("  project: {}", report.project.root);
-            println!("    config: {}", if report.project.config_present { "found" } else { "MISSING" });
-            println!(
-                "    metadata: {} files, {} objects",
-                report.project.metadata_files_count, report.project.objects_count
-            );
-            println!(
-                "  lockfile: {}",
-                if report.lockfile.present {
-                    if report.lockfile.valid { "valid" } else { "INVALID" }
-                } else {
-                    "not present"
-                }
-            );
-            if let Some(ref db) = report.target_database {
-                println!("  target database: {} {}", db.kind, db.version.as_deref().unwrap_or(""));
-            }
-            println!(
-                "  dbt validation: mode={}, available={}",
-                report.dbt_validation.mode, report.dbt_validation.available
-            );
-            println!(
-                "  policy: {}",
-                report.policy.pack.as_deref().unwrap_or("(none)")
-            );
-            println!("  generators: {} registered", report.generators.len());
-            if let Some(ref gen) = report.last_generation {
-                println!(
-                    "  last generation: {} artifacts",
-                    gen.artifact_count
-                );
-            }
-            if report.issues.unresolved_count > 0 {
-                println!("  issues: {} unresolved", report.issues.unresolved_count);
-            }
-            println!();
-            if findings.is_empty() {
-                println!("All checks passed.");
-            } else {
-                for f in &findings {
-                    println!("  [{}] {}: {}", f.severity, f.code, f.message);
-                }
-                println!();
-                println!(
-                    "{} error(s), {} warning(s)",
-                    error_count, warning_count
-                );
-            }
+            print_text_report(&report, &findings, error_count, warning_count);
         }
     }
 
@@ -219,6 +170,58 @@ pub fn run(ctx: &CommandContext, _args: &DoctorArgs) -> anyhow::Result<()> {
     }
 
     Ok(())
+}
+
+fn print_text_report(
+    report: &DoctorReport,
+    findings: &[Finding],
+    error_count: usize,
+    warning_count: usize,
+) {
+    println!("know-now doctor");
+    println!("  engine: v{} ({}/{})", report.engine.version, report.engine.os, report.engine.arch);
+    println!("  project: {}", report.project.root);
+    println!("    config: {}", if report.project.config_present { "found" } else { "MISSING" });
+    println!(
+        "    metadata: {} files, {} objects",
+        report.project.metadata_files_count, report.project.objects_count
+    );
+    println!(
+        "  lockfile: {}",
+        if report.lockfile.present {
+            if report.lockfile.valid { "valid" } else { "INVALID" }
+        } else {
+            "not present"
+        }
+    );
+    if let Some(ref db) = report.target_database {
+        println!("  target database: {} {}", db.kind, db.version.as_deref().unwrap_or(""));
+    }
+    println!(
+        "  dbt validation: mode={}, available={}",
+        report.dbt_validation.mode, report.dbt_validation.available
+    );
+    println!(
+        "  policy: {}",
+        report.policy.pack.as_deref().unwrap_or("(none)")
+    );
+    println!("  generators: {} registered", report.generators.len());
+    if let Some(ref gen) = report.last_generation {
+        println!("  last generation: {} artifacts", gen.artifact_count);
+    }
+    if report.issues.unresolved_count > 0 {
+        println!("  issues: {} unresolved", report.issues.unresolved_count);
+    }
+    println!();
+    if findings.is_empty() {
+        println!("All checks passed.");
+    } else {
+        for f in findings {
+            println!("  [{}] {}: {}", f.severity, f.code, f.message);
+        }
+        println!();
+        println!("{error_count} error(s), {warning_count} warning(s)");
+    }
 }
 
 fn check_project(ctx: &CommandContext, findings: &mut Vec<Finding>) -> ProjectInfo {
@@ -283,30 +286,26 @@ fn check_lockfile(ctx: &CommandContext, findings: &mut Vec<Finding>) -> Lockfile
         };
     }
 
-    let lockfile = know_now_lock::lockfile::Lockfile::read_from(&lock_path);
-    let valid = match lockfile {
-        Ok(lf) => {
-            let resolved = resolve_current_versions();
-            let result = know_now_lock::check::check_lockfile(&lf, &resolved);
-            if !result.is_ok() {
-                findings.push(Finding {
-                    severity: "warning".into(),
-                    code: "DOC-LOCK-001".into(),
-                    message: "lockfile is stale — run 'know-now lock update'".into(),
-                });
-                false
-            } else {
-                true
-            }
-        }
-        Err(_) => {
+    let valid = if let Ok(lf) = know_now_lock::lockfile::Lockfile::read_from(&lock_path) {
+        let resolved = resolve_current_versions();
+        let result = know_now_lock::check::check_lockfile(&lf, &resolved);
+        if result.is_ok() {
+            true
+        } else {
             findings.push(Finding {
-                severity: "error".into(),
-                code: "DOC-LOCK-002".into(),
-                message: "lockfile is corrupt".into(),
+                severity: "warning".into(),
+                code: "DOC-LOCK-001".into(),
+                message: "lockfile is stale — run 'know-now lock update'".into(),
             });
             false
         }
+    } else {
+        findings.push(Finding {
+            severity: "error".into(),
+            code: "DOC-LOCK-002".into(),
+            message: "lockfile is corrupt".into(),
+        });
+        false
     };
 
     LockfileInfo {
@@ -366,8 +365,7 @@ fn check_target_database(ctx: &CommandContext) -> Option<TargetDatabaseInfo> {
             .lines()
             .find(|l| l.trim().starts_with("kind:"))
             .and_then(|l| l.split(':').nth(1))
-            .map(|s| s.trim().to_owned())
-            .unwrap_or_else(|| "unknown".into());
+            .map_or_else(|| "unknown".into(), |s| s.trim().to_owned());
         let version = content
             .lines()
             .find(|l| l.trim().starts_with("version:") && !l.contains("contract"))
@@ -420,7 +418,7 @@ fn check_issues(ctx: &CommandContext) -> IssuesInfo {
         .ok()
         .and_then(|content| {
             let v: serde_json::Value = serde_json::from_str(&content).ok()?;
-            v.as_array().map(|a| a.len())
+            v.as_array().map(Vec::len)
         })
         .unwrap_or(0);
     IssuesInfo {

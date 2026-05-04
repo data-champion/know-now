@@ -8,8 +8,8 @@ fn cmd() -> Command {
 #[test]
 fn help_shows_all_phase2a_subcommands() {
     let expected = [
-        "init", "validate", "check", "schema", "generate", "diff", "doctor", "lock", "id",
-        "examples", "config", "version",
+        "init", "validate", "check", "schema", "generate", "diff", "doctor", "explain", "lock",
+        "id", "examples", "config", "version",
     ];
     let output = cmd().arg("--help").output().expect("should run");
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -2481,4 +2481,166 @@ fn doctor_reports_generators() {
         "should report at least 4 generators, got {}",
         generators.len()
     );
+}
+
+// ── explain ──────────────────────────────────────────────────────────
+
+#[test]
+fn explain_help_shows_flags() {
+    cmd()
+        .args(["explain", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("--artifact"))
+        .stdout(predicate::str::contains("--object-id"))
+        .stdout(predicate::str::contains("--list"));
+}
+
+#[test]
+fn explain_without_manifest_fails() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["explain", "--list"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("EXPLAIN-NO-MANIFEST-001"));
+}
+
+#[test]
+fn explain_list_after_generate() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["explain", "--list"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("know-now explain"))
+        .stdout(predicate::str::contains("artifact(s) in manifest"));
+}
+
+#[test]
+fn explain_list_json_output() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+
+    let output = cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["--format", "json", "explain", "--list"])
+        .output()
+        .expect("should run");
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let json: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+    assert_eq!(json["payload"]["query"]["kind"], "list");
+    assert!(json["payload"]["results"].is_array());
+    assert!(json["payload"]["artifact_count"].as_u64().unwrap() > 0);
+}
+
+#[test]
+fn explain_by_artifact_path() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["explain", "--artifact", "schema.sql"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("generator:"))
+        .stdout(predicate::str::contains("kind:"));
+}
+
+#[test]
+fn explain_by_artifact_no_match() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["explain", "--artifact", "nonexistent.sql"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("No matching artifacts found"));
+}
+
+#[test]
+fn explain_no_query_fails() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["explain"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("--artifact").or(predicate::str::contains("--list")));
 }
