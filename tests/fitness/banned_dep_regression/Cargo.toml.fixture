@@ -1,0 +1,25 @@
+# Banned-dep regression fixture.
+#
+# This is NOT a real Cargo.toml — it documents what a violation looks like.
+# The architecture fitness tests (crates/know_now_fitness/tests/architecture.rs)
+# verify that no generator crate depends on banned YAML parser crates.
+#
+# If a developer were to add the dependency shown below, the following tests
+# would fail:
+#   - inv01_generators_no_yaml_parser_deps
+#   - inv02_yaml_parser_isolated_to_metadata
+#
+# To manually verify the fitness detection:
+#   1. Temporarily add `serde_yaml = "0.9"` to crates/know_now_gen_dbt/Cargo.toml
+#   2. Run: cargo test -p know_now_fitness
+#   3. Observe: inv01 and inv02 fail with "INVARIANT VIOLATED" messages
+#   4. Revert the change
+
+[package]
+name = "know_now_gen_example_banned"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# This dependency is banned — fitness tests will catch it:
+serde_yaml = "0.9"

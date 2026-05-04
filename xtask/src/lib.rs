@@ -448,16 +448,86 @@ fn cmd_e2e(phase: E2ePhase) -> anyhow::Result<()> {
 
 fn run_e2e_phase(phase: E2ePhase) -> anyhow::Result<String> {
     match phase {
-        E2ePhase::Foundation => {
-            run_external_command("cargo", ["test", "-p", "know_now_fitness"])?;
-            Ok("cargo test -p know_now_fitness".to_string())
-        }
+        E2ePhase::Foundation => run_e2e_foundation(),
         E2ePhase::Phase1 => run_e2e_script("tests/e2e/phase-1.sh", phase.as_str()),
         E2ePhase::Phase2A => run_e2e_script("tests/e2e/phase-2a.sh", phase.as_str()),
         E2ePhase::Phase2B => run_e2e_script("tests/e2e/phase-2b.sh", phase.as_str()),
         E2ePhase::Phase3 => run_e2e_script("tests/e2e/phase-3.sh", phase.as_str()),
         E2ePhase::All => unreachable!("expanded by caller"),
     }
+}
+
+fn run_e2e_foundation() -> anyhow::Result<String> {
+    let mut stdout = io::stdout();
+    let mut steps_passed = 0u32;
+
+    writeln!(stdout, "  [foundation] step 1: cargo build --workspace")?;
+    run_external_command("cargo", ["build", "--workspace"])?;
+    steps_passed += 1;
+
+    writeln!(stdout, "  [foundation] step 2: cargo test --workspace")?;
+    run_external_command("cargo", ["test", "--workspace"])?;
+    steps_passed += 1;
+
+    writeln!(stdout, "  [foundation] step 3: cargo fmt --all -- --check")?;
+    run_external_command("cargo", ["fmt", "--all", "--", "--check"])?;
+    steps_passed += 1;
+
+    writeln!(
+        stdout,
+        "  [foundation] step 4: cargo clippy --all-targets -- -D warnings"
+    )?;
+    run_external_command(
+        "cargo",
+        [
+            "clippy",
+            "--all-targets",
+            "--all-features",
+            "--",
+            "-D",
+            "warnings",
+        ],
+    )?;
+    steps_passed += 1;
+
+    writeln!(stdout, "  [foundation] step 5: cargo deny check")?;
+    run_external_command("cargo", ["deny", "check"])?;
+    steps_passed += 1;
+
+    writeln!(stdout, "  [foundation] step 6: architecture fitness tests")?;
+    run_external_command("cargo", ["test", "-p", "know_now_fitness"])?;
+    steps_passed += 1;
+
+    writeln!(stdout, "  [foundation] step 7: frontend boot")?;
+    if Path::new("web/package.json").exists() {
+        let web = Path::new("web");
+        run_external_in_dir("pnpm", &["install", "--frozen-lockfile"], web)?;
+        run_external_in_dir("pnpm", &["typecheck"], web)?;
+        run_external_in_dir("pnpm", &["build"], web)?;
+        steps_passed += 1;
+    } else {
+        writeln!(stdout, "    skipped (web/package.json not found)")?;
+    }
+
+    writeln!(stdout, "  [foundation] step 8: beads graph hygiene")?;
+    if command_available("br") {
+        let cycles_raw = run_command_capture("br", ["dep", "cycles"])?;
+        let cycles_lower = cycles_raw.to_ascii_lowercase();
+        if !(cycles_lower.contains("no dependency cycles")
+            || cycles_lower.contains("no cycles detected"))
+        {
+            anyhow::bail!("dependency cycles detected in beads graph:\n{cycles_raw}");
+        }
+        steps_passed += 1;
+    } else {
+        writeln!(stdout, "    skipped (br not available)")?;
+    }
+
+    writeln!(stdout, "  [foundation] step 9: docs check")?;
+    cmd_docs_check()?;
+    steps_passed += 1;
+
+    Ok(format!("{steps_passed} steps passed"))
 }
 
 fn run_e2e_script(script_path: &str, phase_name: &str) -> anyhow::Result<String> {
@@ -700,6 +770,25 @@ fn run_external_command_dyn(program: &str, args: &[&str]) -> anyhow::Result<()> 
     }
 
     anyhow::bail!("`{program}` exited with status {status}")
+}
+
+fn run_external_in_dir(program: &str, args: &[&str], dir: &Path) -> anyhow::Result<()> {
+    let status = Command::new(program)
+        .args(args)
+        .current_dir(dir)
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .status()
+        .with_context(|| format!("failed to execute `{program}` in {}", dir.display()))?;
+
+    if status.success() {
+        return Ok(());
+    }
+
+    anyhow::bail!(
+        "`{program}` in {} exited with status {status}",
+        dir.display()
+    )
 }
 
 fn run_command_capture<const N: usize>(program: &str, args: [&str; N]) -> anyhow::Result<String> {
