@@ -78,7 +78,7 @@ pub async fn start_server(config: ServerConfig) -> std::io::Result<ServerHandle>
         sessions: Arc::new(session::SessionStore::new()),
     };
 
-    let app = build_app(state);
+    let app = build_app(state, local_addr);
 
     let (shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel();
 
@@ -99,8 +99,8 @@ pub async fn start_server(config: ServerConfig) -> std::io::Result<ServerHandle>
     })
 }
 
-fn build_app(state: AppState) -> Router {
-    let origin = format!("http://{}:{}", state.config.host, state.config.port);
+fn build_app(state: AppState, addr: SocketAddr) -> Router {
+    let origin = format!("http://{addr}");
 
     routes::router(state.clone())
         .merge(api::router())
