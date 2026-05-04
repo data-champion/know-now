@@ -28,6 +28,26 @@ body {
   line-height: 1.5;
 }
 
+.kn-skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  padding: 0.5rem 1rem;
+  background: var(--kn-accent);
+  color: #fff;
+  z-index: 100;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.kn-skip-link:focus {
+  top: 0;
+}
+
+.kn-main:focus {
+  outline: none;
+}
+
 .kn-sr-only {
   position: absolute;
   width: 1px;

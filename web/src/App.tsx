@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Entity, GraphResponse, RelationshipsResponse } from "./api/client";
 import { KnowNowClient } from "./api/client";
 import { useApi } from "./hooks/useApi";
@@ -17,6 +17,7 @@ type View = "entities" | "graph" | "generation" | "docs" | "manifest" | "traceab
 type GraphMode = "visual" | "table";
 
 export function App() {
+  const mainRef = useRef<HTMLElement>(null);
   const [view, setView] = useState<View>("entities");
   const [selectedEntity, setSelectedEntity] = useState<Entity | null>(null);
   const [graphMode, setGraphMode] = useState<GraphMode>("visual");
@@ -27,6 +28,10 @@ export function App() {
   const { data: graphData } = useApi<GraphResponse>(fetchGraph);
   const { data: relData } = useApi<RelationshipsResponse>(fetchRelationships);
 
+  useEffect(() => {
+    mainRef.current?.focus();
+  }, [view]);
+
   const handleNodeSelect = useCallback((nodeId: string) => {
     setSelectedEntity(null);
     setView("entities");
@@ -35,6 +40,7 @@ export function App() {
 
   return (
     <div className="kn-app">
+      <a href="#main-content" className="kn-skip-link">Skip to main content</a>
       <header className="kn-header">
         <h1 className="kn-header__title">know-now</h1>
         <nav className="kn-nav" aria-label="Main navigation">
@@ -49,7 +55,7 @@ export function App() {
         </nav>
       </header>
 
-      <main className="kn-main">
+      <main className="kn-main" ref={mainRef} tabIndex={-1} id="main-content">
         {view === "entities" && (
           <div className="kn-layout">
             <EntityList
