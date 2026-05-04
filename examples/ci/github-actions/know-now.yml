@@ -1,0 +1,63 @@
+# know-now CI workflow for GitHub Actions
+#
+# Validates metadata and generated output on every push and pull request.
+# Requires: know-now binary available via cargo-binstall or direct download.
+#
+# Usage:
+#   Copy this file to .github/workflows/know-now.yml in your repository.
+#   Set the KNOW_NOW_VERSION input or env var to pin the version.
+
+name: know-now
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  KNOW_NOW_VERSION: "0.1.0"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Metadata validation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install know-now
+        run: |
+          curl -fsSL "https://github.com/data-champion/know-now/releases/download/v${KNOW_NOW_VERSION}/know-now-x86_64-unknown-linux-gnu.tar.gz" \
+            | tar xz -C /usr/local/bin
+
+      - name: Validate metadata
+        run: know-now check --format json --locked
+
+  sarif:
+    name: Code scanning (SARIF)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install know-now
+        run: |
+          curl -fsSL "https://github.com/data-champion/know-now/releases/download/v${KNOW_NOW_VERSION}/know-now-x86_64-unknown-linux-gnu.tar.gz" \
+            | tar xz -C /usr/local/bin
+
+      - name: Run check (SARIF)
+        run: know-now check --format sarif --locked > results.sarif
+        continue-on-error: true
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif

@@ -1,0 +1,46 @@
+# know-now CI configuration for GitLab CI/CD
+#
+# Validates metadata and generated output on merge requests and main pushes.
+# Requires: know-now binary available via direct download.
+#
+# Usage:
+#   Copy this file to .gitlab-ci.yml in your repository root,
+#   or include it via `include:local`.
+
+variables:
+  KNOW_NOW_VERSION: "0.1.0"
+
+stages:
+  - validate
+
+.install-know-now: &install-know-now
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq curl ca-certificates > /dev/null
+    - |
+      curl -fsSL "https://github.com/data-champion/know-now/releases/download/v${KNOW_NOW_VERSION}/know-now-x86_64-unknown-linux-gnu.tar.gz" \
+        | tar xz -C /usr/local/bin
+
+know-now:check:
+  stage: validate
+  image: debian:bookworm-slim
+  <<: *install-know-now
+  script:
+    - know-now check --format json --locked
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+know-now:sarif:
+  stage: validate
+  image: debian:bookworm-slim
+  <<: *install-know-now
+  script:
+    - know-now check --format sarif --locked > results.sarif
+  artifacts:
+    paths:
+      - results.sarif
+    reports:
+      sast: results.sarif
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  allow_failure: true

@@ -1,0 +1,30 @@
+# know-now CI pipeline for Buildkite
+#
+# Validates metadata and generated output on every build.
+# Requires: know-now binary available via direct download.
+#
+# Usage:
+#   Copy this file to .buildkite/pipeline.yml in your repository,
+#   or upload it dynamically via a pipeline upload step.
+
+env:
+  KNOW_NOW_VERSION: "0.1.0"
+
+steps:
+  - label: ":white_check_mark: Metadata validation"
+    command: |
+      curl -fsSL "https://github.com/data-champion/know-now/releases/download/v$${KNOW_NOW_VERSION}/know-now-x86_64-unknown-linux-gnu.tar.gz" \
+        | tar xz -C /usr/local/bin
+      know-now check --format json --locked
+
+  - wait: ~
+
+  - label: ":shield: Code scanning (SARIF)"
+    command: |
+      curl -fsSL "https://github.com/data-champion/know-now/releases/download/v$${KNOW_NOW_VERSION}/know-now-x86_64-unknown-linux-gnu.tar.gz" \
+        | tar xz -C /usr/local/bin
+      know-now check --format sarif --locked > results.sarif
+    artifact_paths:
+      - results.sarif
+    branches: main
+    soft_fail: true

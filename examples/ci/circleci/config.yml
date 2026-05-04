@@ -1,0 +1,56 @@
+# know-now CI configuration for CircleCI
+#
+# Validates metadata and generated output on every push.
+# Requires: know-now binary available via direct download.
+#
+# Usage:
+#   Copy this file to .circleci/config.yml in your repository.
+
+version: 2.1
+
+parameters:
+  know-now-version:
+    type: string
+    default: "0.1.0"
+
+commands:
+  install-know-now:
+    steps:
+      - run:
+          name: Install know-now
+          command: |
+            curl -fsSL "https://github.com/data-champion/know-now/releases/download/v<< pipeline.parameters.know-now-version >>/know-now-x86_64-unknown-linux-gnu.tar.gz" \
+              | tar xz -C /usr/local/bin
+
+jobs:
+  check:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - checkout
+      - install-know-now
+      - run:
+          name: Validate metadata
+          command: know-now check --format json --locked
+
+  sarif:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - checkout
+      - install-know-now
+      - run:
+          name: Run check (SARIF)
+          command: know-now check --format sarif --locked > results.sarif
+      - store_artifacts:
+          path: results.sarif
+          destination: sarif
+
+workflows:
+  validate:
+    jobs:
+      - check
+      - sarif:
+          filters:
+            branches:
+              only: main
