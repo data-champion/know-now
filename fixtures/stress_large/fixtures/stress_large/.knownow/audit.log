@@ -1,1 +1,0 @@
-{"timestamp":"2026-05-04T23:27:43Z","command":"validate","engine_version":"0.1.0","project_root":"fixtures/stress_large","result":"failure","error_code":"no metadata/ directory found at fixtures/stress_large"}
