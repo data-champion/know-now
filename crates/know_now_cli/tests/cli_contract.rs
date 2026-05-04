@@ -349,15 +349,81 @@ fn id_suggest_all_present_says_so() {
 }
 
 #[test]
-fn id_backfill_dry_run() {
+fn id_backfill_default_is_dry_run() {
     let project = id_fixture_missing_ids();
     cmd()
         .args(["--project"])
         .arg(project.path())
-        .args(["id", "backfill", "--dry-run"])
+        .args(["id", "backfill"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("ent_customer"));
+        .stdout(predicate::str::contains("ent_customer"))
+        .stdout(predicate::str::contains("Run with --apply"));
+}
+
+#[test]
+fn id_backfill_apply_writes_ids() {
+    let project = id_fixture_missing_ids();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["id", "backfill", "--apply"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("patched"));
+
+    let content = std::fs::read_to_string(project.path().join("metadata/project.yml")).unwrap();
+    assert!(
+        content.contains("id: ent_customer"),
+        "backfill must insert entity ID"
+    );
+}
+
+#[test]
+fn id_backfill_apply_creates_backup() {
+    let project = id_fixture_missing_ids();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["id", "backfill", "--apply"])
+        .assert()
+        .success();
+
+    let backups_dir = project.path().join(".knownow/backups");
+    assert!(backups_dir.is_dir(), "backups directory must be created");
+    let entries: Vec<_> = std::fs::read_dir(&backups_dir).unwrap().collect();
+    assert_eq!(entries.len(), 1, "exactly one backup timestamp dir");
+}
+
+#[test]
+fn id_backfill_apply_then_check_passes() {
+    let project = id_fixture_missing_ids();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["id", "backfill", "--apply"])
+        .assert()
+        .success();
+
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["id", "check"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("All objects have valid stable IDs"));
+}
+
+#[test]
+fn id_backfill_no_missing_says_so() {
+    let project = id_fixture_all_ids();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["id", "backfill"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("No missing IDs found"));
 }
 
 #[test]
@@ -2217,21 +2283,6 @@ fn generate_manifest_includes_all_generators() {
 
 #[test]
 fn generate_no_crlf_in_phase2b_output() {
-    let tmp = tempfile::tempdir().expect("tempdir");
-    cmd()
-        .args(["--project"])
-        .arg(tmp.path())
-        .args(["init", "--demo"])
-        .assert()
-        .success();
-    let project = tmp.path().join("demo-project");
-    cmd()
-        .args(["--project"])
-        .arg(&project)
-        .args(["generate", "--target", "all"])
-        .assert()
-        .success();
-    let generated = project.join("generated");
     fn check_no_crlf(dir: &std::path::Path) {
         if !dir.exists() {
             return;
@@ -2251,6 +2302,22 @@ fn generate_no_crlf_in_phase2b_output() {
             }
         }
     }
+
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate", "--target", "all"])
+        .assert()
+        .success();
+    let generated = project.join("generated");
     check_no_crlf(&generated);
 }
 
@@ -3252,8 +3319,7 @@ fn audit_log_accumulates_entries() {
 
     let audit_log = tmp.path().join(".knownow").join("audit.log");
     let content = std::fs::read_to_string(&audit_log).unwrap();
-    let lines: Vec<_> = content.lines().collect();
-    assert_eq!(lines.len(), 2, "should accumulate entries across runs");
+    assert_eq!(content.lines().count(), 2, "should accumulate entries across runs");
 }
 
 #[test]
