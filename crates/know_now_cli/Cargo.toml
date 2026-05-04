@@ -23,6 +23,7 @@ pkg-fmt = "zip"
 [dependencies]
 anyhow = "1.0.100"
 clap = { version = "4.5.51", features = ["derive"] }
+know_now_catalog = { version = "0.1.0", path = "../know_now_catalog" }
 know_now_codegen = { version = "0.1.0", path = "../know_now_codegen" }
 know_now_contract = { version = "0.1.0", path = "../know_now_contract" }
 know_now_core = { version = "0.1.0", path = "../know_now_core" }

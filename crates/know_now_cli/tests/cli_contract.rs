@@ -9,7 +9,7 @@ fn cmd() -> Command {
 fn help_shows_all_phase2a_subcommands() {
     let expected = [
         "init", "validate", "check", "schema", "generate", "diff", "doctor", "explain", "issues",
-        "lock", "id", "examples", "review", "support", "config", "version",
+        "lock", "id", "examples", "policy", "review", "support", "config", "version",
     ];
     let output = cmd().arg("--help").output().expect("should run");
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -3348,4 +3348,156 @@ fn audit_log_entries_are_valid_jsonl() {
         let _: serde_json::Value =
             serde_json::from_str(line).unwrap_or_else(|e| panic!("line {i} is not valid JSON: {e}"));
     }
+}
+
+// --- policy status tests ---
+
+#[test]
+fn policy_status_shows_builtin_pack() {
+    let dir = valid_project();
+    cmd()
+        .args(["--project", dir.path().to_str().unwrap()])
+        .args(["policy", "status"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("dc_standard"));
+}
+
+#[test]
+fn policy_status_json_has_packs_array() {
+    let dir = valid_project();
+    let output = cmd()
+        .args(["--project", dir.path().to_str().unwrap()])
+        .args(["--format", "json", "policy", "status"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let packs = json["payload"]["packs"].as_array().unwrap();
+    assert!(!packs.is_empty());
+    assert_eq!(packs[0]["name"], "dc_standard");
+}
+
+#[test]
+fn policy_status_with_catalog_shows_drift() {
+    let dir = valid_project();
+    let knownow_dir = dir.path().join(".knownow");
+    std::fs::create_dir_all(&knownow_dir).unwrap();
+    std::fs::write(
+        knownow_dir.join("catalog.json"),
+        r#"{
+            "approved": {
+                "engines": { "know-now": ["0.1.x"] },
+                "policies": { "dc_standard": ["1.0"] }
+            }
+        }"#,
+    )
+    .unwrap();
+
+    cmd()
+        .args(["--project", dir.path().to_str().unwrap()])
+        .args(["policy", "status"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Overall drift"));
+}
+
+#[test]
+fn policy_status_with_missing_catalog_flag_errors() {
+    let dir = valid_project();
+    cmd()
+        .args(["--project", dir.path().to_str().unwrap()])
+        .args(["policy", "status", "--catalog", "/nonexistent/catalog.json"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("catalog file not found"));
+}
+
+#[test]
+fn policy_status_discovers_project_local_packs() {
+    let dir = valid_project();
+    let policy_dir = dir.path().join("policy");
+    std::fs::create_dir(&policy_dir).unwrap();
+    std::fs::write(
+        policy_dir.join("corp.pack.json"),
+        r#"{ "name": "corp_rules", "version": "2.0.0", "rules": [] }"#,
+    )
+    .unwrap();
+
+    cmd()
+        .args(["--project", dir.path().to_str().unwrap()])
+        .args(["policy", "status"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("corp_rules"));
+}
+
+// --- policy explain tests ---
+
+#[test]
+fn policy_explain_builtin_rule() {
+    let dir = valid_project();
+    cmd()
+        .args(["--project", dir.path().to_str().unwrap()])
+        .args(["policy", "explain", "POL-NAM-001"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("entity_name_snake_case"))
+        .stdout(predicate::str::contains("Remediation"));
+}
+
+#[test]
+fn policy_explain_unknown_code() {
+    let dir = valid_project();
+    cmd()
+        .args(["--project", dir.path().to_str().unwrap()])
+        .args(["policy", "explain", "NONEXISTENT-999"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Unknown policy code"));
+}
+
+#[test]
+fn policy_explain_json_output() {
+    let dir = valid_project();
+    let output = cmd()
+        .args(["--project", dir.path().to_str().unwrap()])
+        .args(["--format", "json", "policy", "explain", "POL-ENT-001"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(json["payload"]["found"], true);
+    assert_eq!(json["payload"]["rule"]["code"], "POL-ENT-001");
+}
+
+#[test]
+fn policy_explain_declarative_rule() {
+    let dir = valid_project();
+    let policy_dir = dir.path().join("policy");
+    std::fs::create_dir(&policy_dir).unwrap();
+    std::fs::write(
+        policy_dir.join("corp.pack.json"),
+        r#"{
+            "name": "corp_rules",
+            "version": "1.0.0",
+            "rules": [{
+                "id": "CORP-001",
+                "severity": "error",
+                "applies_to": "entity",
+                "expression": { "kind": "attribute_presence", "attribute": "description" },
+                "rationale": "All entities must have a description for compliance",
+                "remediation": "Add a description field to every entity"
+            }]
+        }"#,
+    )
+    .unwrap();
+
+    cmd()
+        .args(["--project", dir.path().to_str().unwrap()])
+        .args(["policy", "explain", "CORP-001"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("CORP-001"))
+        .stdout(predicate::str::contains("compliance"));
 }

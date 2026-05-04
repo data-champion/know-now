@@ -6,8 +6,8 @@ use clap::{Parser, Subcommand};
 
 use know_now_cli::audit::{self, AuditEntry};
 use know_now_cli::commands::{
-    check, config, diff, doctor, examples, explain, generate, id, init, issues, lock, review,
-    schema, support, validate, version,
+    check, config, diff, doctor, examples, explain, generate, id, init, issues, lock, policy,
+    review, schema, support, validate, version,
 };
 use know_now_cli::context::CommandContext;
 use know_now_cli::exit_code;
@@ -88,6 +88,10 @@ enum Command {
     #[command(subcommand)]
     Examples(examples::ExamplesCommand),
 
+    /// Policy pack status and rule documentation
+    #[command(subcommand)]
+    Policy(policy::PolicyCommand),
+
     /// Export review packs for stakeholder review
     #[command(subcommand)]
     Review(review::ReviewCommand),
@@ -150,6 +154,7 @@ fn main() {
         Command::Lock(cmd) => lock::run(&ctx, cmd),
         Command::Id(cmd) => id::run(&ctx, cmd),
         Command::Examples(cmd) => examples::run(&ctx, cmd),
+        Command::Policy(cmd) => policy::run(&ctx, cmd),
         Command::Review(cmd) => review::run(&ctx, cmd),
         Command::Support(args) => support::run(&ctx, args),
         Command::Config(cmd) => config::run(&ctx, cmd),
@@ -202,6 +207,7 @@ fn command_name(command: &Command) -> &'static str {
         Command::Lock(_) => "lock",
         Command::Id(_) => "id",
         Command::Examples(_) => "examples",
+        Command::Policy(_) => "policy",
         Command::Review(_) => "review",
         Command::Support(_) => "support",
         Command::Config(_) => "config",
