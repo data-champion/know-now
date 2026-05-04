@@ -9,7 +9,8 @@ fn cmd() -> Command {
 fn help_shows_all_phase2a_subcommands() {
     let expected = [
         "init", "validate", "check", "schema", "generate", "diff", "doctor", "explain", "issues",
-        "lock", "id", "examples", "policy", "review", "admin", "support", "config", "version",
+        "lock", "id", "examples", "policy", "review", "serve", "admin", "support", "config",
+        "version",
     ];
     let output = cmd().arg("--help").output().expect("should run");
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -3721,4 +3722,29 @@ fn admin_catalog_check_json_format_has_envelope() {
         .success()
         .stdout(predicate::str::contains(r#""result": "success""#))
         .stdout(predicate::str::contains(r#""valid": true"#));
+}
+
+// ─── serve ────────────────────────────────────────────────────────────────────
+
+#[test]
+fn serve_help_shows_flags() {
+    cmd()
+        .args(["serve", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("--host"))
+        .stdout(predicate::str::contains("--port"))
+        .stdout(predicate::str::contains("--allow-generate"));
+}
+
+#[test]
+fn serve_rejects_network_generate_without_flag() {
+    cmd()
+        .args(["serve", "--host", "0.0.0.0", "--allow-generate"])
+        .timeout(std::time::Duration::from_secs(2))
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "--allow-generate-on-network",
+        ));
 }

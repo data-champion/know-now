@@ -40,8 +40,10 @@ know_now_lock = { version = "0.1.0", path = "../know_now_lock" }
 know_now_toolchain = { version = "0.1.0", path = "../know_now_toolchain" }
 know_now_metadata = { version = "0.1.0", path = "../know_now_metadata", features = ["json-schema"] }
 know_now_policy = { version = "0.1.0", path = "../know_now_policy" }
+know_now_server = { version = "0.1.0", path = "../know_now_server" }
 know_now_validate = { version = "0.1.0", path = "../know_now_validate" }
 know_now_writer = { version = "0.1.0", path = "../know_now_writer" }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 schemars = "0.8"
 sqlparser = "0.55"
 serde = { version = "1", features = ["derive"] }
