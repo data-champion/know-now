@@ -74,7 +74,6 @@ fn unknown_subcommand_exits_with_usage_error() {
 fn stub_commands_exit_with_validation_error() {
     let stubs = [
         vec!["init"],
-        vec!["check"],
         vec!["generate"],
         vec!["examples", "list"],
         vec!["config", "inspect"],
@@ -817,4 +816,207 @@ fn lock_check_detects_unknown_schema_version() {
         .assert()
         .code(predicate::eq(1))
         .stderr(predicate::str::contains("LOCK-SCHEMA-001"));
+}
+
+// ── Check command tests ─────────────────────────────────────────────
+
+#[test]
+fn check_succeeds_on_valid_project() {
+    let project = valid_project();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["check"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Check passed"));
+}
+
+#[test]
+fn check_fails_on_invalid_project() {
+    let project = invalid_project();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["check"])
+        .assert()
+        .code(predicate::eq(1))
+        .stdout(predicate::str::contains("Check failed"));
+}
+
+#[test]
+fn check_json_envelope_on_success() {
+    let project = valid_project();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["check", "--format", "json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""result": "success""#))
+        .stdout(predicate::str::contains(r#""passed": true"#))
+        .stdout(predicate::str::contains(r#""command": "check""#));
+}
+
+#[test]
+fn check_json_envelope_on_failure() {
+    let project = invalid_project();
+    let output = cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["check", "--format", "json"])
+        .output()
+        .expect("should run");
+    assert_eq!(output.status.code(), Some(1));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let envelope: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+    assert_eq!(envelope["result"], "error");
+    assert_eq!(envelope["payload"]["passed"], false);
+}
+
+#[test]
+fn check_quiet_produces_no_stdout() {
+    let project = valid_project();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["check", "--format", "quiet"])
+        .assert()
+        .success()
+        .stdout(predicate::str::is_empty());
+}
+
+#[test]
+fn check_sarif_output() {
+    let project = valid_project();
+    let output = cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["check", "--format", "sarif"])
+        .output()
+        .expect("should run");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let sarif: serde_json::Value = serde_json::from_str(&stdout).expect("valid SARIF JSON");
+    assert_eq!(sarif["version"], "2.1.0");
+}
+
+#[test]
+fn check_locked_succeeds_with_matching_lockfile() {
+    let project = valid_project();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["lock", "update"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["check", "--locked"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Check passed"));
+}
+
+#[test]
+fn check_locked_fails_without_lockfile() {
+    let project = valid_project();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["check", "--locked"])
+        .assert()
+        .code(predicate::eq(1))
+        .stdout(predicate::str::contains("LOCK-MISSING-004"));
+}
+
+#[test]
+fn check_locked_fails_on_stale_lockfile() {
+    let project = valid_project();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["lock", "update"])
+        .assert()
+        .success();
+    let lock_path = project.path().join("know-now.lock");
+    let mut content = std::fs::read_to_string(&lock_path).unwrap();
+    content = content.replace(
+        r#""engine_version": "0.1.0""#,
+        r#""engine_version": "99.0.0""#,
+    );
+    std::fs::write(&lock_path, content).unwrap();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["check", "--locked"])
+        .assert()
+        .code(predicate::eq(1))
+        .stdout(predicate::str::contains("LOCK-STALE-003"));
+}
+
+#[test]
+fn check_locked_json_includes_lock_status() {
+    let project = valid_project();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["lock", "update"])
+        .assert()
+        .success();
+    let output = cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["check", "--locked", "--format", "json"])
+        .output()
+        .expect("should run");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let envelope: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+    assert!(
+        envelope["payload"]["lock_status"].is_object(),
+        "JSON should include lock_status when --locked"
+    );
+    assert_eq!(envelope["payload"]["lock_status"]["passed"], true);
+}
+
+#[test]
+fn check_without_locked_omits_lock_status() {
+    let project = valid_project();
+    let output = cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["check", "--format", "json"])
+        .output()
+        .expect("should run");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let envelope: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+    assert!(
+        envelope["payload"]["lock_status"].is_null(),
+        "JSON should not include lock_status without --locked"
+    );
+}
+
+#[test]
+fn check_no_metadata_dir_exits_with_error() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["check"])
+        .assert()
+        .code(predicate::eq(1))
+        .stderr(predicate::str::contains("no metadata/ directory"));
+}
+
+#[test]
+fn check_help_shows_locked_flag() {
+    let output = cmd()
+        .args(["check", "--help"])
+        .output()
+        .expect("should run");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout.contains("--locked"),
+        "check --help should show --locked flag"
+    );
 }

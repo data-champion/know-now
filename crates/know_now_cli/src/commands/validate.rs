@@ -98,7 +98,7 @@ fn severity_to_sarif_level(severity: Severity) -> &'static str {
     }
 }
 
-fn build_sarif(diagnostics: &[Diagnostic]) -> serde_json::Value {
+pub(crate) fn build_sarif(diagnostics: &[Diagnostic]) -> serde_json::Value {
     let results: Vec<serde_json::Value> = diagnostics
         .iter()
         .map(|d| {

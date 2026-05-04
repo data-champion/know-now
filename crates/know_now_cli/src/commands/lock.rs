@@ -37,7 +37,7 @@ pub fn run(ctx: &CommandContext, cmd: &LockCommand) -> anyhow::Result<()> {
     }
 }
 
-fn resolve_current_versions() -> ResolvedVersions {
+pub(crate) fn resolve_current_versions() -> ResolvedVersions {
     let policy_info = know_now_policy::dc_standard::DcStandard.info();
 
     let mut generators = BTreeMap::new();
