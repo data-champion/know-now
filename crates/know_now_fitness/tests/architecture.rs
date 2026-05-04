@@ -418,3 +418,93 @@ fn diagnostics_no_metadata_dep() {
          should be self-contained (PRD §8.1)"
     );
 }
+
+// ---------------------------------------------------------------------------
+// Cross-cutting: know_now_audit must NOT depend on know_now_diagnostics
+// (avoid circular dependency — diagnostics depends on audit for redaction)
+// ---------------------------------------------------------------------------
+#[test]
+fn audit_no_diagnostics_dep() {
+    let audit_deps = transitive_deps(&RESOLVED, "know_now_audit");
+
+    assert!(
+        !audit_deps.contains("know_now_diagnostics"),
+        "know_now_audit must not depend on know_now_diagnostics — \
+         diagnostics consumes audit's redaction, not the reverse"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Banned macros: println!/eprintln!/dbg!/print!/eprint! forbidden in
+// production crate source (tests/ and xtask/ exempted).
+// Belt-and-braces check alongside clippy lints.
+// ---------------------------------------------------------------------------
+#[test]
+fn banned_macros_in_production_crates() {
+    let banned = ["println!", "eprintln!", "dbg!", "print!", "eprint!"];
+    let ws = workspace_metadata();
+    let ws_names = workspace_package_names(&ws);
+    let exempted = ["xtask", "know_now_fitness"];
+    let mut violations = Vec::new();
+
+    for pkg in &ws.packages {
+        if !ws_names.contains(&pkg.name) {
+            continue;
+        }
+        if exempted.contains(&pkg.name.as_str()) {
+            continue;
+        }
+
+        let src_dir = pkg.manifest_path.parent().unwrap().join("src");
+        let src_path = std::path::Path::new(src_dir.as_str());
+        if !src_path.exists() {
+            continue;
+        }
+
+        scan_dir_for_banned(src_path, &banned, &mut violations);
+    }
+
+    assert!(
+        violations.is_empty(),
+        "Banned macros found in production crate source (use tracing instead):\n  {}",
+        violations.join("\n  ")
+    );
+}
+
+fn scan_dir_for_banned(dir: &std::path::Path, banned: &[&str], violations: &mut Vec<String>) {
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            scan_dir_for_banned(&path, banned, violations);
+            continue;
+        }
+        let Some(ext) = path.extension() else {
+            continue;
+        };
+        if ext != "rs" {
+            continue;
+        }
+        let Ok(content) = std::fs::read_to_string(&path) else {
+            continue;
+        };
+        for (line_num, line) in content.lines().enumerate() {
+            let trimmed = line.trim();
+            if trimmed.starts_with("//") || trimmed.starts_with("///") {
+                continue;
+            }
+            for macro_name in banned {
+                if line.contains(macro_name) {
+                    violations.push(format!(
+                        "{}:{}: {}",
+                        path.display(),
+                        line_num + 1,
+                        macro_name
+                    ));
+                }
+            }
+        }
+    }
+}

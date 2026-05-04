@@ -4,5 +4,8 @@ version = "0.1.0"
 edition = "2021"
 license.workspace = true
 
+[dependencies]
+regex = "1"
+
 [lints]
 workspace = true

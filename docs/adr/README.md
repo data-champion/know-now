@@ -50,3 +50,4 @@ The PRD §24 decisions table summarizes high-level decisions and their status. A
 | [0005](0005-frontend-package-manager-pnpm.md) | Frontend package manager: pnpm | Accepted |
 | [0006](0006-trunk-based-development-main-no-prs.md) | Trunk-based development on `main` with no feature branches or PRs | Accepted |
 | [0007](0007-review-gate-different-agent-via-mcp-agent-mail.md) | Code-review gate by a different agent via mcp-agent-mail | Accepted |
+| [0008](0008-structured-logging-tracing.md) | Structured logging via `tracing` | Accepted |
