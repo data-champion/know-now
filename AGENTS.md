@@ -18,9 +18,9 @@ For positioning, personas, scope by phase, and detailed architecture, read [`doc
 
 ## 2. Repository status
 
-The repository is **pre-implementation** (PRD Phase 1 — architecture contract spike — has not started). At the time of writing, only the PRD and contributor docs exist. The Rust workspace, the TypeScript dashboard, fixtures, and the CI pipeline are all unbuilt.
+The repository is **Phase 1 complete; Phase 2A active** (PRD §23.1 exit criteria met at `190fe48`). The Rust workspace builds, the metadata parser enforces the YAML subset with source-aware diagnostics, the canonical ProjectGraph is constructed, generators produce PostgreSQL DDL and Markdown docs, output is provably deterministic, and the writer provides atomic promotion with path safety. Volatile run state is separated from generated output. `cargo xtask e2e phase1` passes all 14 integration tests.
 
-Expect this state to change. Treat any code you find as authoritative over any doc that disagrees with it once code lands.
+Treat any code you find as authoritative over any doc that disagrees with it.
 
 ---
 
