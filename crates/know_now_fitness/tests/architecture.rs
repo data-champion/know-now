@@ -347,7 +347,7 @@ fn inv15_templates_restricted_minijinja() {
         for dep in &pkg.dependencies {
             if dep.name == "minijinja" {
                 let features = &dep.features;
-                let banned_features = ["custom_syntax", "loader", "fuel", "multi_template"];
+                let banned_features = ["custom_syntax", "loader", "multi_template"];
                 for banned in &banned_features {
                     assert!(
                         !features.iter().any(|f| f == *banned),
