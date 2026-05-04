@@ -3,6 +3,8 @@ name = "know_now_cli"
 version = "0.1.0"
 edition = "2021"
 license.workspace = true
+repository.workspace = true
+description = "Local-first metadata-driven data platform generation engine"
 
 [lib]
 path = "src/lib.rs"
@@ -10,6 +12,13 @@ path = "src/lib.rs"
 [[bin]]
 name = "know-now"
 path = "src/main.rs"
+
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/know-now-{ target }{ archive-suffix }"
+pkg-fmt = "tgz"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-fmt = "zip"
 
 [lints]
 workspace = true
