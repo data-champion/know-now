@@ -471,6 +471,107 @@ fn banned_macros_in_production_crates() {
     );
 }
 
+// ---------------------------------------------------------------------------
+// NFR-M5 sentinel: the architecture fitness test for generator independence
+// must not be silently removed. bsf.6 owns this gate.
+// ---------------------------------------------------------------------------
+#[test]
+fn nfr_m5_generator_independence_test_exists() {
+    let source = std::fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/tests/architecture.rs"
+    ))
+    .expect("cannot read architecture.rs");
+    let sentinels = [
+        "fn inv01_generators_no_yaml_parser_deps",
+        "fn inv02_yaml_parser_isolated_to_metadata",
+        "fn generators_no_cross_deps",
+    ];
+    let mut missing = Vec::new();
+    for sentinel in sentinels {
+        if !source.contains(sentinel) {
+            missing.push(sentinel);
+        }
+    }
+    assert!(
+        missing.is_empty(),
+        "NFR-M5 SENTINEL FAILED — these architecture fitness tests must not be removed \
+         (bsf.6, AGENTS.md §4.1):\n  {}",
+        missing.join("\n  ")
+    );
+}
+
+// ---------------------------------------------------------------------------
+// NFR-M8 sentinel: YAML parser dependency enforcement tests must stay.
+// ---------------------------------------------------------------------------
+#[test]
+fn nfr_m8_parser_dep_policy_enforced() {
+    assert!(
+        !BANNED_YAML_CRATES.is_empty(),
+        "NFR-M8 VIOLATED — BANNED_YAML_CRATES must not be empty (PRD §10.2, NFR-M8)"
+    );
+
+    let source = std::fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/tests/architecture.rs"
+    ))
+    .expect("cannot read architecture.rs");
+    assert!(
+        source.contains("fn inv02_yaml_parser_isolated_to_metadata"),
+        "NFR-M8 SENTINEL FAILED — YAML parser isolation test must not be removed"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// NFR-M3 sentinel: TypeScript strict mode must be enabled when web/ exists.
+// ---------------------------------------------------------------------------
+#[test]
+fn nfr_m3_typescript_strict_mode() {
+    let tsconfig_path = std::path::Path::new("web/tsconfig.json");
+    if !tsconfig_path.exists() {
+        return;
+    }
+    let content = std::fs::read_to_string(tsconfig_path).expect("cannot read web/tsconfig.json");
+    assert!(
+        content.contains("\"strict\": true") || content.contains("\"strict\":true"),
+        "NFR-M3 VIOLATED — web/tsconfig.json must have \"strict\": true (AGENTS.md §6.2)"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// NFR-M7 sentinel: pnpm-lock.yaml must be committed when web/ exists.
+// ---------------------------------------------------------------------------
+#[test]
+fn nfr_m7_frontend_lockfile_committed() {
+    let pkg_path = std::path::Path::new("web/package.json");
+    if !pkg_path.exists() {
+        return;
+    }
+    let lock_path = std::path::Path::new("web/pnpm-lock.yaml");
+    assert!(
+        lock_path.exists(),
+        "NFR-M7 VIOLATED — web/pnpm-lock.yaml must be committed (AGENTS.md §5, PRD §17.6)"
+    );
+
+    let banned_locks = [
+        "web/package-lock.json",
+        "web/yarn.lock",
+        "web/bun.lock",
+        "web/bun.lockb",
+    ];
+    let mut violations = Vec::new();
+    for banned in banned_locks {
+        if std::path::Path::new(banned).exists() {
+            violations.push(banned);
+        }
+    }
+    assert!(
+        violations.is_empty(),
+        "NFR-M7 VIOLATED — only pnpm-lock.yaml is allowed, found: {}",
+        violations.join(", ")
+    );
+}
+
 fn scan_dir_for_banned(dir: &std::path::Path, banned: &[&str], violations: &mut Vec<String>) {
     let Ok(entries) = std::fs::read_dir(dir) else {
         return;

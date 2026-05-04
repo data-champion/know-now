@@ -99,6 +99,12 @@ jobs:
           cargo install cargo-deny --locked
           cargo deny check
 
+      - name: Rustdoc lint (Linux gate, NFR-M2)
+        if: runner.os == 'Linux'
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: cargo doc --workspace --no-deps
+
       - name: Rust Job Summary
         if: always()
         run: |

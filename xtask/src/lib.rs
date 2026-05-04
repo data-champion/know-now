@@ -256,6 +256,11 @@ fn cmd_check() -> anyhow::Result<()> {
         return finish_check(&results);
     }
 
+    results.push(run_rustdoc_step());
+    if last_failed(&results) {
+        return finish_check(&results);
+    }
+
     results.push(run_fixture_diff_step());
     finish_check(&results)
 }
@@ -823,6 +828,33 @@ fn run_fitness_step() -> StepResult {
         name: "fitness",
         status: StepStatus::Skip,
         detail: "fitness harness crate not present yet".to_string(),
+    }
+}
+
+fn run_rustdoc_step() -> StepResult {
+    let status = Command::new("cargo")
+        .args(["doc", "--workspace", "--no-deps"])
+        .env("RUSTDOCFLAGS", "-D warnings")
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .status();
+
+    match status {
+        Ok(exit) if exit.success() => StepResult {
+            name: "rustdoc",
+            status: StepStatus::Pass,
+            detail: "ok".to_string(),
+        },
+        Ok(exit) => StepResult {
+            name: "rustdoc",
+            status: StepStatus::Fail,
+            detail: format!("exit status {exit}"),
+        },
+        Err(err) => StepResult {
+            name: "rustdoc",
+            status: StepStatus::Fail,
+            detail: format!("failed to execute cargo doc: {err}"),
+        },
     }
 }
 
