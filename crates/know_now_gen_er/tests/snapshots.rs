@@ -203,9 +203,6 @@ fn er_single_entity_snapshot() {
         trace: ContractTrace::default(),
     };
     let artifacts = gen.generate(&contract).unwrap();
-    let mmd = artifacts
-        .iter()
-        .find(|a| a.path.ends_with(".mmd"))
-        .unwrap();
+    let mmd = artifacts.iter().find(|a| a.path.ends_with(".mmd")).unwrap();
     insta::assert_snapshot!("er_single_entity", mmd.content);
 }

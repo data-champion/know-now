@@ -130,7 +130,10 @@ impl Generator for ErDiagramGenerator {
     }
 }
 
-fn render_er_diagram(entities: &[ContractEntity], relationships: &[ContractRelationship]) -> String {
+fn render_er_diagram(
+    entities: &[ContractEntity],
+    relationships: &[ContractRelationship],
+) -> String {
     let mut lines = Vec::new();
     lines.push("erDiagram".to_owned());
 
@@ -194,10 +197,14 @@ fn rel_default_label(rel: &ContractRelationship) -> &str {
     }
 }
 
-fn is_fk_attribute(attr_name: &str, relationships: &[ContractRelationship], entity_name: &str) -> bool {
-    relationships.iter().any(|r| {
-        r.from_entity == entity_name && r.from_key.as_deref() == Some(attr_name)
-    })
+fn is_fk_attribute(
+    attr_name: &str,
+    relationships: &[ContractRelationship],
+    entity_name: &str,
+) -> bool {
+    relationships
+        .iter()
+        .any(|r| r.from_entity == entity_name && r.from_key.as_deref() == Some(attr_name))
 }
 
 #[allow(clippy::match_same_arms)]
@@ -247,7 +254,10 @@ fn group_by_domain(entities: &[ContractEntity]) -> BTreeMap<String, Vec<Contract
     let mut domains: BTreeMap<String, Vec<ContractEntity>> = BTreeMap::new();
     for entity in entities {
         if let Some(ref domain) = entity.domain {
-            domains.entry(domain.clone()).or_default().push(entity.clone());
+            domains
+                .entry(domain.clone())
+                .or_default()
+                .push(entity.clone());
         }
     }
     domains
@@ -260,7 +270,13 @@ fn refs_to_owned(rels: &[&ContractRelationship]) -> Vec<ContractRelationship> {
 fn sanitize_domain_name(domain: &str) -> String {
     domain
         .chars()
-        .map(|c| if c.is_alphanumeric() || c == '_' || c == '-' { c } else { '_' })
+        .map(|c| {
+            if c.is_alphanumeric() || c == '_' || c == '-' {
+                c
+            } else {
+                '_'
+            }
+        })
         .collect::<String>()
         .to_lowercase()
 }
@@ -484,10 +500,7 @@ mod tests {
     fn mmd_contains_entity_block() {
         let gen = ErDiagramGenerator::new();
         let artifacts = gen.generate(&minimal_contract()).unwrap();
-        let mmd = artifacts
-            .iter()
-            .find(|a| a.path.ends_with(".mmd"))
-            .unwrap();
+        let mmd = artifacts.iter().find(|a| a.path.ends_with(".mmd")).unwrap();
         assert!(mmd.content.contains("erDiagram"));
         assert!(mmd.content.contains("customer {"));
         assert!(mmd.content.contains("integer id PK"));
@@ -639,15 +652,11 @@ mod tests {
         let mut contract = multi_entity_contract();
         contract.entities[1].domain = Some("logistics".into());
         let artifacts = gen.generate(&contract).unwrap();
-        assert!(artifacts
-            .iter()
-            .any(|a| a.path == "diagrams/er/sales.mmd"));
+        assert!(artifacts.iter().any(|a| a.path == "diagrams/er/sales.mmd"));
         assert!(artifacts
             .iter()
             .any(|a| a.path == "diagrams/er/logistics.mmd"));
-        assert!(artifacts
-            .iter()
-            .any(|a| a.path == "diagrams/er/sales.md"));
+        assert!(artifacts.iter().any(|a| a.path == "diagrams/er/sales.md"));
         assert!(artifacts
             .iter()
             .any(|a| a.path == "diagrams/er/logistics.md"));
@@ -721,7 +730,10 @@ mod tests {
 
     #[test]
     fn sanitize_domain_name_special_chars() {
-        assert_eq!(sanitize_domain_name("Sales & Marketing"), "sales___marketing");
+        assert_eq!(
+            sanitize_domain_name("Sales & Marketing"),
+            "sales___marketing"
+        );
         assert_eq!(sanitize_domain_name("data-ops"), "data-ops");
         assert_eq!(sanitize_domain_name("My Domain"), "my_domain");
     }
