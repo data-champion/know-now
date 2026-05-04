@@ -343,6 +343,7 @@ fn supported_targets() -> Vec<GenerateTarget> {
         GenerateTarget::Quality,
         GenerateTarget::Docs,
         GenerateTarget::Diagrams,
+        GenerateTarget::Fixtures,
     ]
 }
 

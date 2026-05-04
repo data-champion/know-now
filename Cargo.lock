@@ -826,6 +826,7 @@ dependencies = [
 name = "know_now_gen_quality"
 version = "0.1.0"
 dependencies = [
+ "insta",
  "know_now_codegen",
  "know_now_contract",
  "serde_json",

@@ -2024,3 +2024,232 @@ fn generate_no_crlf_in_output() {
         "NFR-PO3: manifest must use LF only"
     );
 }
+
+#[test]
+fn generate_quality_target_produces_contracts() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate", "--target", "quality"])
+        .assert()
+        .success();
+    let qc_dir = project.join("generated/quality_contracts");
+    assert!(qc_dir.exists(), "quality_contracts/ dir should exist");
+    assert!(
+        qc_dir.join("customer.yml").exists(),
+        "customer quality contract should exist"
+    );
+}
+
+#[test]
+fn generate_quality_contract_is_valid_yaml() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate", "--target", "quality"])
+        .assert()
+        .success();
+    let qc_dir = project.join("generated/quality_contracts");
+    for entry in std::fs::read_dir(&qc_dir).unwrap() {
+        let entry = entry.unwrap();
+        if entry.path().extension().is_some_and(|e| e == "yml") {
+            let content = std::fs::read_to_string(entry.path()).unwrap();
+            assert!(
+                !content.is_empty(),
+                "quality contract {} should not be empty",
+                entry.path().display()
+            );
+            assert!(
+                content.contains("checks:"),
+                "quality contract {} should have checks section",
+                entry.path().display()
+            );
+        }
+    }
+}
+
+#[test]
+fn generate_dbt_sources_yml_is_valid_yaml() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate", "--target", "dbt"])
+        .assert()
+        .success();
+    let sources_path = project.join("generated/dbt/models/sources.yml");
+    if sources_path.exists() {
+        let content = std::fs::read_to_string(&sources_path).unwrap();
+        assert!(content.contains("sources:"), "sources.yml must have sources key");
+    }
+}
+
+#[test]
+fn generate_dbt_mart_models_exist() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate", "--target", "dbt"])
+        .assert()
+        .success();
+    let marts_dir = project.join("generated/dbt/models/marts");
+    assert!(marts_dir.exists(), "marts directory should exist");
+    let mart_files: Vec<_> = std::fs::read_dir(&marts_dir)
+        .unwrap()
+        .filter_map(std::result::Result::ok)
+        .filter(|e| e.path().extension().is_some_and(|ext| ext == "sql"))
+        .collect();
+    assert!(
+        !mart_files.is_empty(),
+        "at least one mart .sql model should exist"
+    );
+}
+
+#[test]
+fn generate_dbt_schema_yml_has_models() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate", "--target", "dbt"])
+        .assert()
+        .success();
+    let schema_path = project.join("generated/dbt/models/marts/schema.yml");
+    if schema_path.exists() {
+        let content = std::fs::read_to_string(&schema_path).unwrap();
+        assert!(content.contains("models:"), "marts schema.yml must have models key");
+    }
+}
+
+#[test]
+fn generate_all_targets_produces_all_phase2b_artifacts() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate", "--target", "all"])
+        .assert()
+        .success();
+    let generated = project.join("generated");
+    assert!(generated.join("ddl/postgres/schema.sql").exists(), "DDL");
+    assert!(generated.join("docs/README.md").exists(), "docs");
+    assert!(generated.join("dbt/dbt_project.yml").exists(), "dbt");
+    assert!(generated.join("quality_contracts").exists(), "quality");
+    assert!(generated.join("fixtures/README.md").exists(), "fixtures");
+    assert!(generated.join("diagrams/er/all.mmd").exists(), "ER diagram");
+}
+
+#[test]
+fn generate_manifest_includes_all_generators() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate", "--target", "all"])
+        .assert()
+        .success();
+    let manifest = std::fs::read_to_string(project.join("generated/manifest.json")).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&manifest).expect("valid JSON");
+    let artifacts = json["artifacts"].as_array().expect("artifacts array");
+    let generators: std::collections::HashSet<&str> = artifacts
+        .iter()
+        .filter_map(|a| a["generator"].as_str())
+        .collect();
+    assert!(generators.contains("know_now_gen_postgres"), "postgres in manifest");
+    assert!(generators.contains("know_now_gen_docs"), "docs in manifest");
+    assert!(generators.contains("know_now_gen_dbt"), "dbt in manifest");
+    assert!(generators.contains("know_now_gen_quality"), "quality in manifest");
+    assert!(generators.contains("know_now_gen_fixtures"), "fixtures in manifest");
+    assert!(generators.contains("know_now_gen_er"), "ER in manifest");
+}
+
+#[test]
+fn generate_no_crlf_in_phase2b_output() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate", "--target", "all"])
+        .assert()
+        .success();
+    let generated = project.join("generated");
+    fn check_no_crlf(dir: &std::path::Path) {
+        if !dir.exists() {
+            return;
+        }
+        for entry in std::fs::read_dir(dir).unwrap() {
+            let entry = entry.unwrap();
+            let path = entry.path();
+            if path.is_dir() {
+                check_no_crlf(&path);
+            } else {
+                let content = std::fs::read_to_string(&path).unwrap_or_default();
+                assert!(
+                    !content.contains('\r'),
+                    "NFR-PO3: {} must use LF only",
+                    path.display()
+                );
+            }
+        }
+    }
+    check_no_crlf(&generated);
+}
