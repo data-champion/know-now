@@ -1,0 +1,27 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/know_now_cli",
+  "crates/know_now_core",
+  "crates/know_now_diagnostics",
+  "crates/know_now_metadata",
+  "crates/know_now_contract",
+  "crates/know_now_identity",
+  "crates/know_now_validate",
+  "crates/know_now_codegen",
+  "crates/know_now_ir",
+  "crates/know_now_writer",
+  "crates/know_now_lock",
+  "crates/know_now_gen_postgres",
+  "crates/know_now_gen_dbt",
+  "crates/know_now_gen_quality",
+  "crates/know_now_gen_docs",
+  "crates/know_now_diff",
+  "crates/know_now_server",
+  "crates/know_now_policy",
+  "crates/know_now_templates",
+  "crates/know_now_cache",
+  "crates/know_now_toolchain",
+  "crates/know_now_audit",
+  "xtask",
+]
