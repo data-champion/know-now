@@ -5,8 +5,8 @@ use std::time::Duration;
 use clap::{Parser, Subcommand};
 
 use know_now_cli::commands::{
-    check, config, diff, doctor, examples, explain, generate, id, init, lock, schema, validate,
-    version,
+    check, config, diff, doctor, examples, explain, generate, id, init, issues, lock, schema,
+    validate, version,
 };
 use know_now_cli::context::CommandContext;
 use know_now_cli::exit_code;
@@ -71,6 +71,10 @@ enum Command {
     /// Explain generated artifacts, trace metadata origins
     Explain(explain::ExplainArgs),
 
+    /// Track and manage deprecation issues
+    #[command(subcommand)]
+    Issues(issues::IssuesCommand),
+
     /// Lockfile operations
     #[command(subcommand)]
     Lock(lock::LockCommand),
@@ -134,6 +138,7 @@ fn main() {
         Command::Diff(args) => diff::run(&ctx, args),
         Command::Doctor(args) => doctor::run(&ctx, args),
         Command::Explain(args) => explain::run(&ctx, args),
+        Command::Issues(cmd) => issues::run(&ctx, cmd),
         Command::Lock(cmd) => lock::run(&ctx, cmd),
         Command::Id(cmd) => id::run(&ctx, cmd),
         Command::Examples(cmd) => examples::run(&ctx, cmd),

@@ -7,6 +7,7 @@ pub mod explain;
 pub mod generate;
 pub mod id;
 pub mod init;
+pub mod issues;
 pub mod lock;
 pub mod schema;
 pub mod validate;

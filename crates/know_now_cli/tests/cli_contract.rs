@@ -8,8 +8,8 @@ fn cmd() -> Command {
 #[test]
 fn help_shows_all_phase2a_subcommands() {
     let expected = [
-        "init", "validate", "check", "schema", "generate", "diff", "doctor", "explain", "lock",
-        "id", "examples", "config", "version",
+        "init", "validate", "check", "schema", "generate", "diff", "doctor", "explain", "issues",
+        "lock", "id", "examples", "config", "version",
     ];
     let output = cmd().arg("--help").output().expect("should run");
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -2643,4 +2643,145 @@ fn explain_no_query_fails() {
         .assert()
         .failure()
         .stderr(predicate::str::contains("--artifact").or(predicate::str::contains("--list")));
+}
+
+// ── issues ───────────────────────────────────────────────────────────
+
+#[test]
+fn issues_list_help_shows_flags() {
+    cmd()
+        .args(["issues", "list", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("--status"));
+}
+
+#[test]
+fn issues_list_empty_project() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["issues", "list"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("No issues found"));
+}
+
+#[test]
+fn issues_list_json_empty() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    let output = cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["--format", "json", "issues", "list"])
+        .output()
+        .expect("should run");
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let json: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+    assert_eq!(json["result"], "success");
+    assert!(json["payload"].is_array());
+    assert_eq!(json["payload"].as_array().unwrap().len(), 0);
+}
+
+#[test]
+fn issues_resolve_nonexistent_fails() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["issues", "resolve", "no-such-id"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("ISSUE-NOT-FOUND-001"));
+}
+
+#[test]
+fn issues_snooze_nonexistent_fails() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["issues", "snooze", "no-such-id", "--reason", "testing"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("ISSUE-NOT-FOUND-001"));
+}
+
+#[test]
+fn issues_roundtrip_resolve() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    let issues_dir = tmp.path().join(".knownow");
+    std::fs::create_dir_all(&issues_dir).unwrap();
+    let issues_json = issues_dir.join("issues.json");
+    std::fs::write(
+        &issues_json,
+        r#"[{"id":"test-001","affected_object":"ent_customer","change_type":"breaking","description":"column removed","suggested_fix":"add column back","status":"open","snooze_reason":null,"created_at":"2026-05-04T00:00:00Z","updated_at":null}]"#,
+    )
+    .unwrap();
+
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["issues", "list"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("test-001"))
+        .stdout(predicate::str::contains("column removed"));
+
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["issues", "resolve", "test-001"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Resolved issue"));
+
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["issues", "list"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("No issues found"));
+
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["issues", "list", "--status", "all"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("[RESOLVED]"))
+        .stdout(predicate::str::contains("test-001"));
+}
+
+#[test]
+fn issues_roundtrip_snooze() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    let issues_dir = tmp.path().join(".knownow");
+    std::fs::create_dir_all(&issues_dir).unwrap();
+    let issues_json = issues_dir.join("issues.json");
+    std::fs::write(
+        &issues_json,
+        r#"[{"id":"test-002","affected_object":"attr_email","change_type":"ambiguous","description":"type changed","suggested_fix":"verify compatibility","status":"open","snooze_reason":null,"created_at":"2026-05-04T00:00:00Z","updated_at":null}]"#,
+    )
+    .unwrap();
+
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["issues", "snooze", "test-002", "--reason", "waiting for review"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Snoozed issue"));
+
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["issues", "list", "--status", "snoozed"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("test-002"))
+        .stdout(predicate::str::contains("waiting for review"));
 }
