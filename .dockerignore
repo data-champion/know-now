@@ -1,0 +1,14 @@
+target/
+.git/
+.bv/
+.ntm/
+.codex/
+.beads/
+node_modules/
+web/node_modules/
+web/tests/e2e/results/
+web/playwright-report/
+storage.sqlite3
+*.sqlite3
+*.swp
+*.swo

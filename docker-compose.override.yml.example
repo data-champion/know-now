@@ -1,0 +1,27 @@
+# WARNING: This override exposes the know-now server on all network interfaces.
+#
+# By default, docker-compose.yml binds to 127.0.0.1 (loopback) only.
+# This file is intentionally NOT named docker-compose.override.yml so it
+# is not auto-loaded. Copy it to docker-compose.override.yml only if you
+# understand the security implications.
+#
+# The know-now local server is NOT designed as an authenticated multi-user
+# deployment. Exposing it to a network means anyone who can reach the port
+# can access the dashboard, including generated code and metadata.
+#
+# See: PRD §13.2, AGENTS.md §8 (NFR-S14, S15, S16)
+#
+# Usage:
+#   cp docker-compose.override.yml.example docker-compose.override.yml
+#   docker compose up
+
+services:
+  know-now-server:
+    command:
+      - serve
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "3827"
+    ports:
+      - "0.0.0.0:3827:3827"

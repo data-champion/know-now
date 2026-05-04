@@ -74,5 +74,10 @@ fn built_in_examples() -> Vec<ExampleEntry> {
             profile: "demo",
             description: "Full e-commerce demo (customer, order, product).",
         },
+        ExampleEntry {
+            name: "docker-compose",
+            profile: "docker-compose",
+            description: "Full local demo via Docker Compose: docker compose up",
+        },
     ]
 }

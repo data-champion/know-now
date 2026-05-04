@@ -37,6 +37,16 @@ curl -fsSL https://github.com/data-champion/know-now/releases/latest/download/kn
 
 On Windows, download the `.zip` archive and add the extracted directory to your `PATH`.
 
+## Docker Compose (full demo stack)
+
+If you want to try know-now without installing Rust or Node:
+
+```bash
+docker compose up
+```
+
+This builds and runs the engine, dashboard, and PostgreSQL. See [`docker-compose.md`](docker-compose.md) for details.
+
 ## Source build (fallback)
 
 ```bash
