@@ -2261,7 +2261,9 @@ fn diff_help_shows_flags() {
         .assert()
         .success()
         .stdout(predicate::str::contains("--baseline"))
-        .stdout(predicate::str::contains("--migration-safe"));
+        .stdout(predicate::str::contains("--migration-safe"))
+        .stdout(predicate::str::contains("--impact"))
+        .stdout(predicate::str::contains("--scan-custom"));
 }
 
 #[test]
@@ -2389,6 +2391,108 @@ fn diff_git_baseline_not_yet_implemented() {
         .assert()
         .failure()
         .stderr(predicate::str::contains("DIFF-GIT-001"));
+}
+
+#[test]
+fn diff_impact_flag_accepted() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+
+    let manifest_path = project.join("generated/manifest.json");
+    let manifest = std::fs::read_to_string(&manifest_path).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&manifest).unwrap();
+    if json.get("contract").is_none() {
+        return;
+    }
+
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["diff", "--impact"])
+        .assert()
+        .success();
+}
+
+#[test]
+fn diff_impact_json_output() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+
+    let manifest_path = project.join("generated/manifest.json");
+    let manifest = std::fs::read_to_string(&manifest_path).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&manifest).unwrap();
+    if json.get("contract").is_none() {
+        return;
+    }
+
+    let output = cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["--format", "json", "diff", "--impact"])
+        .output()
+        .expect("should run");
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let result: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+    assert_eq!(result["result"], "success");
+    assert!(result["payload"]["diff"].is_object());
+}
+
+#[test]
+fn diff_scan_custom_no_custom_dir() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+
+    let manifest_path = project.join("generated/manifest.json");
+    let manifest = std::fs::read_to_string(&manifest_path).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&manifest).unwrap();
+    if json.get("contract").is_none() {
+        return;
+    }
+
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["diff", "--scan-custom"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("No custom/"));
 }
 
 #[test]
