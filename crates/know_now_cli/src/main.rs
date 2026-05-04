@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 use std::process;
+use std::time::Duration;
 
 use clap::{Parser, Subcommand};
 
@@ -9,6 +10,7 @@ use know_now_cli::commands::{
 use know_now_cli::context::CommandContext;
 use know_now_cli::exit_code;
 use know_now_cli::output::OutputFormat;
+use know_now_toolchain::project_lock;
 
 /// Local-first metadata-driven data platform generation engine
 #[derive(Debug, Parser)]
@@ -95,6 +97,24 @@ fn main() {
         config_path: cli.config,
     };
 
+    let lock_guard = if requires_write_lock(&cli.command) {
+        let locks_dir = ctx.project_root.join(".knownow").join("locks");
+        let cmd_name = write_lock_command_name(&cli.command);
+        match project_lock::acquire(
+            &locks_dir,
+            cmd_name,
+            Duration::from_secs(project_lock::DEFAULT_LOCK_TIMEOUT_SECS),
+        ) {
+            Ok(guard) => Some(guard),
+            Err(e) => {
+                eprintln!("error: {e}");
+                process::exit(exit_code::VALIDATION_ERROR);
+            }
+        }
+    } else {
+        None
+    };
+
     let result = match &cli.command {
         Command::Init(args) => init::run(&ctx, args),
         Command::Validate(args) => validate::run(&ctx, args),
@@ -108,8 +128,26 @@ fn main() {
         Command::Version(args) => version::run(&ctx, args),
     };
 
+    drop(lock_guard);
+
     if let Err(err) = result {
         eprintln!("error: {err}");
         process::exit(exit_code::VALIDATION_ERROR);
+    }
+}
+
+fn requires_write_lock(command: &Command) -> bool {
+    matches!(
+        command,
+        Command::Init(_) | Command::Generate(_) | Command::Lock(lock::LockCommand::Update(_))
+    )
+}
+
+fn write_lock_command_name(command: &Command) -> &'static str {
+    match command {
+        Command::Init(_) => "init",
+        Command::Generate(_) => "generate",
+        Command::Lock(lock::LockCommand::Update(_)) => "lock update",
+        _ => "unknown",
     }
 }

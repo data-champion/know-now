@@ -2,6 +2,8 @@
 //!
 //! Responsibility is defined in PRD section 8.2 (workspace layout).
 
+pub mod project_lock;
+
 use std::{
     ffi::OsStr,
     fs, io,

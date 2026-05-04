@@ -428,6 +428,7 @@ dependencies = [
  "know_now_lock",
  "know_now_metadata",
  "know_now_policy",
+ "know_now_toolchain",
  "know_now_validate",
  "predicates",
  "schemars",
@@ -576,6 +577,7 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
+ "thiserror",
 ]
 
 [[package]]
