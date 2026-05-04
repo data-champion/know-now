@@ -10,3 +10,6 @@ know_now_contract = { version = "0.1.0", path = "../know_now_contract" }
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+insta = "1.47.2"

@@ -1,0 +1,9 @@
+version: "1.0"
+entities:
+  - id: ent_item
+    name: item
+    attributes:
+      - id: attr_item_id
+        name: id
+        logical_type: integer
+        required: true

@@ -1,0 +1,25 @@
+---
+source: crates/know_now_writer/tests/snapshots.rs
+expression: json
+---
+{
+  "engine_version": "0.1.0",
+  "metadata_schema_version": "0.1.0",
+  "generator_contract_version": "1.0",
+  "project_id": "empty_project",
+  "input_hash": "sha256:2e1cfa82b035c26cbbbdae632cea070514eb8b773f616aaeaf668e2f0be8f10d",
+  "lockfile_hash": "sha256:empty000000000000000000000000000000000000000000000000000000000",
+  "target_database": {
+    "kind": "postgres",
+    "version": "16",
+    "compatibility_floor": "14"
+  },
+  "policy": {
+    "pack": "none",
+    "version": "0.0.0",
+    "hash": "sha256:none0000000000000000000000000000000000000000000000000000000000"
+  },
+  "template_renderers": [],
+  "artifacts": [],
+  "warnings": []
+}

@@ -1,0 +1,1670 @@
+version: "1.0"
+entities:
+  - id: ent_account
+    name: account
+    attributes:
+      - id: attr_account_name
+        name: account_name
+        logical_type: string
+        required: true
+      - id: attr_account_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_account_email
+        name: account_email
+        logical_type: string
+      - id: attr_account_description
+        name: account_description
+        logical_type: text
+      - id: attr_account_status
+        name: account_status
+        logical_type: string
+        required: true
+  - id: ent_transaction
+    name: transaction
+    attributes:
+      - id: attr_transaction_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_transaction_email
+        name: transaction_email
+        logical_type: string
+      - id: attr_transaction_name
+        name: transaction_name
+        logical_type: string
+        required: true
+  - id: ent_product
+    name: product
+    attributes:
+      - id: attr_product_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_product_date
+        name: product_date
+        logical_type: date
+      - id: attr_product_name
+        name: product_name
+        logical_type: string
+        required: true
+      - id: attr_product_created_at
+        name: product_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_product_count
+        name: product_count
+        logical_type: integer
+  - id: ent_customer
+    name: customer
+    attributes:
+      - id: attr_customer_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_customer_name
+        name: customer_name
+        logical_type: string
+        required: true
+      - id: attr_customer_status
+        name: customer_status
+        logical_type: string
+        required: true
+  - id: ent_invoice
+    name: invoice
+    attributes:
+      - id: attr_invoice_date
+        name: invoice_date
+        logical_type: date
+      - id: attr_invoice_created_at
+        name: invoice_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_invoice_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_payment
+    name: payment
+    attributes:
+      - id: attr_payment_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_payment_email
+        name: payment_email
+        logical_type: string
+      - id: attr_payment_updated_at
+        name: payment_updated_at
+        logical_type: timestamp
+      - id: attr_payment_score
+        name: payment_score
+        logical_type: float
+      - id: attr_payment_date
+        name: payment_date
+        logical_type: date
+  - id: ent_shipment
+    name: shipment
+    attributes:
+      - id: attr_shipment_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_shipment_flag
+        name: shipment_flag
+        logical_type: boolean
+      - id: attr_shipment_created_at
+        name: shipment_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_shipment_description
+        name: shipment_description
+        logical_type: text
+  - id: ent_warehouse
+    name: warehouse
+    attributes:
+      - id: attr_warehouse_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_warehouse_quantity
+        name: warehouse_quantity
+        logical_type: integer
+      - id: attr_warehouse_code
+        name: warehouse_code
+        logical_type: string
+  - id: ent_employee
+    name: employee
+    attributes:
+      - id: attr_employee_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_employee_amount
+        name: employee_amount
+        logical_type: decimal
+      - id: attr_employee_description
+        name: employee_description
+        logical_type: text
+      - id: attr_employee_code
+        name: employee_code
+        logical_type: string
+      - id: attr_employee_status
+        name: employee_status
+        logical_type: string
+        required: true
+  - id: ent_department
+    name: department
+    attributes:
+      - id: attr_department_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_department_quantity
+        name: department_quantity
+        logical_type: integer
+      - id: attr_department_count
+        name: department_count
+        logical_type: integer
+      - id: attr_department_score
+        name: department_score
+        logical_type: float
+  - id: ent_project
+    name: project
+    attributes:
+      - id: attr_project_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_project_amount
+        name: project_amount
+        logical_type: decimal
+      - id: attr_project_created_at
+        name: project_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_project_description
+        name: project_description
+        logical_type: text
+  - id: ent_task
+    name: task
+    attributes:
+      - id: attr_task_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_task_flag
+        name: task_flag
+        logical_type: boolean
+      - id: attr_task_date
+        name: task_date
+        logical_type: date
+  - id: ent_ticket
+    name: ticket
+    attributes:
+      - id: attr_ticket_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_ticket_count
+        name: ticket_count
+        logical_type: integer
+      - id: attr_ticket_name
+        name: ticket_name
+        logical_type: string
+        required: true
+  - id: ent_event
+    name: event
+    attributes:
+      - id: attr_event_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_event_score
+        name: event_score
+        logical_type: float
+      - id: attr_event_updated_at
+        name: event_updated_at
+        logical_type: timestamp
+      - id: attr_event_created_at
+        name: event_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_event_amount
+        name: event_amount
+        logical_type: decimal
+  - id: ent_session
+    name: session
+    attributes:
+      - id: attr_session_status
+        name: session_status
+        logical_type: string
+        required: true
+      - id: attr_session_email
+        name: session_email
+        logical_type: string
+      - id: attr_session_name
+        name: session_name
+        logical_type: string
+        required: true
+      - id: attr_session_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_session_updated_at
+        name: session_updated_at
+        logical_type: timestamp
+  - id: ent_campaign
+    name: campaign
+    attributes:
+      - id: attr_campaign_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_campaign_description
+        name: campaign_description
+        logical_type: text
+      - id: attr_campaign_name
+        name: campaign_name
+        logical_type: string
+        required: true
+  - id: ent_channel
+    name: channel
+    attributes:
+      - id: attr_channel_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_channel_name
+        name: channel_name
+        logical_type: string
+        required: true
+      - id: attr_channel_count
+        name: channel_count
+        logical_type: integer
+  - id: ent_region
+    name: region
+    attributes:
+      - id: attr_region_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_region_updated_at
+        name: region_updated_at
+        logical_type: timestamp
+      - id: attr_region_amount
+        name: region_amount
+        logical_type: decimal
+      - id: attr_region_code
+        name: region_code
+        logical_type: string
+  - id: ent_store
+    name: store
+    attributes:
+      - id: attr_store_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_store_status
+        name: store_status
+        logical_type: string
+        required: true
+      - id: attr_store_updated_at
+        name: store_updated_at
+        logical_type: timestamp
+      - id: attr_store_description
+        name: store_description
+        logical_type: text
+  - id: ent_supplier
+    name: supplier
+    attributes:
+      - id: attr_supplier_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_supplier_updated_at
+        name: supplier_updated_at
+        logical_type: timestamp
+      - id: attr_supplier_score
+        name: supplier_score
+        logical_type: float
+      - id: attr_supplier_name
+        name: supplier_name
+        logical_type: string
+        required: true
+      - id: attr_supplier_created_at
+        name: supplier_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_category
+    name: category
+    attributes:
+      - id: attr_category_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_category_date
+        name: category_date
+        logical_type: date
+      - id: attr_category_email
+        name: category_email
+        logical_type: string
+      - id: attr_category_status
+        name: category_status
+        logical_type: string
+        required: true
+      - id: attr_category_quantity
+        name: category_quantity
+        logical_type: integer
+  - id: ent_tag
+    name: tag
+    attributes:
+      - id: attr_tag_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_tag_description
+        name: tag_description
+        logical_type: text
+      - id: attr_tag_updated_at
+        name: tag_updated_at
+        logical_type: timestamp
+      - id: attr_tag_email
+        name: tag_email
+        logical_type: string
+  - id: ent_comment
+    name: comment
+    attributes:
+      - id: attr_comment_status
+        name: comment_status
+        logical_type: string
+        required: true
+      - id: attr_comment_updated_at
+        name: comment_updated_at
+        logical_type: timestamp
+      - id: attr_comment_amount
+        name: comment_amount
+        logical_type: decimal
+      - id: attr_comment_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_comment_quantity
+        name: comment_quantity
+        logical_type: integer
+  - id: ent_review
+    name: review
+    attributes:
+      - id: attr_review_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_review_amount
+        name: review_amount
+        logical_type: decimal
+      - id: attr_review_count
+        name: review_count
+        logical_type: integer
+  - id: ent_rating
+    name: rating
+    attributes:
+      - id: attr_rating_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_rating_status
+        name: rating_status
+        logical_type: string
+        required: true
+      - id: attr_rating_created_at
+        name: rating_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_rating_email
+        name: rating_email
+        logical_type: string
+  - id: ent_subscription
+    name: subscription
+    attributes:
+      - id: attr_subscription_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_subscription_updated_at
+        name: subscription_updated_at
+        logical_type: timestamp
+      - id: attr_subscription_flag
+        name: subscription_flag
+        logical_type: boolean
+      - id: attr_subscription_count
+        name: subscription_count
+        logical_type: integer
+  - id: ent_plan
+    name: plan
+    attributes:
+      - id: attr_plan_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_plan_code
+        name: plan_code
+        logical_type: string
+      - id: attr_plan_description
+        name: plan_description
+        logical_type: text
+      - id: attr_plan_score
+        name: plan_score
+        logical_type: float
+      - id: attr_plan_status
+        name: plan_status
+        logical_type: string
+        required: true
+  - id: ent_feature
+    name: feature
+    attributes:
+      - id: attr_feature_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_feature_quantity
+        name: feature_quantity
+        logical_type: integer
+      - id: attr_feature_description
+        name: feature_description
+        logical_type: text
+      - id: attr_feature_email
+        name: feature_email
+        logical_type: string
+      - id: attr_feature_created_at
+        name: feature_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_license
+    name: license
+    attributes:
+      - id: attr_license_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_license_created_at
+        name: license_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_license_count
+        name: license_count
+        logical_type: integer
+      - id: attr_license_amount
+        name: license_amount
+        logical_type: decimal
+  - id: ent_contract
+    name: contract
+    attributes:
+      - id: attr_contract_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_contract_date
+        name: contract_date
+        logical_type: date
+      - id: attr_contract_flag
+        name: contract_flag
+        logical_type: boolean
+  - id: ent_budget
+    name: budget
+    attributes:
+      - id: attr_budget_reference
+        name: budget_reference
+        logical_type: uuid
+      - id: attr_budget_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_budget_name
+        name: budget_name
+        logical_type: string
+        required: true
+  - id: ent_expense
+    name: expense
+    attributes:
+      - id: attr_expense_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_expense_code
+        name: expense_code
+        logical_type: string
+      - id: attr_expense_reference
+        name: expense_reference
+        logical_type: uuid
+  - id: ent_revenue
+    name: revenue
+    attributes:
+      - id: attr_revenue_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_revenue_created_at
+        name: revenue_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_revenue_name
+        name: revenue_name
+        logical_type: string
+        required: true
+      - id: attr_revenue_quantity
+        name: revenue_quantity
+        logical_type: integer
+      - id: attr_revenue_email
+        name: revenue_email
+        logical_type: string
+  - id: ent_forecast
+    name: forecast
+    attributes:
+      - id: attr_forecast_flag
+        name: forecast_flag
+        logical_type: boolean
+      - id: attr_forecast_date
+        name: forecast_date
+        logical_type: date
+      - id: attr_forecast_description
+        name: forecast_description
+        logical_type: text
+      - id: attr_forecast_score
+        name: forecast_score
+        logical_type: float
+      - id: attr_forecast_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_target
+    name: target
+    attributes:
+      - id: attr_target_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_target_name
+        name: target_name
+        logical_type: string
+        required: true
+      - id: attr_target_updated_at
+        name: target_updated_at
+        logical_type: timestamp
+      - id: attr_target_date
+        name: target_date
+        logical_type: date
+      - id: attr_target_description
+        name: target_description
+        logical_type: text
+  - id: ent_metric
+    name: metric
+    attributes:
+      - id: attr_metric_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_metric_name
+        name: metric_name
+        logical_type: string
+        required: true
+      - id: attr_metric_description
+        name: metric_description
+        logical_type: text
+      - id: attr_metric_count
+        name: metric_count
+        logical_type: integer
+      - id: attr_metric_code
+        name: metric_code
+        logical_type: string
+  - id: ent_report
+    name: report
+    attributes:
+      - id: attr_report_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_report_email
+        name: report_email
+        logical_type: string
+      - id: attr_report_score
+        name: report_score
+        logical_type: float
+      - id: attr_report_description
+        name: report_description
+        logical_type: text
+  - id: ent_dashboard
+    name: dashboard
+    attributes:
+      - id: attr_dashboard_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_dashboard_code
+        name: dashboard_code
+        logical_type: string
+      - id: attr_dashboard_date
+        name: dashboard_date
+        logical_type: date
+      - id: attr_dashboard_name
+        name: dashboard_name
+        logical_type: string
+        required: true
+      - id: attr_dashboard_updated_at
+        name: dashboard_updated_at
+        logical_type: timestamp
+  - id: ent_alert
+    name: alert
+    attributes:
+      - id: attr_alert_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_alert_updated_at
+        name: alert_updated_at
+        logical_type: timestamp
+      - id: attr_alert_date
+        name: alert_date
+        logical_type: date
+      - id: attr_alert_created_at
+        name: alert_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_notification
+    name: notification
+    attributes:
+      - id: attr_notification_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_notification_amount
+        name: notification_amount
+        logical_type: decimal
+      - id: attr_notification_reference
+        name: notification_reference
+        logical_type: uuid
+  - id: ent_message
+    name: message
+    attributes:
+      - id: attr_message_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_message_reference
+        name: message_reference
+        logical_type: uuid
+      - id: attr_message_quantity
+        name: message_quantity
+        logical_type: integer
+  - id: ent_thread
+    name: thread
+    attributes:
+      - id: attr_thread_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_thread_amount
+        name: thread_amount
+        logical_type: decimal
+      - id: attr_thread_flag
+        name: thread_flag
+        logical_type: boolean
+  - id: ent_group
+    name: group
+    attributes:
+      - id: attr_group_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_group_amount
+        name: group_amount
+        logical_type: decimal
+      - id: attr_group_reference
+        name: group_reference
+        logical_type: uuid
+  - id: ent_role
+    name: role
+    attributes:
+      - id: attr_role_status
+        name: role_status
+        logical_type: string
+        required: true
+      - id: attr_role_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_role_quantity
+        name: role_quantity
+        logical_type: integer
+      - id: attr_role_created_at
+        name: role_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_permission
+    name: permission
+    attributes:
+      - id: attr_permission_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_permission_email
+        name: permission_email
+        logical_type: string
+      - id: attr_permission_flag
+        name: permission_flag
+        logical_type: boolean
+  - id: ent_audit_log
+    name: audit_log
+    attributes:
+      - id: attr_audit_log_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_audit_log_date
+        name: audit_log_date
+        logical_type: date
+      - id: attr_audit_log_quantity
+        name: audit_log_quantity
+        logical_type: integer
+  - id: ent_changelog
+    name: changelog
+    attributes:
+      - id: attr_changelog_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_changelog_updated_at
+        name: changelog_updated_at
+        logical_type: timestamp
+      - id: attr_changelog_flag
+        name: changelog_flag
+        logical_type: boolean
+  - id: ent_snapshot
+    name: snapshot
+    attributes:
+      - id: attr_snapshot_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_snapshot_description
+        name: snapshot_description
+        logical_type: text
+      - id: attr_snapshot_date
+        name: snapshot_date
+        logical_type: date
+      - id: attr_snapshot_created_at
+        name: snapshot_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_snapshot_count
+        name: snapshot_count
+        logical_type: integer
+  - id: ent_archive
+    name: archive
+    attributes:
+      - id: attr_archive_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_archive_date
+        name: archive_date
+        logical_type: date
+      - id: attr_archive_reference
+        name: archive_reference
+        logical_type: uuid
+  - id: ent_backup
+    name: backup
+    attributes:
+      - id: attr_backup_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_backup_status
+        name: backup_status
+        logical_type: string
+        required: true
+      - id: attr_backup_quantity
+        name: backup_quantity
+        logical_type: integer
+      - id: attr_backup_description
+        name: backup_description
+        logical_type: text
+      - id: attr_backup_count
+        name: backup_count
+        logical_type: integer
+  - id: ent_config
+    name: config
+    attributes:
+      - id: attr_config_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_config_amount
+        name: config_amount
+        logical_type: decimal
+      - id: attr_config_flag
+        name: config_flag
+        logical_type: boolean
+      - id: attr_config_date
+        name: config_date
+        logical_type: date
+      - id: attr_config_reference
+        name: config_reference
+        logical_type: uuid
+  - id: ent_setting
+    name: setting
+    attributes:
+      - id: attr_setting_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_setting_quantity
+        name: setting_quantity
+        logical_type: integer
+      - id: attr_setting_name
+        name: setting_name
+        logical_type: string
+        required: true
+  - id: ent_preference
+    name: preference
+    attributes:
+      - id: attr_preference_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_preference_created_at
+        name: preference_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_preference_date
+        name: preference_date
+        logical_type: date
+      - id: attr_preference_status
+        name: preference_status
+        logical_type: string
+        required: true
+  - id: ent_template
+    name: template
+    attributes:
+      - id: attr_template_status
+        name: template_status
+        logical_type: string
+        required: true
+      - id: attr_template_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_template_name
+        name: template_name
+        logical_type: string
+        required: true
+      - id: attr_template_email
+        name: template_email
+        logical_type: string
+      - id: attr_template_updated_at
+        name: template_updated_at
+        logical_type: timestamp
+  - id: ent_workflow
+    name: workflow
+    attributes:
+      - id: attr_workflow_status
+        name: workflow_status
+        logical_type: string
+        required: true
+      - id: attr_workflow_name
+        name: workflow_name
+        logical_type: string
+        required: true
+      - id: attr_workflow_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_approval
+    name: approval
+    attributes:
+      - id: attr_approval_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_approval_date
+        name: approval_date
+        logical_type: date
+      - id: attr_approval_status
+        name: approval_status
+        logical_type: string
+        required: true
+      - id: attr_approval_description
+        name: approval_description
+        logical_type: text
+  - id: ent_request
+    name: request
+    attributes:
+      - id: attr_request_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_request_status
+        name: request_status
+        logical_type: string
+        required: true
+      - id: attr_request_date
+        name: request_date
+        logical_type: date
+      - id: attr_request_code
+        name: request_code
+        logical_type: string
+      - id: attr_request_created_at
+        name: request_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_response
+    name: response
+    attributes:
+      - id: attr_response_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_response_status
+        name: response_status
+        logical_type: string
+        required: true
+      - id: attr_response_reference
+        name: response_reference
+        logical_type: uuid
+      - id: attr_response_quantity
+        name: response_quantity
+        logical_type: integer
+      - id: attr_response_count
+        name: response_count
+        logical_type: integer
+  - id: ent_feedback
+    name: feedback
+    attributes:
+      - id: attr_feedback_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_feedback_quantity
+        name: feedback_quantity
+        logical_type: integer
+      - id: attr_feedback_updated_at
+        name: feedback_updated_at
+        logical_type: timestamp
+  - id: ent_survey
+    name: survey
+    attributes:
+      - id: attr_survey_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_survey_count
+        name: survey_count
+        logical_type: integer
+      - id: attr_survey_score
+        name: survey_score
+        logical_type: float
+      - id: attr_survey_flag
+        name: survey_flag
+        logical_type: boolean
+  - id: ent_question
+    name: question
+    attributes:
+      - id: attr_question_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_question_updated_at
+        name: question_updated_at
+        logical_type: timestamp
+      - id: attr_question_score
+        name: question_score
+        logical_type: float
+      - id: attr_question_reference
+        name: question_reference
+        logical_type: uuid
+      - id: attr_question_name
+        name: question_name
+        logical_type: string
+        required: true
+  - id: ent_answer
+    name: answer
+    attributes:
+      - id: attr_answer_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_answer_email
+        name: answer_email
+        logical_type: string
+      - id: attr_answer_amount
+        name: answer_amount
+        logical_type: decimal
+  - id: ent_quiz
+    name: quiz
+    attributes:
+      - id: attr_quiz_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_quiz_quantity
+        name: quiz_quantity
+        logical_type: integer
+      - id: attr_quiz_score
+        name: quiz_score
+        logical_type: float
+  - id: ent_course
+    name: course
+    attributes:
+      - id: attr_course_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_course_code
+        name: course_code
+        logical_type: string
+      - id: attr_course_count
+        name: course_count
+        logical_type: integer
+      - id: attr_course_score
+        name: course_score
+        logical_type: float
+      - id: attr_course_description
+        name: course_description
+        logical_type: text
+  - id: ent_lesson
+    name: lesson
+    attributes:
+      - id: attr_lesson_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_lesson_score
+        name: lesson_score
+        logical_type: float
+      - id: attr_lesson_name
+        name: lesson_name
+        logical_type: string
+        required: true
+      - id: attr_lesson_flag
+        name: lesson_flag
+        logical_type: boolean
+  - id: ent_student
+    name: student
+    attributes:
+      - id: attr_student_name
+        name: student_name
+        logical_type: string
+        required: true
+      - id: attr_student_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_student_updated_at
+        name: student_updated_at
+        logical_type: timestamp
+      - id: attr_student_date
+        name: student_date
+        logical_type: date
+      - id: attr_student_score
+        name: student_score
+        logical_type: float
+  - id: ent_instructor
+    name: instructor
+    attributes:
+      - id: attr_instructor_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_instructor_reference
+        name: instructor_reference
+        logical_type: uuid
+      - id: attr_instructor_status
+        name: instructor_status
+        logical_type: string
+        required: true
+  - id: ent_grade
+    name: grade
+    attributes:
+      - id: attr_grade_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_grade_flag
+        name: grade_flag
+        logical_type: boolean
+      - id: attr_grade_score
+        name: grade_score
+        logical_type: float
+  - id: ent_certificate
+    name: certificate
+    attributes:
+      - id: attr_certificate_score
+        name: certificate_score
+        logical_type: float
+      - id: attr_certificate_count
+        name: certificate_count
+        logical_type: integer
+      - id: attr_certificate_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_badge
+    name: badge
+    attributes:
+      - id: attr_badge_count
+        name: badge_count
+        logical_type: integer
+      - id: attr_badge_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_badge_quantity
+        name: badge_quantity
+        logical_type: integer
+  - id: ent_achievement
+    name: achievement
+    attributes:
+      - id: attr_achievement_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_achievement_reference
+        name: achievement_reference
+        logical_type: uuid
+      - id: attr_achievement_score
+        name: achievement_score
+        logical_type: float
+      - id: attr_achievement_flag
+        name: achievement_flag
+        logical_type: boolean
+  - id: ent_reward
+    name: reward
+    attributes:
+      - id: attr_reward_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_reward_email
+        name: reward_email
+        logical_type: string
+      - id: attr_reward_score
+        name: reward_score
+        logical_type: float
+      - id: attr_reward_date
+        name: reward_date
+        logical_type: date
+  - id: ent_coupon
+    name: coupon
+    attributes:
+      - id: attr_coupon_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_coupon_flag
+        name: coupon_flag
+        logical_type: boolean
+      - id: attr_coupon_code
+        name: coupon_code
+        logical_type: string
+      - id: attr_coupon_status
+        name: coupon_status
+        logical_type: string
+        required: true
+      - id: attr_coupon_description
+        name: coupon_description
+        logical_type: text
+  - id: ent_discount
+    name: discount
+    attributes:
+      - id: attr_discount_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_discount_created_at
+        name: discount_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_discount_email
+        name: discount_email
+        logical_type: string
+  - id: ent_promotion
+    name: promotion
+    attributes:
+      - id: attr_promotion_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_promotion_email
+        name: promotion_email
+        logical_type: string
+      - id: attr_promotion_amount
+        name: promotion_amount
+        logical_type: decimal
+      - id: attr_promotion_quantity
+        name: promotion_quantity
+        logical_type: integer
+      - id: attr_promotion_score
+        name: promotion_score
+        logical_type: float
+  - id: ent_offer
+    name: offer
+    attributes:
+      - id: attr_offer_flag
+        name: offer_flag
+        logical_type: boolean
+      - id: attr_offer_date
+        name: offer_date
+        logical_type: date
+      - id: attr_offer_score
+        name: offer_score
+        logical_type: float
+      - id: attr_offer_code
+        name: offer_code
+        logical_type: string
+      - id: attr_offer_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_deal
+    name: deal
+    attributes:
+      - id: attr_deal_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_deal_score
+        name: deal_score
+        logical_type: float
+      - id: attr_deal_code
+        name: deal_code
+        logical_type: string
+      - id: attr_deal_quantity
+        name: deal_quantity
+        logical_type: integer
+      - id: attr_deal_created_at
+        name: deal_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_lead
+    name: lead
+    attributes:
+      - id: attr_lead_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_lead_score
+        name: lead_score
+        logical_type: float
+      - id: attr_lead_status
+        name: lead_status
+        logical_type: string
+        required: true
+  - id: ent_opportunity
+    name: opportunity
+    attributes:
+      - id: attr_opportunity_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_opportunity_created_at
+        name: opportunity_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_opportunity_status
+        name: opportunity_status
+        logical_type: string
+        required: true
+      - id: attr_opportunity_score
+        name: opportunity_score
+        logical_type: float
+  - id: ent_pipeline
+    name: pipeline
+    attributes:
+      - id: attr_pipeline_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_pipeline_created_at
+        name: pipeline_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_pipeline_name
+        name: pipeline_name
+        logical_type: string
+        required: true
+      - id: attr_pipeline_count
+        name: pipeline_count
+        logical_type: integer
+      - id: attr_pipeline_updated_at
+        name: pipeline_updated_at
+        logical_type: timestamp
+  - id: ent_stage
+    name: stage
+    attributes:
+      - id: attr_stage_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_stage_date
+        name: stage_date
+        logical_type: date
+      - id: attr_stage_amount
+        name: stage_amount
+        logical_type: decimal
+      - id: attr_stage_description
+        name: stage_description
+        logical_type: text
+      - id: attr_stage_status
+        name: stage_status
+        logical_type: string
+        required: true
+  - id: ent_milestone
+    name: milestone
+    attributes:
+      - id: attr_milestone_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_milestone_amount
+        name: milestone_amount
+        logical_type: decimal
+      - id: attr_milestone_status
+        name: milestone_status
+        logical_type: string
+        required: true
+      - id: attr_milestone_description
+        name: milestone_description
+        logical_type: text
+      - id: attr_milestone_count
+        name: milestone_count
+        logical_type: integer
+  - id: ent_deliverable
+    name: deliverable
+    attributes:
+      - id: attr_deliverable_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_deliverable_quantity
+        name: deliverable_quantity
+        logical_type: integer
+      - id: attr_deliverable_description
+        name: deliverable_description
+        logical_type: text
+  - id: ent_artifact
+    name: artifact
+    attributes:
+      - id: attr_artifact_amount
+        name: artifact_amount
+        logical_type: decimal
+      - id: attr_artifact_reference
+        name: artifact_reference
+        logical_type: uuid
+      - id: attr_artifact_name
+        name: artifact_name
+        logical_type: string
+        required: true
+      - id: attr_artifact_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_asset
+    name: asset
+    attributes:
+      - id: attr_asset_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_asset_quantity
+        name: asset_quantity
+        logical_type: integer
+      - id: attr_asset_name
+        name: asset_name
+        logical_type: string
+        required: true
+      - id: attr_asset_reference
+        name: asset_reference
+        logical_type: uuid
+  - id: ent_resource
+    name: resource
+    attributes:
+      - id: attr_resource_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_resource_date
+        name: resource_date
+        logical_type: date
+      - id: attr_resource_description
+        name: resource_description
+        logical_type: text
+      - id: attr_resource_code
+        name: resource_code
+        logical_type: string
+      - id: attr_resource_amount
+        name: resource_amount
+        logical_type: decimal
+  - id: ent_allocation
+    name: allocation
+    attributes:
+      - id: attr_allocation_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_allocation_status
+        name: allocation_status
+        logical_type: string
+        required: true
+      - id: attr_allocation_amount
+        name: allocation_amount
+        logical_type: decimal
+  - id: ent_schedule
+    name: schedule
+    attributes:
+      - id: attr_schedule_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_schedule_flag
+        name: schedule_flag
+        logical_type: boolean
+      - id: attr_schedule_date
+        name: schedule_date
+        logical_type: date
+      - id: attr_schedule_email
+        name: schedule_email
+        logical_type: string
+  - id: ent_calendar
+    name: calendar
+    attributes:
+      - id: attr_calendar_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_calendar_reference
+        name: calendar_reference
+        logical_type: uuid
+      - id: attr_calendar_updated_at
+        name: calendar_updated_at
+        logical_type: timestamp
+      - id: attr_calendar_date
+        name: calendar_date
+        logical_type: date
+  - id: ent_booking
+    name: booking
+    attributes:
+      - id: attr_booking_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_booking_score
+        name: booking_score
+        logical_type: float
+      - id: attr_booking_date
+        name: booking_date
+        logical_type: date
+  - id: ent_reservation
+    name: reservation
+    attributes:
+      - id: attr_reservation_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_reservation_updated_at
+        name: reservation_updated_at
+        logical_type: timestamp
+      - id: attr_reservation_name
+        name: reservation_name
+        logical_type: string
+        required: true
+      - id: attr_reservation_code
+        name: reservation_code
+        logical_type: string
+  - id: ent_venue
+    name: venue
+    attributes:
+      - id: attr_venue_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_venue_quantity
+        name: venue_quantity
+        logical_type: integer
+      - id: attr_venue_email
+        name: venue_email
+        logical_type: string
+      - id: attr_venue_date
+        name: venue_date
+        logical_type: date
+  - id: ent_room
+    name: room
+    attributes:
+      - id: attr_room_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_room_quantity
+        name: room_quantity
+        logical_type: integer
+      - id: attr_room_created_at
+        name: room_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_equipment
+    name: equipment
+    attributes:
+      - id: attr_equipment_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_equipment_amount
+        name: equipment_amount
+        logical_type: decimal
+      - id: attr_equipment_status
+        name: equipment_status
+        logical_type: string
+        required: true
+  - id: ent_inventory
+    name: inventory
+    attributes:
+      - id: attr_inventory_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_inventory_score
+        name: inventory_score
+        logical_type: float
+      - id: attr_inventory_description
+        name: inventory_description
+        logical_type: text
+      - id: attr_inventory_date
+        name: inventory_date
+        logical_type: date
+      - id: attr_inventory_flag
+        name: inventory_flag
+        logical_type: boolean
+  - id: ent_stock
+    name: stock
+    attributes:
+      - id: attr_stock_quantity
+        name: stock_quantity
+        logical_type: integer
+      - id: attr_stock_score
+        name: stock_score
+        logical_type: float
+      - id: attr_stock_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_stock_name
+        name: stock_name
+        logical_type: string
+        required: true
+  - id: ent_order_line
+    name: order_line
+    attributes:
+      - id: attr_order_line_count
+        name: order_line_count
+        logical_type: integer
+      - id: attr_order_line_score
+        name: order_line_score
+        logical_type: float
+      - id: attr_order_line_description
+        name: order_line_description
+        logical_type: text
+      - id: attr_order_line_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_order_line_email
+        name: order_line_email
+        logical_type: string
+  - id: ent_return_item
+    name: return_item
+    attributes:
+      - id: attr_return_item_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_return_item_code
+        name: return_item_code
+        logical_type: string
+      - id: attr_return_item_updated_at
+        name: return_item_updated_at
+        logical_type: timestamp
+      - id: attr_return_item_description
+        name: return_item_description
+        logical_type: text
+  - id: ent_refund
+    name: refund
+    attributes:
+      - id: attr_refund_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_refund_flag
+        name: refund_flag
+        logical_type: boolean
+      - id: attr_refund_date
+        name: refund_date
+        logical_type: date
+  - id: ent_credit
+    name: credit
+    attributes:
+      - id: attr_credit_count
+        name: credit_count
+        logical_type: integer
+      - id: attr_credit_date
+        name: credit_date
+        logical_type: date
+      - id: attr_credit_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_credit_name
+        name: credit_name
+        logical_type: string
+        required: true
+      - id: attr_credit_email
+        name: credit_email
+        logical_type: string

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://know-now.dev/schemas/logging/v0.1.0/phase-2a-pipeline-stages.json",
+  "title": "Phase 2A Pipeline Stage Names",
+  "description": "Canonical stage names emitted during a Phase 2A generate pipeline run. Only stage names and ordering are asserted — never timestamps or duration_ms values (those are volatile). Stage names come from the 42e.10 taxonomy (diagnostics::stage::Stage::ALL).",
+  "type": "object",
+  "required": ["stages"],
+  "properties": {
+    "stages": {
+      "type": "array",
+      "description": "Ordered list of pipeline stage names that must appear in --verbose JSON output.",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 18,
+      "uniqueItems": true,
+      "enum": [
+        [
+          "discovery",
+          "parsing",
+          "yaml_subset",
+          "deserialize",
+          "semantic",
+          "policy",
+          "default_resolution",
+          "contract",
+          "capabilities",
+          "planning",
+          "generation",
+          "validation",
+          "manual_edit_detection",
+          "path_safety",
+          "stale_plan",
+          "atomic_write",
+          "manifesting",
+          "run_log"
+        ]
+      ]
+    }
+  }
+}

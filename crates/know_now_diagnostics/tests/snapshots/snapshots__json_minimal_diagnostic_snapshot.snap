@@ -1,0 +1,9 @@
+---
+source: crates/know_now_diagnostics/tests/snapshots.rs
+expression: pretty
+---
+{
+  "code": "WARN-001",
+  "message": "something is off",
+  "severity": "warning"
+}

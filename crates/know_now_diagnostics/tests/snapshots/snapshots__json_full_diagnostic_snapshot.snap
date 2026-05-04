@@ -1,0 +1,24 @@
+---
+source: crates/know_now_diagnostics/tests/snapshots.rs
+expression: pretty
+---
+{
+  "code": "META-REL-001",
+  "help": "did you mean `customer`?",
+  "location": {
+    "column": 18,
+    "file": "metadata/relationships/orders.yml",
+    "line": 12
+  },
+  "message": "relationship references unknown entity `customers`",
+  "metadata_object_id": "rel_order_customer",
+  "severity": "error",
+  "source_text": {
+    "highlight_len": 9,
+    "highlight_start": 16,
+    "label": "unknown entity",
+    "line_number": 12,
+    "text": "to_entity: customers"
+  },
+  "yaml_path": "relationships.orders.to_entity"
+}

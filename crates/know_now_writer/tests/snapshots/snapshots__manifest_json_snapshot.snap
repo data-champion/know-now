@@ -1,0 +1,66 @@
+---
+source: crates/know_now_writer/tests/snapshots.rs
+expression: json
+---
+{
+  "engine_version": "1.0.0",
+  "metadata_schema_version": "0.1.0",
+  "generator_contract_version": "1.0",
+  "project_id": "ecommerce_demo",
+  "input_hash": "sha256:aaa4a656ab3aa7aa32381a11525f48d5ea9ada27ec52ad278cc7a4463cfd3008",
+  "lockfile_hash": "sha256:lockfile000000000000000000000000000000000000000000000000000000",
+  "target_database": {
+    "kind": "postgres",
+    "version": "18",
+    "compatibility_floor": "16"
+  },
+  "policy": {
+    "pack": "dc_standard",
+    "version": "1.0",
+    "hash": "sha256:pol000000000000000000000000000000000000000000000000000000000000"
+  },
+  "template_renderers": [],
+  "artifacts": [
+    {
+      "path": "ddl/postgres/schema.sql",
+      "kind": "postgres_ddl",
+      "artifact_id": "art_postgres_schema",
+      "generator": "know_now_gen_postgres",
+      "generator_version": "1.0.0",
+      "hash": "sha256:b62febc26680bf4454fbfc2b99bb1a14ed3d80a7dc6c13ac47b964bfae16202e",
+      "metadata_object_ids": [
+        "ent_customer",
+        "attr_customer_id"
+      ],
+      "trace": [
+        {
+          "artifact_span": {
+            "line_start": 1,
+            "line_end": 3
+          },
+          "metadata_object_ids": [
+            "ent_customer"
+          ],
+          "policy_rule_ids": [
+            "pol_naming_convention"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "docs/entities/customer.md",
+      "kind": "markdown_doc",
+      "artifact_id": "art_docs_customer",
+      "generator": "know_now_gen_docs",
+      "generator_version": "1.0.0",
+      "hash": "sha256:853d3e1501fa8e17e92729b47fa8a3bb890a82a75a4903b988c9c5e89322dbe4",
+      "metadata_object_ids": [
+        "ent_customer"
+      ],
+      "trace": []
+    }
+  ],
+  "warnings": [
+    "Entity `order` has no business key defined."
+  ]
+}

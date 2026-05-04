@@ -1,0 +1,5 @@
+---
+source: crates/know_now_diagnostics/tests/snapshots.rs
+expression: output
+---
+warning[WARN-001]: something is off

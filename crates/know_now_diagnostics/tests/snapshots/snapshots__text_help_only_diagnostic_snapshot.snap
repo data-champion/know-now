@@ -1,0 +1,6 @@
+---
+source: crates/know_now_diagnostics/tests/snapshots.rs
+expression: output
+---
+info[INFO-042]: consider using a business key
+help: add a `business_key` field to the entity definition

@@ -12,3 +12,6 @@ thiserror = "2"
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+insta = "1.47.2"

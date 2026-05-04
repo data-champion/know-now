@@ -1,0 +1,21 @@
+version: "1.0"
+entities:
+  - id: ent_Order
+    name: Order
+    attributes:
+      - id: attr_Order_Select
+        name: Select
+        logical_type: string
+      - id: attr_Order_id
+        name: id
+        logical_type: integer
+        required: true
+    business_key: [id]
+  - id: ent_User
+    name: User
+    attributes:
+      - id: attr_User_name
+        name: name
+        logical_type: string
+        required: true
+    business_key: [name]

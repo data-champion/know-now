@@ -13,3 +13,6 @@ sqlparser = { version = "0.55", features = ["visitor"] }
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+insta = "1.47.2"

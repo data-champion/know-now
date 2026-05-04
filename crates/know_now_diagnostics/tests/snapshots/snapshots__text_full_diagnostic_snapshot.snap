@@ -1,0 +1,11 @@
+---
+source: crates/know_now_diagnostics/tests/snapshots.rs
+expression: output
+---
+error[META-REL-001]: relationship references unknown entity `customers`
+  --> metadata/relationships/orders.yml:12:18
+   |
+12 |     to_entity: customers
+   |                ^^^^^^^^^ unknown entity
+   |
+help: did you mean `customer`?
