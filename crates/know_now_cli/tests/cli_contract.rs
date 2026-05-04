@@ -9,7 +9,7 @@ fn cmd() -> Command {
 fn help_shows_all_phase2a_subcommands() {
     let expected = [
         "init", "validate", "check", "schema", "generate", "diff", "doctor", "explain", "issues",
-        "lock", "id", "examples", "support", "config", "version",
+        "lock", "id", "examples", "review", "support", "config", "version",
     ];
     let output = cmd().arg("--help").output().expect("should run");
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -2939,4 +2939,148 @@ fn support_bundle_redacts_env() {
             "unexpected env var in bundle: {key}"
         );
     }
+}
+
+// ── review ───────────────────────────────────────────────────────────
+
+#[test]
+fn review_export_help_shows_flags() {
+    cmd()
+        .args(["review", "export", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("--output"))
+        .stdout(predicate::str::contains("--dry-run"));
+}
+
+#[test]
+fn review_export_dry_run_on_demo() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["review", "export", "--dry-run"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Review pack would be written to"))
+        .stdout(predicate::str::contains("summary.md"))
+        .stdout(predicate::str::contains("manifest_summary.json"));
+}
+
+#[test]
+fn review_export_dry_run_json() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+
+    let output = cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["--format", "json", "review", "export", "--dry-run"])
+        .output()
+        .expect("should run");
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let json: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+    assert_eq!(json["result"], "success");
+    assert!(json["payload"]["files"].is_array());
+    let files = json["payload"]["files"].as_array().unwrap();
+    assert!(files.iter().any(|f| f.as_str() == Some("summary.md")));
+}
+
+#[test]
+fn review_export_writes_files() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+
+    let output_dir = tmp.path().join("reviews");
+    std::fs::create_dir_all(&output_dir).unwrap();
+
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["review", "export", "--output"])
+        .arg(&output_dir)
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Review pack exported to"));
+
+    let review_dirs: Vec<_> = std::fs::read_dir(&output_dir)
+        .unwrap()
+        .flatten()
+        .filter(|e| e.file_name().to_string_lossy().starts_with("review_"))
+        .collect();
+    assert_eq!(review_dirs.len(), 1);
+
+    let review_path = review_dirs[0].path();
+    let summary = std::fs::read_to_string(review_path.join("summary.md")).unwrap();
+    assert!(summary.contains("# Review Summary"));
+    assert!(summary.contains("## Entities"));
+
+    let manifest_summary =
+        std::fs::read_to_string(review_path.join("manifest_summary.json")).unwrap();
+    let ms: serde_json::Value = serde_json::from_str(&manifest_summary).expect("valid JSON");
+    assert!(ms["generation_status"].is_string());
+
+    assert!(review_path.join("entities").is_dir());
+}
+
+#[test]
+fn review_export_entity_files_have_attributes() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+
+    let output_dir = tmp.path().join("reviews");
+    std::fs::create_dir_all(&output_dir).unwrap();
+
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["review", "export", "--output"])
+        .arg(&output_dir)
+        .assert()
+        .success();
+
+    let review_dirs: Vec<_> = std::fs::read_dir(&output_dir)
+        .unwrap()
+        .flatten()
+        .filter(|e| e.file_name().to_string_lossy().starts_with("review_"))
+        .collect();
+    let review_path = review_dirs[0].path();
+    let entities_dir = review_path.join("entities");
+    let entity_files: Vec<_> = std::fs::read_dir(&entities_dir)
+        .unwrap()
+        .flatten()
+        .filter(|e| e.path().extension().is_some_and(|ext| ext == "md"))
+        .collect();
+    assert!(!entity_files.is_empty(), "should have entity markdown files");
+
+    let first_entity = std::fs::read_to_string(entity_files[0].path()).unwrap();
+    assert!(first_entity.contains("## Attributes"));
+    assert!(first_entity.contains("**Status:**"));
 }
