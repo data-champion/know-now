@@ -54,6 +54,7 @@ struct InitConfig {
 
 pub fn run(ctx: &CommandContext, args: &InitArgs) -> anyhow::Result<()> {
     let config = resolve_config(args)?;
+    validate_project_name(&config.name)?;
     let project_dir = ctx.project_root.join(&config.name);
 
     if project_dir.exists() {
@@ -62,6 +63,27 @@ pub fn run(ctx: &CommandContext, args: &InitArgs) -> anyhow::Result<()> {
 
     scaffold(&project_dir, &config)?;
     emit_output(ctx, &config, &project_dir)
+}
+
+fn validate_project_name(name: &str) -> anyhow::Result<()> {
+    if name.is_empty() {
+        anyhow::bail!("project name cannot be empty");
+    }
+    if name == "." || name == ".." {
+        anyhow::bail!("project name must not be '.' or '..'");
+    }
+    if name.contains('/') || name.contains('\\') || name.contains("..") {
+        anyhow::bail!("project name must not contain path separators or '..'");
+    }
+    if !name
+        .bytes()
+        .all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_' || b == b'.')
+    {
+        anyhow::bail!(
+            "project name may only contain ASCII letters, digits, hyphens, underscores, and dots"
+        );
+    }
+    Ok(())
 }
 
 fn resolve_config(args: &InitArgs) -> anyhow::Result<InitConfig> {
@@ -118,8 +140,6 @@ fn guided_config() -> anyhow::Result<InitConfig> {
         "Target database (postgres/none) [postgres]: ",
     )?;
     let has_postgres = db.is_empty() || db == "postgres";
-
-    let _policy = prompt_line(&mut out, &mut lines, "Policy pack [dc_standard]: ")?;
 
     let gp_str = prompt_line(
         &mut out,

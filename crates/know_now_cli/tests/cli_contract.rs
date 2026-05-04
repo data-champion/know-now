@@ -72,11 +72,7 @@ fn unknown_subcommand_exits_with_usage_error() {
 
 #[test]
 fn stub_commands_exit_with_validation_error() {
-    let stubs = [
-        vec!["generate"],
-        vec!["examples", "list"],
-        vec!["config", "inspect"],
-    ];
+    let stubs = [vec!["generate"]];
     for args in &stubs {
         cmd()
             .args(args)
@@ -1319,7 +1315,7 @@ fn init_guided_reads_stdin() {
         .args(["--project"])
         .arg(tmp.path())
         .args(["init", "--guided"])
-        .write_stdin("guided-project\npostgres\n\nask\n")
+        .write_stdin("guided-project\npostgres\nask\n")
         .assert()
         .success()
         .stdout(predicate::str::contains("guided-project"));
@@ -1335,7 +1331,7 @@ fn init_guided_validates() {
         .args(["--project"])
         .arg(tmp.path())
         .args(["init", "--guided"])
-        .write_stdin("guided-project\npostgres\n\nask\n")
+        .write_stdin("guided-project\npostgres\nask\n")
         .assert()
         .success();
     cmd()
@@ -1344,4 +1340,214 @@ fn init_guided_validates() {
         .args(["validate"])
         .assert()
         .success();
+}
+
+#[test]
+fn init_guided_none_db_creates_minimal() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--guided"])
+        .write_stdin("guided-none\nnone\nignore\n")
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path().join("guided-none"))
+        .args(["validate"])
+        .assert()
+        .success();
+}
+
+#[test]
+fn init_rejects_path_traversal() {
+    cmd()
+        .args(["init", "../../evil"])
+        .assert()
+        .code(predicate::eq(1))
+        .stderr(predicate::str::contains("path separators"));
+}
+
+#[test]
+fn init_rejects_special_chars_in_name() {
+    cmd()
+        .args(["init", "foo:bar"])
+        .assert()
+        .code(predicate::eq(1))
+        .stderr(predicate::str::contains("ASCII letters"));
+}
+
+#[test]
+fn init_rejects_dot_as_name() {
+    cmd()
+        .args(["init", "."])
+        .assert()
+        .code(predicate::eq(1))
+        .stderr(predicate::str::contains("must not be '.' or '..'"));
+}
+
+// ── examples list ─────────────────────────────────────────────
+
+#[test]
+fn examples_list_shows_all_profiles() {
+    let expected = [
+        "minimal",
+        "consultant-postgres-dbt",
+        "dbt-existing-stack",
+        "governed-team",
+        "demo-ecommerce",
+    ];
+    let assert = cmd().args(["examples", "list"]).assert().success();
+    let stdout = String::from_utf8_lossy(&assert.get_output().stdout);
+    for name in &expected {
+        assert!(stdout.contains(name), "examples list should contain '{name}'");
+    }
+}
+
+#[test]
+fn examples_list_json_envelope() {
+    cmd()
+        .args(["examples", "list", "--format", "json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""result": "success""#))
+        .stdout(predicate::str::contains("minimal"))
+        .stdout(predicate::str::contains("demo-ecommerce"));
+}
+
+#[test]
+fn examples_list_quiet_produces_no_output() {
+    cmd()
+        .args(["examples", "list", "--format", "quiet"])
+        .assert()
+        .success()
+        .stdout(predicate::str::is_empty());
+}
+
+// ── config inspect ────────────────────────────────────────────
+
+#[test]
+fn config_inspect_without_project() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["config", "inspect"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Config file:  not found"))
+        .stdout(predicate::str::contains("Metadata dir: not found"))
+        .stdout(predicate::str::contains("Lockfile:      not found"));
+}
+
+#[test]
+fn config_inspect_json_envelope() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["config", "inspect", "--format", "json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""result": "success""#))
+        .stdout(predicate::str::contains("engine_version"))
+        .stdout(predicate::str::contains("generators"));
+}
+
+#[test]
+fn config_inspect_quiet_produces_no_output() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["config", "inspect", "--format", "quiet"])
+        .assert()
+        .success()
+        .stdout(predicate::str::is_empty());
+}
+
+#[test]
+fn config_inspect_with_project_shows_metadata() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "inspect-test", "--profile", "demo"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path().join("inspect-test"))
+        .args(["config", "inspect"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Config file:  found"))
+        .stdout(predicate::str::contains("Metadata dir: found"))
+        .stdout(predicate::str::contains("Entities:"))
+        .stdout(predicate::str::contains("Lockfile:      valid"));
+}
+
+#[test]
+fn config_inspect_json_with_project_has_metadata() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "inspect-json-test", "--profile", "demo"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path().join("inspect-json-test"))
+        .args(["config", "inspect", "--format", "json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("entity_count"))
+        .stdout(predicate::str::contains("relationship_count"))
+        .stdout(predicate::str::contains("lockfile"));
+}
+
+// ── version (expanded) ───────────────────────────────────────
+
+#[test]
+fn version_json_includes_all_schema_versions() {
+    cmd()
+        .args(["version", "--format", "json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("engine_version"))
+        .stdout(predicate::str::contains("metadata_schema_version"))
+        .stdout(predicate::str::contains("generator_contract_version"))
+        .stdout(predicate::str::contains("lockfile_schema_version"));
+}
+
+#[test]
+fn version_capabilities_json_envelope() {
+    cmd()
+        .args(["version", "--capabilities", "--format", "json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""result": "success""#))
+        .stdout(predicate::str::contains("know_now_gen_postgres"))
+        .stdout(predicate::str::contains("artifact_kinds"));
+}
+
+#[test]
+fn version_capabilities_shows_dialects() {
+    cmd()
+        .args(["version", "--capabilities"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("dialect: postgres"))
+        .stdout(predicate::str::contains("14, 15, 16, 17"));
+}
+
+#[test]
+fn version_capabilities_quiet_produces_no_output() {
+    cmd()
+        .args(["version", "--capabilities", "--format", "quiet"])
+        .assert()
+        .success()
+        .stdout(predicate::str::is_empty());
 }

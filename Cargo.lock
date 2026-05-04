@@ -420,6 +420,7 @@ dependencies = [
  "anyhow",
  "assert_cmd",
  "clap",
+ "know_now_codegen",
  "know_now_contract",
  "know_now_core",
  "know_now_diagnostics",
