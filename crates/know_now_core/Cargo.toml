@@ -16,6 +16,7 @@ know_now_gen_postgres = { version = "0.1.0", path = "../know_now_gen_postgres" }
 know_now_gen_docs = { version = "0.1.0", path = "../know_now_gen_docs" }
 know_now_writer = { version = "0.1.0", path = "../know_now_writer" }
 know_now_toolchain = { version = "0.1.0", path = "../know_now_toolchain" }
+postgres = "0.19"
 
 [lints]
 workspace = true

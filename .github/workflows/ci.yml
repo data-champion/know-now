@@ -434,7 +434,7 @@ jobs:
           set -euo pipefail
           {
             echo "## Deferred/Phase-Dependent Gates"
-            echo "- PostgreSQL 16/17/18 DDL execution matrix: TODO (Phase 2A/2B)."
+            echo "- PostgreSQL 16/17/18 DDL execution matrix: covered by postgres-live job."
             echo "- dbt compile validation for generated demo project: TODO (Phase 2B)."
             echo "- Mermaid syntax validation: TODO (Phase 2B)."
             echo "- JSON schema full-suite validation: TODO (Phase 2A+)."
@@ -447,6 +447,52 @@ jobs:
         with:
           name: fixture-diff-summary
           path: fixture-diff.json
+
+  postgres-live:
+    if: github.event_name != 'schedule'
+    name: PostgreSQL Live Matrix (PG ${{ matrix.pg }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pg: ['16', '17', '18']
+    services:
+      postgres:
+        image: postgres:${{ matrix.pg }}
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      KNOW_NOW_PG_TEST_URL: postgres://postgres:postgres@127.0.0.1:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        run: |
+          set -euo pipefail
+          rustup set profile minimal
+          rustup toolchain install "$RUSTUP_TOOLCHAIN"
+          rustup default "$RUSTUP_TOOLCHAIN"
+
+      - name: Run live Postgres integration harness
+        run: cargo test -p know_now_core --test postgres_live -- --nocapture
+
+      - name: PostgreSQL Job Summary
+        if: always()
+        run: |
+          {
+            echo "## PostgreSQL Live Matrix"
+            echo "- PostgreSQL version: ${{ matrix.pg }}"
+            echo "- Harness: \`cargo test -p know_now_core --test postgres_live -- --nocapture\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   coverage-soft-gate:
     if: github.event_name != 'schedule'
@@ -524,6 +570,7 @@ jobs:
       - docs-and-links
       - beads-hygiene
       - phase-gates
+      - postgres-live
       - coverage-soft-gate
     steps:
       - name: Aggregate gate status
@@ -544,6 +591,7 @@ jobs:
             echo "| Docs and Links | ${{ needs.docs-and-links.result }} |"
             echo "| Beads Hygiene | ${{ needs.beads-hygiene.result }} |"
             echo "| Phase and Integration Gates | ${{ needs.phase-gates.result }} |"
+            echo "| PostgreSQL Live Matrix | ${{ needs.postgres-live.result }} |"
             echo "| Coverage (Soft Gate) | ${{ needs.coverage-soft-gate.result }} |"
             echo ""
             echo "Artifacts: coverage summary, fixture diff summary, beads routing/hygiene report."
@@ -557,7 +605,8 @@ jobs:
             "${{ needs.web.result }}" \
             "${{ needs.docs-and-links.result }}" \
             "${{ needs.beads-hygiene.result }}" \
-            "${{ needs.phase-gates.result }}"
+            "${{ needs.phase-gates.result }}" \
+            "${{ needs.postgres-live.result }}"
           do
             if [ "$gate" != "success" ]; then
               hard_fail=1
