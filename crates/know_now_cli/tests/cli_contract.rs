@@ -3084,3 +3084,98 @@ fn review_export_entity_files_have_attributes() {
     assert!(first_entity.contains("## Attributes"));
     assert!(first_entity.contains("**Status:**"));
 }
+
+// ── audit log ────────────────────────────────────────────────────────
+
+#[test]
+fn audit_log_created_on_version() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["version"])
+        .assert()
+        .success();
+
+    let audit_log = tmp.path().join(".knownow").join("audit.log");
+    assert!(audit_log.exists(), "audit.log should be created");
+    let content = std::fs::read_to_string(&audit_log).unwrap();
+    let lines: Vec<_> = content.lines().collect();
+    assert_eq!(lines.len(), 1, "should have exactly one audit entry");
+    let entry: serde_json::Value = serde_json::from_str(lines[0]).expect("valid JSONL");
+    assert_eq!(entry["command"], "version");
+    assert_eq!(entry["result"], "success");
+    assert!(entry["timestamp"].is_string());
+    assert!(entry["engine_version"].is_string());
+}
+
+#[test]
+fn audit_log_records_failure() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["validate"])
+        .assert()
+        .failure();
+
+    let audit_log = tmp.path().join(".knownow").join("audit.log");
+    assert!(audit_log.exists(), "audit.log should exist even on failure");
+    let content = std::fs::read_to_string(&audit_log).unwrap();
+    let lines: Vec<_> = content.lines().collect();
+    assert_eq!(lines.len(), 1);
+    let entry: serde_json::Value = serde_json::from_str(lines[0]).expect("valid JSONL");
+    assert_eq!(entry["command"], "validate");
+    assert_eq!(entry["result"], "failure");
+    assert!(entry["error_code"].is_string());
+}
+
+#[test]
+fn audit_log_accumulates_entries() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["version"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["version"])
+        .assert()
+        .success();
+
+    let audit_log = tmp.path().join(".knownow").join("audit.log");
+    let content = std::fs::read_to_string(&audit_log).unwrap();
+    let lines: Vec<_> = content.lines().collect();
+    assert_eq!(lines.len(), 2, "should accumulate entries across runs");
+}
+
+#[test]
+fn audit_log_entries_are_valid_jsonl() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["doctor"])
+        .assert()
+        .success();
+
+    let audit_log = project.join(".knownow").join("audit.log");
+    if !audit_log.exists() {
+        return;
+    }
+    let content = std::fs::read_to_string(&audit_log).unwrap();
+    for (i, line) in content.lines().enumerate() {
+        let _: serde_json::Value =
+            serde_json::from_str(line).unwrap_or_else(|e| panic!("line {i} is not valid JSON: {e}"));
+    }
+}

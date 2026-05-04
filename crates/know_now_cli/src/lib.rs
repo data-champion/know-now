@@ -3,6 +3,7 @@
 //! Responsibility is defined in PRD section 8.2 (workspace layout).
 #![allow(clippy::missing_errors_doc)]
 
+pub mod audit;
 pub mod commands;
 pub mod context;
 pub mod output;

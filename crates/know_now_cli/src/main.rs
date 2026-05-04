@@ -4,6 +4,7 @@ use std::time::Duration;
 
 use clap::{Parser, Subcommand};
 
+use know_now_cli::audit::{self, AuditEntry};
 use know_now_cli::commands::{
     check, config, diff, doctor, examples, explain, generate, id, init, issues, lock, review,
     schema, support, validate, version,
@@ -157,6 +158,23 @@ fn main() {
 
     drop(lock_guard);
 
+    let knownow_dir = ctx.project_root.join(".knownow");
+    let (audit_result, audit_error_code) = match &result {
+        Ok(()) => ("success", None),
+        Err(e) => ("failure", Some(e.to_string())),
+    };
+    audit::append_audit_entry(
+        &knownow_dir,
+        &AuditEntry {
+            timestamp: audit::now_iso8601(),
+            command: command_name(&cli.command).to_owned(),
+            engine_version: env!("CARGO_PKG_VERSION").to_owned(),
+            project_root: ctx.project_root.display().to_string(),
+            result: audit_result.to_owned(),
+            error_code: audit_error_code,
+        },
+    );
+
     if let Err(err) = result {
         eprintln!("error: {err}");
         process::exit(exit_code::VALIDATION_ERROR);
@@ -168,6 +186,27 @@ fn requires_write_lock(command: &Command) -> bool {
         command,
         Command::Init(_) | Command::Generate(_) | Command::Lock(lock::LockCommand::Update(_))
     )
+}
+
+fn command_name(command: &Command) -> &'static str {
+    match command {
+        Command::Init(_) => "init",
+        Command::Validate(_) => "validate",
+        Command::Check(_) => "check",
+        Command::Schema(_) => "schema",
+        Command::Generate(_) => "generate",
+        Command::Diff(_) => "diff",
+        Command::Doctor(_) => "doctor",
+        Command::Explain(_) => "explain",
+        Command::Issues(_) => "issues",
+        Command::Lock(_) => "lock",
+        Command::Id(_) => "id",
+        Command::Examples(_) => "examples",
+        Command::Review(_) => "review",
+        Command::Support(_) => "support",
+        Command::Config(_) => "config",
+        Command::Version(_) => "version",
+    }
 }
 
 fn write_lock_command_name(command: &Command) -> &'static str {
