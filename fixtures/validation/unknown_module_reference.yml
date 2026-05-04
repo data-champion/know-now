@@ -1,0 +1,6 @@
+# DO NOT FIX — expected error: META-MOD-001
+# Entity references a module that doesn't exist.
+entities:
+  - name: customer
+    module: nonexistent_module
+    attributes: []

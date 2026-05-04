@@ -7,3 +7,6 @@ pub mod budgets;
 pub mod fixtures;
 pub mod parser;
 pub mod span;
+
+#[cfg(any(test, feature = "test-support"))]
+pub mod test_support;

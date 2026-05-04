@@ -1,0 +1,11 @@
+# DO NOT FIX — expected error: META-SRC-001
+# Source table maps to an entity that doesn't exist.
+entities:
+  - name: customer
+    attributes: []
+sources:
+  - name: crm
+    tables:
+      - name: users
+        entity: nonexistent_entity
+        columns: []

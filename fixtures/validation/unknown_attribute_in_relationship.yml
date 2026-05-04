@@ -1,0 +1,16 @@
+# DO NOT FIX — expected error: META-REL-002
+# Relationship key references an attribute that doesn't exist on the entity.
+entities:
+  - name: customer
+    attributes:
+      - name: id
+        logical_type: integer
+  - name: order
+    attributes:
+      - name: id
+        logical_type: integer
+relationships:
+  - from_entity: order
+    to_entity: customer
+    from_key: nonexistent_key
+    to_key: id

@@ -1,0 +1,8 @@
+# DO NOT FIX — expected error: META-REL-001
+# Relationship references an entity that doesn't exist.
+entities:
+  - name: customer
+    attributes: []
+relationships:
+  - from_entity: nonexistent
+    to_entity: customer

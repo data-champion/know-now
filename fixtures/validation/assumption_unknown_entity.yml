@@ -1,0 +1,7 @@
+# DO NOT FIX — expected error: META-ASM-001
+# Assumption references an entity that doesn't exist.
+entities: []
+assumptions:
+  - id: asm_test
+    statement: Entity exists
+    entity: nonexistent_entity

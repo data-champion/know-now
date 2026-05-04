@@ -1,0 +1,7 @@
+# DO NOT FIX — expected error: META-Q-001
+# Open question references an entity that doesn't exist.
+entities: []
+open_questions:
+  - id: q_test
+    question: Does this entity exist?
+    entity: nonexistent_entity

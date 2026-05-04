@@ -1,0 +1,6 @@
+# DO NOT FIX — expected error: META-DOM-001
+# Entity references a domain that doesn't exist.
+entities:
+  - name: customer
+    domain: nonexistent_domain
+    attributes: []

@@ -1,0 +1,72 @@
+# Valid — full metadata with all cross-references satisfied.
+version: "1.0"
+project:
+  name: test_project
+  description: Test project
+  owner: team
+  tags:
+    - demo
+domains:
+  - id: sales
+    name: Sales
+modules:
+  - id: core
+    name: Core
+entities:
+  - id: ent_customer
+    name: customer
+    domain: sales
+    module: core
+    business_key:
+      - email
+    attributes:
+      - id: attr_customer_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_customer_email
+        name: email
+        logical_type: string
+        semantic_type: email
+  - id: ent_order
+    name: order
+    domain: sales
+    attributes:
+      - id: attr_order_id
+        name: id
+        logical_type: integer
+      - id: attr_order_customer_id
+        name: customer_id
+        logical_type: integer
+relationships:
+  - id: rel_order_customer
+    from_entity: order
+    to_entity: customer
+    cardinality: many_to_one
+    from_key: customer_id
+    to_key: id
+sources:
+  - name: crm
+    kind: postgres
+    tables:
+      - name: customers
+        entity: customer
+        columns:
+          - source: cust_id
+            target: id
+rules:
+  - id: rule_email_format
+    name: email_format
+    entity: customer
+    attribute: email
+governance:
+  data_owner: team
+  data_steward: jane
+open_questions:
+  - id: q_gdpr
+    question: GDPR handling?
+    entity: customer
+assumptions:
+  - id: asm_email
+    statement: All customers have emails
+    entity: customer

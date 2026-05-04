@@ -1,0 +1,9 @@
+# DO NOT FIX — expected error: META-ID-001
+# Two objects share the same stable ID.
+entities:
+  - id: same_id
+    name: customer
+    attributes: []
+  - id: same_id
+    name: order
+    attributes: []

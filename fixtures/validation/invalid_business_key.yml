@@ -1,0 +1,9 @@
+# DO NOT FIX — expected error: META-ENT-002
+# Business key references an attribute that doesn't exist on the entity.
+entities:
+  - name: customer
+    business_key:
+      - nonexistent_attr
+    attributes:
+      - name: id
+        logical_type: integer

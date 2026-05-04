@@ -1,0 +1,12 @@
+# DO NOT FIX — expected error: META-ENT-001
+# Two entities share the same name within the same domain.
+domains:
+  - id: sales
+    name: Sales
+entities:
+  - name: customer
+    domain: sales
+    attributes: []
+  - name: customer
+    domain: sales
+    attributes: []
