@@ -44,7 +44,7 @@ The PRD §24 decisions table summarizes high-level decisions and their status. A
 | ADR | Title | Status |
 | --- | ----- | ------ |
 | [0001](0001-record-architecture-decisions.md) | Record architecture decisions | Accepted |
-| [0002](0002-yaml-parser-serde-saphyr.md) | YAML parser: `serde-saphyr` primary, `marked-yaml` fallback | Accepted |
+| [0002](0002-yaml-parser-serde-saphyr.md) | YAML parser: `serde-saphyr` confirmed | Confirmed |
 | [0003](0003-yaml-authoring-subset.md) | Constrained YAML authoring subset | Accepted |
 | [0004](0004-template-renderer-minijinja-restricted.md) | Restricted MiniJinja-based template renderer profile | Accepted |
 | [0005](0005-frontend-package-manager-pnpm.md) | Frontend package manager: pnpm | Accepted |

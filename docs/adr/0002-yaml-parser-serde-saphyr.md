@@ -1,6 +1,6 @@
 # ADR-0002: YAML parser — `serde-saphyr` primary, `marked-yaml` fallback
 
-- **Status:** Accepted (pending Phase 1 spike validation)
+- **Status:** Confirmed (Phase 1 spike validated 2026-05-04)
 - **Date:** 2026-05-02
 - **Deciders:** Maintainer
 - **Related:** PRD §10.2, §17.2 (NFR-S13, NFR-S19, NFR-S21), §17.6 (NFR-M8), §22 step 2
@@ -45,6 +45,24 @@ Negative / risks:
 - We commit to dependency-policy review (NFR-S19) on every parser-related upgrade.
 
 Phase 1 exit criteria (PRD §23.1) include parser-spike validation: unsupported-feature diagnostics, duplicate-key rejection, and parser budget tests. If those fail, switching to `marked-yaml` per the fallback rule is in-scope and pre-approved by this ADR.
+
+## Phase 1 Spike Validation (2026-05-04)
+
+Evaluation against PRD §10.2 criteria:
+
+| Criterion | Verdict | Notes |
+|-----------|---------|-------|
+| Subset enforcement quality | Pass | `validate_subset()` pre-scan rejects anchors, aliases, merge keys, custom tags, include directives, multi-document. 11 negative fixture tests. |
+| Diagnostic quality | Pass | Error variants include `Location` (line/column). know-now's wrapper currently discards location from deserialization errors — fix is in-scope, not a parser limitation. |
+| Source-span fidelity | Pass | `serde-saphyr::Error` variants carry `Location` with line/column. Pre-scan errors report line numbers. |
+| Parser budget support | Pass | File size, nesting depth, node count, anchor count, alias count, keys-per-mapping — all enforced in `budgets.rs`. |
+| Maintenance posture | Pass | v0.0.25, no advisories, actively maintained saphyr-rs project. `cargo deny check` clean. |
+| Dependency depth | Acceptable | 11 transitive dependencies via serde-saphyr. No C/FFI. All MIT/Apache-2.0. |
+| Audited license | Pass | MIT. All transitive deps pass `cargo deny check licenses`. |
+
+**Decision: serde-saphyr confirmed.** The `marked-yaml` fallback is not needed. No switching required.
+
+**Follow-up:** Extract line/column from `serde_saphyr::Error::location` in `parser.rs` deserialization error path to close the diagnostic quality gap (implementation issue, not a parser limitation).
 
 ## References
 
