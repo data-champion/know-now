@@ -4,6 +4,7 @@
 //! secures browser access. Write endpoints gated behind `allow-generate` feature
 //! + runtime flag.
 
+mod api;
 mod launch_token;
 mod routes;
 mod security;
@@ -102,6 +103,7 @@ fn build_app(state: AppState) -> Router {
     let origin = format!("http://{}:{}", state.config.host, state.config.port);
 
     routes::router(state.clone())
+        .merge(api::router())
         .layer(security::cors_layer(&origin))
         .layer(security::x_content_type_options())
         .layer(security::x_frame_options())
