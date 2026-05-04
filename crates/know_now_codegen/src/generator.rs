@@ -37,9 +37,11 @@ pub trait Generator: Send + Sync {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use know_now_contract::contract::ContractTrace;
 
     struct StubGenerator;
 
+    #[allow(clippy::unnecessary_literal_bound)]
     impl Generator for StubGenerator {
         fn name(&self) -> &str {
             "stub"
@@ -77,7 +79,7 @@ mod tests {
             governance: None,
             open_questions: vec![],
             assumptions: vec![],
-            trace: Default::default(),
+            trace: ContractTrace::default(),
         };
         let result = gen.generate(&contract).unwrap();
         assert!(result.is_empty());

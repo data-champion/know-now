@@ -4,5 +4,15 @@ version = "0.1.0"
 edition = "2021"
 license.workspace = true
 
+[dependencies]
+know_now_codegen = { version = "0.1.0", path = "../know_now_codegen" }
+know_now_contract = { version = "0.1.0", path = "../know_now_contract" }
+know_now_validate = { version = "0.1.0", path = "../know_now_validate" }
+
+[dev-dependencies]
+know_now_metadata = { version = "0.1.0", path = "../know_now_metadata", features = ["test-support"] }
+know_now_gen_postgres = { version = "0.1.0", path = "../know_now_gen_postgres" }
+know_now_gen_docs = { version = "0.1.0", path = "../know_now_gen_docs" }
+
 [lints]
 workspace = true

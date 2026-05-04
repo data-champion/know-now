@@ -314,13 +314,13 @@ mod tests {
 
     #[test]
     fn minimal_metadata_deserializes() {
-        let yaml = r#"
+        let yaml = r"
 entities:
   - name: customer
     attributes:
       - name: id
         type: integer
-"#;
+";
         let meta: AuthoringMetadata = serde_saphyr::from_str(yaml).unwrap();
         assert_eq!(meta.entities.len(), 1);
         assert_eq!(meta.entities[0].name, "customer");
@@ -421,25 +421,25 @@ assumptions:
 
     #[test]
     fn unknown_field_rejected() {
-        let yaml = r#"
+        let yaml = r"
 entities:
   - name: customer
     foo_unknown: bar
     attributes: []
-"#;
+";
         let result: Result<AuthoringMetadata, _> = serde_saphyr::from_str(yaml);
         assert!(result.is_err());
     }
 
     #[test]
     fn logical_type_snake_case() {
-        let yaml = r#"
+        let yaml = r"
 entities:
   - name: t
     attributes:
       - name: a
         logical_type: timestamp_tz
-"#;
+";
         let meta: AuthoringMetadata = serde_saphyr::from_str(yaml).unwrap();
         assert_eq!(
             meta.entities[0].attributes[0].logical_type,
@@ -449,13 +449,13 @@ entities:
 
     #[test]
     fn semantic_type_snake_case() {
-        let yaml = r#"
+        let yaml = r"
 entities:
   - name: t
     attributes:
       - name: a
         semantic_type: ip_address
-"#;
+";
         let meta: AuthoringMetadata = serde_saphyr::from_str(yaml).unwrap();
         assert_eq!(
             meta.entities[0].attributes[0].semantic_type,
@@ -484,13 +484,13 @@ entities:
 
     #[test]
     fn metadata_json_roundtrip() {
-        let yaml = r#"
+        let yaml = r"
 entities:
   - name: customer
     attributes:
       - name: id
         logical_type: integer
-"#;
+";
         let meta: AuthoringMetadata = serde_saphyr::from_str(yaml).unwrap();
         let json = serde_json::to_string(&meta).unwrap();
         let parsed: AuthoringMetadata = serde_json::from_str(&json).unwrap();
