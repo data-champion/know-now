@@ -48,3 +48,5 @@ The PRD §24 decisions table summarizes high-level decisions and their status. A
 | [0003](0003-yaml-authoring-subset.md) | Constrained YAML authoring subset | Accepted |
 | [0004](0004-template-renderer-minijinja-restricted.md) | Restricted MiniJinja-based template renderer profile | Accepted |
 | [0005](0005-frontend-package-manager-pnpm.md) | Frontend package manager: pnpm | Accepted |
+| [0006](0006-trunk-based-development-main-no-prs.md) | Trunk-based development on `main` with no feature branches or PRs | Accepted |
+| [0007](0007-review-gate-different-agent-via-mcp-agent-mail.md) | Code-review gate by a different agent via mcp-agent-mail | Accepted |

@@ -1,6 +1,6 @@
 # ADR-NNNN: <Short title in sentence case>
 
-- **Status:** Proposed | Accepted | Superseded by ADR-NNNN | Deprecated
+- **Status:** Proposed | Accepted | Superseded by ADR-NNNN
 - **Date:** YYYY-MM-DD
 - **Deciders:** <names or roles>
 - **Related:** PRD §X.Y, ADR-NNNN, beads know-now-NN
