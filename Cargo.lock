@@ -537,6 +537,12 @@ dependencies = [
 [[package]]
 name = "know_now_policy"
 version = "0.1.0"
+dependencies = [
+ "know_now_diagnostics",
+ "know_now_metadata",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "know_now_server"
