@@ -693,7 +693,10 @@ dependencies = [
  "know_now_contract",
  "know_now_core",
  "know_now_diagnostics",
+ "know_now_gen_dbt",
  "know_now_gen_docs",
+ "know_now_gen_er",
+ "know_now_gen_fixtures",
  "know_now_gen_postgres",
  "know_now_identity",
  "know_now_lock",
@@ -769,6 +772,12 @@ dependencies = [
 [[package]]
 name = "know_now_gen_dbt"
 version = "0.1.0"
+dependencies = [
+ "insta",
+ "know_now_codegen",
+ "know_now_contract",
+ "serde_json",
+]
 
 [[package]]
 name = "know_now_gen_docs"
@@ -777,6 +786,26 @@ dependencies = [
  "insta",
  "know_now_codegen",
  "know_now_contract",
+]
+
+[[package]]
+name = "know_now_gen_er"
+version = "0.1.0"
+dependencies = [
+ "insta",
+ "know_now_codegen",
+ "know_now_contract",
+ "serde_json",
+]
+
+[[package]]
+name = "know_now_gen_fixtures"
+version = "0.1.0"
+dependencies = [
+ "insta",
+ "know_now_codegen",
+ "know_now_contract",
+ "serde_json",
 ]
 
 [[package]]

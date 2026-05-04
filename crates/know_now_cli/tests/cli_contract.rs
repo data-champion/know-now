@@ -1631,7 +1631,7 @@ fn generate_fixtures_target_produces_csv() {
 }
 
 #[test]
-fn generate_phase2b_dbt_target_rejected() {
+fn generate_dbt_target_produces_artifacts() {
     let tmp = tempfile::tempdir().expect("tempdir");
     cmd()
         .args(["--project"])
@@ -1639,13 +1639,16 @@ fn generate_phase2b_dbt_target_rejected() {
         .args(["init", "--demo"])
         .assert()
         .success();
+    let project = tmp.path().join("demo-project");
     cmd()
         .args(["--project"])
-        .arg(tmp.path().join("demo-project"))
+        .arg(&project)
         .args(["generate", "--target", "dbt"])
         .assert()
-        .code(predicate::eq(2))
-        .stderr(predicate::str::contains("Phase 2B feature"));
+        .success();
+    assert!(project.join("generated/dbt/dbt_project.yml").exists());
+    assert!(project.join("generated/dbt/models/staging").exists());
+    assert!(project.join("generated/dbt/models/marts").exists());
 }
 
 #[test]

@@ -7,6 +7,7 @@ use know_now_codegen::artifact::{ArtifactDescriptor as CodegenArtifact, Artifact
 use know_now_codegen::generator::Generator;
 use know_now_contract::contract::GeneratorContract;
 use know_now_diagnostics::diagnostic::{Diagnostic, Severity};
+use know_now_gen_dbt::DbtGenerator;
 use know_now_gen_docs::DocsGenerator;
 use know_now_gen_er::ErDiagramGenerator;
 use know_now_gen_fixtures::FixtureGenerator;
@@ -309,6 +310,7 @@ fn resolve_targets(args: &GenerateArgs) -> Vec<GenerateTarget> {
                 }
             }
             GenerateTarget::Ddl
+            | GenerateTarget::Dbt
             | GenerateTarget::Docs
             | GenerateTarget::Diagrams
             | GenerateTarget::Fixtures => {
@@ -321,7 +323,7 @@ fn resolve_targets(args: &GenerateArgs) -> Vec<GenerateTarget> {
                     "Phase 3 feature: --target changed is not available in Phase 2A (track via S_P3_DIFF / S_P3_MIGRATIONS)",
                 );
             }
-            GenerateTarget::Dbt | GenerateTarget::Quality | GenerateTarget::Review => {
+            GenerateTarget::Quality | GenerateTarget::Review => {
                 usage_error(
                     "Phase 2B feature: requested --target value is not available in this Phase 2A build",
                 );
@@ -335,6 +337,7 @@ fn resolve_targets(args: &GenerateArgs) -> Vec<GenerateTarget> {
 fn supported_targets() -> Vec<GenerateTarget> {
     vec![
         GenerateTarget::Ddl,
+        GenerateTarget::Dbt,
         GenerateTarget::Docs,
         GenerateTarget::Diagrams,
     ]
@@ -387,6 +390,13 @@ fn run_generators(
             }
             GenerateTarget::Docs => {
                 let generator = DocsGenerator::new();
+                let generated = generator
+                    .generate(contract)
+                    .map_err(|e| join_generation_errors(&e))?;
+                artifacts.extend(generated);
+            }
+            GenerateTarget::Dbt => {
+                let generator = DbtGenerator::new();
                 let generated = generator
                     .generate(contract)
                     .map_err(|e| join_generation_errors(&e))?;
