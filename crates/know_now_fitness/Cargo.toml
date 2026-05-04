@@ -1,0 +1,12 @@
+[package]
+name = "know_now_fitness"
+version = "0.1.0"
+edition = "2021"
+license.workspace = true
+publish = false
+
+[dependencies]
+cargo_metadata = "0.19"
+
+[lints]
+workspace = true

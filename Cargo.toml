@@ -23,6 +23,7 @@ members = [
   "crates/know_now_cache",
   "crates/know_now_toolchain",
   "crates/know_now_audit",
+  "crates/know_now_fitness",
   "xtask",
 ]
 
