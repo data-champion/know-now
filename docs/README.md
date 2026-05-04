@@ -24,9 +24,19 @@ These live at the repository root for discoverability:
 - [`dev/versioning.md`](dev/versioning.md) — versioning policy across engine, metadata schema, generator contract, local API, lockfile schema, renderer profile, and packs.
 - [`dev/commit-conventions.md`](dev/commit-conventions.md) — Conventional Commits guide tailored to this repo.
 
-## User reference (placeholder)
+## User reference
 
-User-facing reference docs (CLI, metadata YAML reference, semantic types, governance metadata, dbt customization, policy packs, template packs, CI/CD recipes, troubleshooting) will be added during Phase 2A and Phase 2B as the corresponding features land. The full list of planned guides is in PRD §19.1.
+Metadata authoring guides:
+
+- [`user/metadata-reference.md`](user/metadata-reference.md)
+- [`user/yaml-subset.md`](user/yaml-subset.md)
+- [`user/logical-types.md`](user/logical-types.md)
+- [`user/semantic-types.md`](user/semantic-types.md)
+- [`user/governance.md`](user/governance.md)
+- [`user/open-questions-assumptions.md`](user/open-questions-assumptions.md)
+- [`user/domains-modules.md`](user/domains-modules.md)
+
+Additional user docs (CLI details, dbt customization, policy packs, template packs, CI/CD recipes, troubleshooting) continue to land by phase. The full list of planned guides is in PRD §19.1.
 
 ## Operations reference (placeholder)
 
