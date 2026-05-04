@@ -8,8 +8,8 @@ fn cmd() -> Command {
 #[test]
 fn help_shows_all_phase2a_subcommands() {
     let expected = [
-        "init", "validate", "check", "schema", "generate", "diff", "lock", "id", "examples",
-        "config", "version",
+        "init", "validate", "check", "schema", "generate", "diff", "doctor", "lock", "id",
+        "examples", "config", "version",
     ];
     let output = cmd().arg("--help").output().expect("should run");
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -2389,4 +2389,96 @@ fn diff_git_baseline_not_yet_implemented() {
         .assert()
         .failure()
         .stderr(predicate::str::contains("DIFF-GIT-001"));
+}
+
+#[test]
+fn doctor_help_shows_flags() {
+    cmd()
+        .args(["doctor", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("--check-updates"));
+}
+
+#[test]
+fn doctor_on_demo_project_exits_zero() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["doctor"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("know-now doctor"));
+}
+
+#[test]
+fn doctor_json_output() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    let output = cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["--format", "json", "doctor"])
+        .output()
+        .expect("should run");
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let json: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+    assert_eq!(json["doctor_schema_version"], "1.0");
+    assert!(json["engine"]["version"].is_string());
+    assert!(json["project"]["config_present"].is_boolean());
+    assert!(json["generators"].is_array());
+}
+
+#[test]
+fn doctor_without_metadata_reports_error() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    std::fs::create_dir_all(tmp.path().join("empty-project")).unwrap();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path().join("empty-project"))
+        .args(["doctor"])
+        .assert()
+        .code(predicate::eq(2))
+        .stdout(predicate::str::contains("DOC-META-001"));
+}
+
+#[test]
+fn doctor_reports_generators() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    let output = cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["--format", "json", "doctor"])
+        .output()
+        .expect("should run");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let json: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+    let generators = json["generators"].as_array().expect("generators array");
+    assert!(
+        generators.len() >= 4,
+        "should report at least 4 generators, got {}",
+        generators.len()
+    );
 }
