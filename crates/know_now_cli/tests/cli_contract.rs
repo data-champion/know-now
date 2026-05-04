@@ -76,8 +76,6 @@ fn stub_commands_exit_with_validation_error() {
         vec!["init"],
         vec!["check"],
         vec!["generate"],
-        vec!["lock", "update"],
-        vec!["lock", "check"],
         vec!["examples", "list"],
         vec!["config", "inspect"],
     ];
@@ -555,4 +553,268 @@ fn validate_text_shows_summary() {
         .assert()
         .code(predicate::eq(1))
         .stdout(predicate::str::contains("Validation failed"));
+}
+
+// ── Lock command tests ──────────────────────────────────────────────
+
+#[test]
+fn lock_update_creates_lockfile() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "update"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Lockfile updated"));
+    assert!(dir.path().join("know-now.lock").exists());
+}
+
+#[test]
+fn lock_update_is_idempotent() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "update"])
+        .assert()
+        .success();
+    let first = std::fs::read_to_string(dir.path().join("know-now.lock")).unwrap();
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "update"])
+        .assert()
+        .success();
+    let second = std::fs::read_to_string(dir.path().join("know-now.lock")).unwrap();
+    assert_eq!(first, second, "lock update must be idempotent");
+}
+
+#[test]
+fn lock_update_json_envelope() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "update", "--format", "json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""result": "success""#))
+        .stdout(predicate::str::contains(r#""command": "lock update""#));
+}
+
+#[test]
+fn lock_update_quiet_produces_no_stdout() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "update", "--format", "quiet"])
+        .assert()
+        .success()
+        .stdout(predicate::str::is_empty());
+    assert!(dir.path().join("know-now.lock").exists());
+}
+
+#[test]
+fn lock_check_succeeds_after_update() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "update"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "check"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("All versions match"));
+}
+
+#[test]
+fn lock_check_fails_when_no_lockfile() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "check"])
+        .assert()
+        .code(predicate::eq(1))
+        .stderr(predicate::str::contains("LOCK-MISSING-004"));
+}
+
+#[test]
+fn lock_check_fails_on_corrupt_lockfile() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    std::fs::write(dir.path().join("know-now.lock"), "not json").unwrap();
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "check"])
+        .assert()
+        .code(predicate::eq(1))
+        .stderr(predicate::str::contains("LOCK-CORRUPT-005"));
+}
+
+#[test]
+fn lock_check_fails_on_stale_lockfile() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "update"])
+        .assert()
+        .success();
+    let lock_path = dir.path().join("know-now.lock");
+    let mut content = std::fs::read_to_string(&lock_path).unwrap();
+    content = content.replace(
+        r#""engine_version": "0.1.0""#,
+        r#""engine_version": "99.0.0""#,
+    );
+    std::fs::write(&lock_path, content).unwrap();
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "check"])
+        .assert()
+        .code(predicate::eq(1))
+        .stdout(predicate::str::contains("Drifted fields"));
+}
+
+#[test]
+fn lock_check_json_envelope_on_success() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "update"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "check", "--format", "json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""result": "success""#))
+        .stdout(predicate::str::contains(r#""passed": true"#));
+}
+
+#[test]
+fn lock_check_json_envelope_on_failure() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "check", "--format", "json"])
+        .assert()
+        .code(predicate::eq(1))
+        .stdout(predicate::str::contains(r#""result": "error""#))
+        .stdout(predicate::str::contains(r#""passed": false"#));
+}
+
+#[test]
+fn lock_update_lockfile_is_valid_json() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "update"])
+        .assert()
+        .success();
+    let content = std::fs::read_to_string(dir.path().join("know-now.lock")).unwrap();
+    let lockfile: serde_json::Value = serde_json::from_str(&content).expect("valid JSON");
+    assert_eq!(lockfile["lockfile_schema_version"], "1.0");
+    assert!(lockfile["generators"].is_object());
+    assert!(lockfile["policy"].is_object());
+}
+
+#[test]
+fn lock_update_lockfile_contains_generators() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "update"])
+        .assert()
+        .success();
+    let content = std::fs::read_to_string(dir.path().join("know-now.lock")).unwrap();
+    let lockfile: serde_json::Value = serde_json::from_str(&content).expect("valid JSON");
+    let generators = lockfile["generators"].as_object().unwrap();
+    assert!(generators.contains_key("know_now_gen_postgres"));
+    assert!(generators.contains_key("know_now_gen_docs"));
+}
+
+#[test]
+fn lock_update_lockfile_contains_policy() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "update"])
+        .assert()
+        .success();
+    let content = std::fs::read_to_string(dir.path().join("know-now.lock")).unwrap();
+    let lockfile: serde_json::Value = serde_json::from_str(&content).expect("valid JSON");
+    assert_eq!(lockfile["policy"]["pack"], "dc_standard");
+    assert_eq!(lockfile["policy"]["version"], "1.0");
+}
+
+#[test]
+fn lock_check_quiet_produces_no_stdout() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "update"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "check", "--format", "quiet"])
+        .assert()
+        .success()
+        .stdout(predicate::str::is_empty());
+}
+
+#[test]
+fn lock_update_shows_accept_contract_upgrade_flag() {
+    let output = cmd()
+        .args(["lock", "update", "--help"])
+        .output()
+        .expect("should run");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout.contains("--accept-contract-upgrade"),
+        "lock update --help should show --accept-contract-upgrade"
+    );
+}
+
+#[test]
+fn lock_check_detects_unknown_schema_version() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "update"])
+        .assert()
+        .success();
+    let lock_path = dir.path().join("know-now.lock");
+    let mut content = std::fs::read_to_string(&lock_path).unwrap();
+    content = content.replace(
+        r#""lockfile_schema_version": "1.0""#,
+        r#""lockfile_schema_version": "99.0""#,
+    );
+    std::fs::write(&lock_path, content).unwrap();
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["lock", "check"])
+        .assert()
+        .code(predicate::eq(1))
+        .stderr(predicate::str::contains("LOCK-SCHEMA-001"));
 }

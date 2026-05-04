@@ -420,9 +420,11 @@ dependencies = [
  "anyhow",
  "assert_cmd",
  "clap",
+ "know_now_contract",
  "know_now_core",
  "know_now_diagnostics",
  "know_now_identity",
+ "know_now_lock",
  "know_now_metadata",
  "know_now_policy",
  "know_now_validate",
@@ -534,6 +536,10 @@ dependencies = [
 [[package]]
 name = "know_now_lock"
 version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "know_now_metadata"
