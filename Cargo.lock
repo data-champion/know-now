@@ -420,6 +420,8 @@ dependencies = [
  "anyhow",
  "assert_cmd",
  "clap",
+ "know_now_core",
+ "know_now_identity",
  "know_now_metadata",
  "predicates",
  "schemars",
@@ -511,6 +513,12 @@ version = "0.1.0"
 [[package]]
 name = "know_now_identity"
 version = "0.1.0"
+dependencies = [
+ "know_now_diagnostics",
+ "know_now_metadata",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "know_now_ir"

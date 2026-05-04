@@ -79,9 +79,6 @@ fn stub_commands_exit_with_validation_error() {
         vec!["generate"],
         vec!["lock", "update"],
         vec!["lock", "check"],
-        vec!["id", "check"],
-        vec!["id", "suggest"],
-        vec!["id", "backfill", "--dry-run"],
         vec!["examples", "list"],
         vec!["config", "inspect"],
     ];
@@ -250,4 +247,146 @@ fn schema_is_deterministic() {
         run1.stdout, run2.stdout,
         "schema output must be deterministic"
     );
+}
+
+fn id_fixture_all_ids() -> tempfile::TempDir {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let meta = dir.path().join("metadata");
+    std::fs::create_dir(&meta).unwrap();
+    std::fs::write(
+        meta.join("project.yml"),
+        r#"version: "1.0"
+entities:
+  - id: ent_customer
+    name: customer
+    attributes:
+      - id: attr_customer_id
+        name: id
+        logical_type: integer
+relationships:
+  - id: rel_order_customer
+    from_entity: order
+    to_entity: customer
+"#,
+    )
+    .unwrap();
+    dir
+}
+
+fn id_fixture_missing_ids() -> tempfile::TempDir {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let meta = dir.path().join("metadata");
+    std::fs::create_dir(&meta).unwrap();
+    std::fs::write(
+        meta.join("project.yml"),
+        r#"version: "1.0"
+entities:
+  - name: customer
+    attributes:
+      - name: id
+        logical_type: integer
+relationships:
+  - from_entity: order
+    to_entity: customer
+"#,
+    )
+    .unwrap();
+    dir
+}
+
+#[test]
+fn id_check_succeeds_when_all_ids_present() {
+    let project = id_fixture_all_ids();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["id", "check"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("All objects have valid stable IDs"));
+}
+
+#[test]
+fn id_check_json_envelope() {
+    let project = id_fixture_all_ids();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["id", "check", "--format", "json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""result": "success""#))
+        .stdout(predicate::str::contains(r#""command": "id check""#));
+}
+
+#[test]
+fn id_check_reports_missing() {
+    let project = id_fixture_missing_ids();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["id", "check"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("missing"));
+}
+
+#[test]
+fn id_suggest_lists_missing_ids() {
+    let project = id_fixture_missing_ids();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["id", "suggest"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("ent_customer"));
+}
+
+#[test]
+fn id_suggest_all_present_says_so() {
+    let project = id_fixture_all_ids();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["id", "suggest"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("All objects already have stable IDs"));
+}
+
+#[test]
+fn id_backfill_dry_run() {
+    let project = id_fixture_missing_ids();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["id", "backfill", "--dry-run"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("ent_customer"));
+}
+
+#[test]
+fn id_check_no_metadata_dir_exits_with_error() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["id", "check"])
+        .assert()
+        .code(predicate::eq(1))
+        .stderr(predicate::str::contains("no metadata/ directory"));
+}
+
+#[test]
+fn id_check_quiet_produces_no_stdout() {
+    let project = id_fixture_all_ids();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["id", "check", "--format", "quiet"])
+        .assert()
+        .success()
+        .stdout(predicate::str::is_empty());
 }
