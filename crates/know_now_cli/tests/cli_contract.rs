@@ -71,15 +71,12 @@ fn unknown_subcommand_exits_with_usage_error() {
 }
 
 #[test]
-fn stub_commands_exit_with_validation_error() {
-    let stubs = [vec!["generate"]];
-    for args in &stubs {
-        cmd()
-            .args(args)
-            .assert()
-            .code(predicate::eq(1))
-            .stderr(predicate::str::contains("not yet implemented"));
-    }
+fn generate_without_metadata_exits_with_error() {
+    cmd()
+        .args(["generate"])
+        .assert()
+        .code(predicate::eq(1))
+        .stderr(predicate::str::contains("no metadata/ directory found"));
 }
 
 #[test]
@@ -94,6 +91,7 @@ fn generate_help_shows_all_flags() {
         "--changed",
         "--prune",
         "--accept-generated-overwrite",
+        "--migration-safe",
     ];
     let output = cmd()
         .args(["generate", "--help"])
@@ -1553,4 +1551,394 @@ fn version_capabilities_quiet_produces_no_output() {
         .assert()
         .success()
         .stdout(predicate::str::is_empty());
+}
+
+// ── generate command tests ───────────────────────────────────
+
+#[test]
+fn generate_phase3_changed_flag_rejected() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path().join("demo-project"))
+        .args(["generate", "--changed"])
+        .assert()
+        .code(predicate::eq(2))
+        .stderr(predicate::str::contains("Phase 3 feature"));
+}
+
+#[test]
+fn generate_phase3_migration_safe_flag_rejected() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path().join("demo-project"))
+        .args(["generate", "--migration-safe"])
+        .assert()
+        .code(predicate::eq(2))
+        .stderr(predicate::str::contains("Phase 3 feature"));
+}
+
+#[test]
+fn generate_phase2b_fixtures_target_rejected() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path().join("demo-project"))
+        .args(["generate", "--target", "fixtures"])
+        .assert()
+        .code(predicate::eq(2))
+        .stderr(predicate::str::contains("Phase 2B feature"));
+}
+
+#[test]
+fn generate_phase2b_dbt_target_rejected() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path().join("demo-project"))
+        .args(["generate", "--target", "dbt"])
+        .assert()
+        .code(predicate::eq(2))
+        .stderr(predicate::str::contains("Phase 2B feature"));
+}
+
+#[test]
+fn generate_dry_run_writes_no_files() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate", "--dry-run"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Dry run"));
+    assert!(
+        !project.join("generated/manifest.json").exists(),
+        "dry run must not write manifest.json"
+    );
+    assert!(
+        !project.join("generated/ddl").exists(),
+        "dry run must not write DDL artifacts"
+    );
+}
+
+#[test]
+fn generate_dry_run_json_output() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    let output = cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["--format", "json", "generate", "--dry-run"])
+        .output()
+        .expect("should run");
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let json: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+    assert_eq!(json["result"], "success");
+    assert_eq!(json["command"], "generate");
+    assert_eq!(json["payload"]["dry_run"], true);
+    assert!(json["payload"]["planned_artifacts"].is_array());
+}
+
+#[test]
+fn generate_produces_artifacts() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Generation complete"));
+
+    let generated = project.join("generated");
+    assert!(generated.exists(), "generated/ should exist");
+    assert!(
+        generated.join("manifest.json").exists(),
+        "manifest.json should exist"
+    );
+    assert!(
+        generated.join("ddl/postgres/schema.sql").exists(),
+        "DDL artifact should exist"
+    );
+    assert!(
+        generated.join("docs/README.md").exists(),
+        "docs overview should exist"
+    );
+}
+
+#[test]
+fn generate_manifest_is_valid_json() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+    let manifest_path = project.join("generated/manifest.json");
+    let content = std::fs::read_to_string(&manifest_path).expect("read manifest");
+    let json: serde_json::Value = serde_json::from_str(&content).expect("valid JSON");
+    assert!(json["artifacts"].is_array());
+    assert!(json["engine_version"].is_string());
+}
+
+#[test]
+fn generate_ddl_contains_sql() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+    let ddl_path = project.join("generated/ddl/postgres/schema.sql");
+    let content = std::fs::read_to_string(&ddl_path).expect("read DDL");
+    assert!(content.contains("CREATE TABLE"));
+    assert!(content.contains("Generated by know-now"));
+}
+
+#[test]
+fn generate_is_deterministic() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+    let first_ddl =
+        std::fs::read_to_string(project.join("generated/ddl/postgres/schema.sql")).unwrap();
+    let first_manifest = std::fs::read_to_string(project.join("generated/manifest.json")).unwrap();
+
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+    let second_ddl =
+        std::fs::read_to_string(project.join("generated/ddl/postgres/schema.sql")).unwrap();
+    let second_manifest = std::fs::read_to_string(project.join("generated/manifest.json")).unwrap();
+
+    assert_eq!(first_ddl, second_ddl, "DDL must be deterministic");
+    assert_eq!(
+        first_manifest, second_manifest,
+        "manifest must be deterministic"
+    );
+}
+
+#[test]
+fn generate_target_ddl_only() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate", "--target", "ddl"])
+        .assert()
+        .success();
+    let generated = project.join("generated");
+    assert!(generated.join("ddl/postgres/schema.sql").exists());
+    assert!(
+        !generated.join("docs/README.md").exists(),
+        "docs should not exist when targeting only DDL"
+    );
+}
+
+#[test]
+fn generate_target_docs_only() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate", "--target", "docs"])
+        .assert()
+        .success();
+    let generated = project.join("generated");
+    assert!(generated.join("docs/README.md").exists());
+    assert!(
+        !generated.join("ddl").exists(),
+        "DDL should not exist when targeting only docs"
+    );
+}
+
+#[test]
+fn generate_target_comma_separated() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate", "--target", "ddl,docs"])
+        .assert()
+        .success();
+    let generated = project.join("generated");
+    assert!(generated.join("ddl/postgres/schema.sql").exists());
+    assert!(generated.join("docs/README.md").exists());
+}
+
+#[test]
+fn generate_failure_preserves_prior_output() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+
+    let ddl_path = project.join("generated/ddl/postgres/schema.sql");
+    assert!(ddl_path.exists(), "first generate should create DDL");
+    let first_ddl = std::fs::read_to_string(&ddl_path).unwrap();
+
+    let entity_files: Vec<_> = std::fs::read_dir(project.join("metadata"))
+        .unwrap()
+        .filter_map(std::result::Result::ok)
+        .filter(|e| {
+            e.path()
+                .extension()
+                .is_some_and(|ext| ext == "yaml" || ext == "yml")
+        })
+        .collect();
+    if let Some(first_yaml) = entity_files.first() {
+        std::fs::write(first_yaml.path(), "invalid: [yaml: content").unwrap();
+    }
+
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .failure();
+
+    let preserved_ddl = std::fs::read_to_string(&ddl_path).unwrap();
+    assert_eq!(
+        first_ddl, preserved_ddl,
+        "prior generated output must be preserved on failure"
+    );
+}
+
+#[test]
+fn generate_no_crlf_in_output() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+
+    let ddl = std::fs::read_to_string(project.join("generated/ddl/postgres/schema.sql")).unwrap();
+    assert!(
+        !ddl.contains('\r'),
+        "NFR-PO3: generated DDL must use LF only"
+    );
+    let manifest = std::fs::read_to_string(project.join("generated/manifest.json")).unwrap();
+    assert!(
+        !manifest.contains('\r'),
+        "NFR-PO3: manifest must use LF only"
+    );
 }
