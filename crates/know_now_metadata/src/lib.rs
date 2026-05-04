@@ -4,4 +4,5 @@
 
 pub mod budgets;
 pub mod fixtures;
+pub mod parser;
 pub mod span;
