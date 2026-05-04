@@ -1,0 +1,538 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 2 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  RUSTUP_TOOLCHAIN: 1.94.1
+  CARGO_TERM_COLOR: always
+
+jobs:
+  trunk-consistency:
+    if: github.event_name != 'schedule'
+    name: Trunk Consistency
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate Trunk Branch Naming and Docs
+        run: |
+          set -euo pipefail
+
+          if ! grep -Eq '^\s*branches:\s*\[main\]' .github/workflows/ci.yml; then
+            echo "Expected workflow branch filter to include [main]."
+            exit 1
+          fi
+
+          # Guard against silent branch-name drift in contributor docs.
+          if grep -RInw 'master' AGENTS.md README.md CONTRIBUTING.md .github/workflows; then
+            echo "Found stale 'master' references; expected trunk branch name is 'main'."
+            exit 1
+          fi
+
+          if ! grep -RIn 'main' AGENTS.md README.md CONTRIBUTING.md >/dev/null; then
+            echo "Expected AGENTS/README/CONTRIBUTING to mention trunk branch 'main'."
+            exit 1
+          fi
+
+          {
+            echo "## Trunk Consistency"
+            echo "- Branch filters include \`main\` in workflow triggers."
+            echo "- No stale \`master\` references found in trunk workflow/docs."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  rust:
+    if: github.event_name != 'schedule'
+    name: Rust (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        run: |
+          set -euo pipefail
+          rustup set profile minimal
+          rustup toolchain install "$RUSTUP_TOOLCHAIN" --component rustfmt --component clippy
+          rustup default "$RUSTUP_TOOLCHAIN"
+          rustc -V
+          cargo -V
+
+      - name: Cargo fmt (Linux gate)
+        if: runner.os == 'Linux'
+        run: cargo fmt --all -- --check
+
+      - name: Cargo clippy (Linux gate)
+        if: runner.os == 'Linux'
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Cargo test workspace
+        run: cargo test --workspace
+
+      - name: Cargo deny (Linux gate)
+        if: runner.os == 'Linux'
+        run: |
+          set -euo pipefail
+          cargo install cargo-deny --locked
+          cargo deny check
+
+      - name: Rust Job Summary
+        if: always()
+        run: |
+          {
+            echo "## Rust Matrix"
+            echo "- Runner: ${{ runner.os }}"
+            echo "- Test command: \`cargo test --workspace\`"
+            if [ "${{ runner.os }}" = "Linux" ]; then
+              echo "- Linux gate included fmt/clippy/cargo-deny."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  web:
+    if: github.event_name != 'schedule'
+    name: Web (TypeScript)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node + pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install pnpm and dependencies
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack prepare pnpm@10.33.2 --activate
+          pnpm --version
+          pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      - name: Web Job Summary
+        if: always()
+        run: |
+          {
+            echo "## Web Gate"
+            echo "- Commands: \`pnpm typecheck\`, \`pnpm lint\`, \`pnpm test\`, \`pnpm build\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  docs-and-links:
+    if: github.event_name != 'schedule'
+    name: Docs and Link Gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Rust toolchain
+        run: |
+          set -euo pipefail
+          rustup set profile minimal
+          rustup toolchain install "$RUSTUP_TOOLCHAIN"
+          rustup default "$RUSTUP_TOOLCHAIN"
+
+      - name: ADR index sync check
+        run: cargo xtask docs check
+
+      - name: Internal markdown link validation (AGENTS/README/PRD)
+        run: |
+          set -euo pipefail
+          npm --version
+          npx --yes markdown-link-check --version
+
+          cat > /tmp/mlc.json <<'JSON'
+          {
+            "ignorePatterns": [
+              {"pattern": "^https?://"},
+              {"pattern": "^mailto:"}
+            ]
+          }
+          JSON
+
+          npx --yes markdown-link-check AGENTS.md -c /tmp/mlc.json -q
+          npx --yes markdown-link-check README.md -c /tmp/mlc.json -q
+          npx --yes markdown-link-check docs/PRD.md -c /tmp/mlc.json -q
+
+      - name: Docs Job Summary
+        if: always()
+        run: |
+          {
+            echo "## Docs and Links"
+            echo "- ADR index sync checked via \`cargo xtask docs check\`."
+            echo "- Internal markdown links checked for AGENTS.md, README.md, and docs/PRD.md."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  beads-hygiene:
+    if: github.event_name != 'schedule'
+    name: Beads Hygiene and Routing Smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect .beads changes
+        id: changes
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+            head="${{ github.event.pull_request.head.sha }}"
+          else
+            base="${{ github.event.before }}"
+            head="${{ github.sha }}"
+          fi
+
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+            changed_files="$(git ls-files)"
+          else
+            changed_files="$(git diff --name-only "$base" "$head")"
+          fi
+
+          if printf '%s\n' "$changed_files" | grep -Eq '^\.beads/'; then
+            echo "beads_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "beads_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Go (for bv install path)
+        if: steps.changes.outputs.beads_changed == 'true'
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Setup Rust toolchain (for br install path)
+        if: steps.changes.outputs.beads_changed == 'true'
+        run: |
+          set -euo pipefail
+          rustup set profile minimal
+          rustup toolchain install "$RUSTUP_TOOLCHAIN"
+          rustup default "$RUSTUP_TOOLCHAIN"
+
+      - name: Install br and bv
+        if: steps.changes.outputs.beads_changed == 'true'
+        run: |
+          set -euo pipefail
+
+          if ! command -v br >/dev/null 2>&1; then
+            cargo install beads_rust --locked
+          fi
+
+          if ! command -v bv >/dev/null 2>&1; then
+            go install github.com/Dicklesworthstone/beads_viewer/cmd/bv@v0.16.0
+            export PATH="$(go env GOPATH)/bin:$PATH"
+            echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          fi
+
+          br --version
+          bv --version
+
+      - name: Run beads graph hygiene checks
+        if: steps.changes.outputs.beads_changed == 'true'
+        run: |
+          set -euo pipefail
+
+          br dep cycles --json > br-dep-cycles.json
+          br lint --json > br-lint.json
+          br --no-db sync --status --json > br-sync-status.json
+          br stats --json > br-stats.json
+          br ready --json > br-ready.json
+          bv --robot-triage > bv-triage.json
+          bv --robot-plan > bv-plan.json
+          bv --robot-next > bv-next.json || true
+
+          total_issues="$(jq -r '.summary.total_issues // 0' br-stats.json)"
+          tombstone_issues="$(jq -r '.summary.tombstone_issues // 0' br-stats.json)"
+          ready_issues="$(jq -r '.summary.ready_issues // 0' br-stats.json)"
+          open_epics="$(br list --status open --type epic --json | jq -r '.total // 0')"
+
+          if [ $((total_issues - tombstone_issues)) -lt 0 ]; then
+            echo "Invalid br stats invariant: total_issues - tombstone_issues < 0"
+            exit 1
+          fi
+
+          if [ "$ready_issues" -eq 0 ] && [ "$open_epics" -gt 0 ]; then
+            echo "No ready issues while open epics exist. Failing fast for routing hygiene."
+            exit 1
+          fi
+
+          br_ready_count="$(jq 'length' br-ready.json)"
+          bv_next_msg="$(jq -r '.message // ""' bv-next.json)"
+
+          if [ "$br_ready_count" -gt 0 ] && [ "$bv_next_msg" = "No actionable items available" ]; then
+            {
+              echo "## Routing Mismatch Detected"
+              echo "- \`br ready --json\` reported $br_ready_count ready item(s)."
+              echo "- \`bv --robot-next\` reported no actionable items."
+              echo "- Route with \`br ready --json\`; use \`bv --robot-plan\` for context while viewer mismatch persists."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Skip note when .beads unchanged
+        if: steps.changes.outputs.beads_changed != 'true'
+        run: |
+          {
+            echo "## Beads Hygiene"
+            echo "- .beads/ unchanged in this revision; hygiene checks skipped."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload beads reports
+        if: steps.changes.outputs.beads_changed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: beads-hygiene-report
+          path: |
+            br-dep-cycles.json
+            br-lint.json
+            br-sync-status.json
+            br-stats.json
+            br-ready.json
+            bv-triage.json
+            bv-plan.json
+            bv-next.json
+
+  phase-gates:
+    if: github.event_name != 'schedule'
+    name: Phase and Integration Gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        run: |
+          set -euo pipefail
+          rustup set profile minimal
+          rustup toolchain install "$RUSTUP_TOOLCHAIN"
+          rustup default "$RUSTUP_TOOLCHAIN"
+
+      - name: Baseline quality gate
+        run: cargo xtask check
+
+      - name: E2E aggregate (Linux)
+        run: |
+          set -euo pipefail
+          if [ -f tests/e2e/phase-1.sh ] && [ -f tests/e2e/phase-2a.sh ] && [ -f tests/e2e/phase-2b.sh ] && [ -f tests/e2e/phase-3.sh ]; then
+            cargo xtask e2e all
+          else
+            echo "Full E2E scripts are not all present yet; aggregate E2E deferred."
+          fi
+
+      - name: E2E phase smoke (macOS/Windows parity plan)
+        run: |
+          set -euo pipefail
+          if [ -f tests/e2e/phase-1.sh ]; then
+            cargo xtask e2e phase1
+          else
+            echo "No phase-specific E2E scripts yet; phase smoke deferred."
+          fi
+
+      - name: Logging schema validator (if fixtures exist)
+        run: |
+          set -euo pipefail
+          if [ -f tests/logging/events.jsonl ]; then
+            cargo xtask logs validate tests/logging/events.jsonl
+          else
+            echo "No tests/logging/events.jsonl fixture yet; logging validation deferred."
+          fi
+
+      - name: Compatibility fixture diff summary
+        run: |
+          set -euo pipefail
+          if cargo xtask fixtures diff --json > fixture-diff.json; then
+            echo "Fixture diff clean."
+          else
+            status=$?
+            echo "Fixture drift detected (see fixture-diff.json)."
+            exit "$status"
+          fi
+
+      - name: Benchmark smoke (non-blocking until budget harness lands)
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          cargo xtask bench
+
+      - name: Placeholder gates for phase-dependent checks
+        run: |
+          set -euo pipefail
+          {
+            echo "## Deferred/Phase-Dependent Gates"
+            echo "- PostgreSQL 16/17/18 DDL execution matrix: TODO (Phase 2A/2B)."
+            echo "- dbt compile validation for generated demo project: TODO (Phase 2B)."
+            echo "- Mermaid syntax validation: TODO (Phase 2B)."
+            echo "- JSON schema full-suite validation: TODO (Phase 2A+)."
+            echo "- Mutation-style policy tests: TODO (Phase 3)."
+            echo "- mcp-agent-mail pre-commit guard wiring verification: TODO (Phase 3 hardening)."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload fixture diff summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: fixture-diff-summary
+          path: fixture-diff.json
+
+  coverage-soft-gate:
+    if: github.event_name != 'schedule'
+    name: Coverage (Soft Gate)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        run: |
+          set -euo pipefail
+          rustup set profile minimal
+          rustup toolchain install "$RUSTUP_TOOLCHAIN"
+          rustup default "$RUSTUP_TOOLCHAIN"
+          rustup component add llvm-tools-preview
+
+      - name: Install cargo-llvm-cov
+        run: cargo install cargo-llvm-cov --locked
+
+      - name: Run coverage and emit summary
+        run: |
+          set -euo pipefail
+          cargo llvm-cov --workspace --json --output-path coverage.json
+
+          line_pct="$(jq -r '.data[0].totals.lines.percent // 0' coverage.json)"
+          region_pct="$(jq -r '.data[0].totals.regions.percent // 0' coverage.json)"
+
+          {
+            echo "## Coverage Report (Soft Gate)"
+            echo "- Overall line coverage: ${line_pct}%"
+            echo "- Overall region coverage: ${region_pct}%"
+            echo "- Target policy: overall >= 90% and stricter crate targets after baseline stabilizes."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-summary
+          path: coverage.json
+
+  nightly-redaction-fuzz:
+    if: github.event_name == 'schedule'
+    name: Nightly Redaction Fuzz
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        run: |
+          set -euo pipefail
+          rustup set profile minimal
+          rustup toolchain install "$RUSTUP_TOOLCHAIN"
+          rustup default "$RUSTUP_TOOLCHAIN"
+
+      - name: Run deterministic redaction fuzz
+        run: cargo xtask redaction fuzz --seed 0x5eed --iterations 20000
+
+      - name: Nightly Summary
+        if: always()
+        run: |
+          {
+            echo "## Nightly Redaction Fuzz"
+            echo "- Ran deterministic redaction fuzz with seed \`0x5eed\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  ci-summary:
+    if: always() && github.event_name != 'schedule'
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs:
+      - trunk-consistency
+      - rust
+      - web
+      - docs-and-links
+      - beads-hygiene
+      - phase-gates
+      - coverage-soft-gate
+    steps:
+      - name: Aggregate gate status
+        run: |
+          set -euo pipefail
+
+          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          {
+            echo "## CI Health Summary"
+            echo "Run: ${run_url}"
+            echo ""
+            echo "| Gate | Result |"
+            echo "| --- | --- |"
+            echo "| Trunk Consistency | ${{ needs.trunk-consistency.result }} |"
+            echo "| Rust Matrix | ${{ needs.rust.result }} |"
+            echo "| Web (TypeScript) | ${{ needs.web.result }} |"
+            echo "| Docs and Links | ${{ needs.docs-and-links.result }} |"
+            echo "| Beads Hygiene | ${{ needs.beads-hygiene.result }} |"
+            echo "| Phase and Integration Gates | ${{ needs.phase-gates.result }} |"
+            echo "| Coverage (Soft Gate) | ${{ needs.coverage-soft-gate.result }} |"
+            echo ""
+            echo "Artifacts: coverage summary, fixture diff summary, beads routing/hygiene report."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          hard_fail=0
+
+          for gate in \
+            "${{ needs.trunk-consistency.result }}" \
+            "${{ needs.rust.result }}" \
+            "${{ needs.web.result }}" \
+            "${{ needs.docs-and-links.result }}" \
+            "${{ needs.beads-hygiene.result }}" \
+            "${{ needs.phase-gates.result }}"
+          do
+            if [ "$gate" != "success" ]; then
+              hard_fail=1
+            fi
+          done
+
+          if [ "$hard_fail" -ne 0 ]; then
+            echo "One or more hard gates failed."
+            exit 1
+          fi
