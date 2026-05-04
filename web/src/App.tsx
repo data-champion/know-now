@@ -7,11 +7,12 @@ import { DocsViewer } from "./components/DocsViewer";
 import { EntityDetail } from "./components/EntityDetail";
 import { EntityList } from "./components/EntityList";
 import { GenerationStatus } from "./components/GenerationStatus";
+import { HealthAdmin } from "./components/HealthAdmin";
 import { ManifestViewer } from "./components/ManifestViewer";
 import { RelationshipGraph } from "./components/RelationshipGraph";
 import { RelationshipTable } from "./components/RelationshipTable";
 
-type View = "entities" | "graph" | "generation" | "docs" | "manifest" | "traceability";
+type View = "entities" | "graph" | "generation" | "docs" | "manifest" | "traceability" | "health";
 type GraphMode = "visual" | "table";
 
 export function App() {
@@ -42,6 +43,7 @@ export function App() {
           <NavTab view={view} target="docs" label="Docs" onClick={setView} />
           <NavTab view={view} target="manifest" label="Manifest" onClick={setView} />
           <NavTab view={view} target="traceability" label="Traceability" onClick={setView} />
+          <NavTab view={view} target="health" label="Health" onClick={setView} />
         </nav>
       </header>
 
@@ -117,6 +119,12 @@ export function App() {
         )}
 
         {view === "traceability" && <ArtifactTraceability />}
+
+        {view === "health" && (
+          <div className="kn-page-content">
+            <HealthAdmin />
+          </div>
+        )}
       </main>
     </div>
   );
