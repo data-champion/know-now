@@ -74,7 +74,6 @@ fn unknown_subcommand_exits_with_usage_error() {
 fn stub_commands_exit_with_validation_error() {
     let stubs = [
         vec!["init"],
-        vec!["validate"],
         vec!["check"],
         vec!["generate"],
         vec!["lock", "update"],
@@ -303,7 +302,9 @@ fn id_check_succeeds_when_all_ids_present() {
         .args(["id", "check"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("All objects have valid stable IDs"));
+        .stdout(predicate::str::contains(
+            "All objects have valid stable IDs",
+        ));
 }
 
 #[test]
@@ -352,7 +353,9 @@ fn id_suggest_all_present_says_so() {
         .args(["id", "suggest"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("All objects already have stable IDs"));
+        .stdout(predicate::str::contains(
+            "All objects already have stable IDs",
+        ));
 }
 
 #[test]
@@ -389,4 +392,167 @@ fn id_check_quiet_produces_no_stdout() {
         .assert()
         .success()
         .stdout(predicate::str::is_empty());
+}
+
+fn valid_project() -> tempfile::TempDir {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let meta = dir.path().join("metadata");
+    std::fs::create_dir(&meta).unwrap();
+    std::fs::write(
+        meta.join("project.yml"),
+        r#"version: "1.0"
+project:
+  name: test
+  owner: team
+domains:
+  - id: dom_sales
+    name: sales
+entities:
+  - id: ent_customer
+    name: customer
+    domain: dom_sales
+    description: A customer
+    attributes:
+      - id: attr_customer_id
+        name: id
+        logical_type: integer
+        description: Primary key
+      - id: attr_customer_email
+        name: email
+        logical_type: string
+        description: Contact email
+relationships:
+  - id: rel_order_customer
+    from_entity: customer
+    to_entity: customer
+"#,
+    )
+    .unwrap();
+    dir
+}
+
+fn invalid_project() -> tempfile::TempDir {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let meta = dir.path().join("metadata");
+    std::fs::create_dir(&meta).unwrap();
+    std::fs::write(
+        meta.join("project.yml"),
+        r#"version: "1.0"
+entities:
+  - name: customer
+    attributes: []
+relationships:
+  - from_entity: nonexistent
+    to_entity: customer
+"#,
+    )
+    .unwrap();
+    dir
+}
+
+#[test]
+fn validate_succeeds_on_valid_project() {
+    let project = valid_project();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["validate"])
+        .assert()
+        .success();
+}
+
+#[test]
+fn validate_fails_on_invalid_refs() {
+    let project = invalid_project();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["validate"])
+        .assert()
+        .code(predicate::eq(1));
+}
+
+#[test]
+fn validate_json_envelope() {
+    let project = valid_project();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["validate", "--format", "json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""result": "success""#))
+        .stdout(predicate::str::contains(r#""valid": true"#));
+}
+
+#[test]
+fn validate_json_reports_errors() {
+    let project = invalid_project();
+    let output = cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["validate", "--format", "json"])
+        .output()
+        .expect("should run");
+    assert_eq!(output.status.code(), Some(1));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let envelope: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+    assert_eq!(envelope["result"], "error");
+    assert_eq!(envelope["payload"]["valid"], false);
+    let diags = envelope["payload"]["diagnostics"].as_array().unwrap();
+    assert!(!diags.is_empty());
+}
+
+#[test]
+fn validate_sarif_output() {
+    let project = valid_project();
+    let output = cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["validate", "--format", "sarif"])
+        .output()
+        .expect("should run");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let sarif: serde_json::Value = serde_json::from_str(&stdout).expect("valid SARIF JSON");
+    assert_eq!(sarif["version"], "2.1.0");
+    assert!(sarif["runs"].is_array());
+    let runs = sarif["runs"].as_array().unwrap();
+    assert_eq!(runs.len(), 1);
+    assert_eq!(runs[0]["tool"]["driver"]["name"], "know-now");
+}
+
+#[test]
+fn validate_quiet_produces_no_stdout() {
+    let project = valid_project();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["validate", "--format", "quiet"])
+        .assert()
+        .success()
+        .stdout(predicate::str::is_empty());
+}
+
+#[test]
+fn validate_no_metadata_dir_exits_with_error() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(dir.path())
+        .args(["validate"])
+        .assert()
+        .code(predicate::eq(1))
+        .stderr(predicate::str::contains("no metadata/ directory"));
+}
+
+#[test]
+fn validate_text_shows_summary() {
+    let project = invalid_project();
+    cmd()
+        .args(["--project"])
+        .arg(project.path())
+        .args(["validate"])
+        .assert()
+        .code(predicate::eq(1))
+        .stdout(predicate::str::contains("Validation failed"));
 }

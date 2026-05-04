@@ -24,8 +24,11 @@ pkg-fmt = "zip"
 anyhow = "1.0.100"
 clap = { version = "4.5.51", features = ["derive"] }
 know_now_core = { version = "0.1.0", path = "../know_now_core" }
+know_now_diagnostics = { version = "0.1.0", path = "../know_now_diagnostics" }
 know_now_identity = { version = "0.1.0", path = "../know_now_identity" }
 know_now_metadata = { version = "0.1.0", path = "../know_now_metadata", features = ["json-schema"] }
+know_now_policy = { version = "0.1.0", path = "../know_now_policy" }
+know_now_validate = { version = "0.1.0", path = "../know_now_validate" }
 schemars = "0.8"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
