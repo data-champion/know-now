@@ -1,0 +1,10 @@
+# Fixture: duplicate_key
+# Purpose: Deliberately invalid — duplicate mapping key.
+# Expected error: META-PAR-DUP
+# DO NOT FIX: This file is intentionally malformed.
+entities:
+  - name: customer
+    name: customer_duplicate
+    attributes:
+      - name: id
+        type: integer

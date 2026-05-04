@@ -1,0 +1,10 @@
+# Fixture: deep_nesting
+# Purpose: Deliberately invalid — exceeds nesting depth budget.
+# Expected error: META-PAR-NESTING (with a budget of max_nesting_depth=3)
+# DO NOT FIX: This file is intentionally malformed.
+level1:
+  level2:
+    level3:
+      level4:
+        level5:
+          too_deep: true

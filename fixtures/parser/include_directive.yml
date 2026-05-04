@@ -1,0 +1,10 @@
+# Fixture: include_directive
+# Purpose: Deliberately invalid — include directive (not part of YAML spec, banned).
+# Expected error: META-PAR-INCLUDE
+# DO NOT FIX: This file is intentionally malformed.
+entities:
+  - !include shared/customer.yml
+  - name: order
+    attributes:
+      - name: id
+        type: integer

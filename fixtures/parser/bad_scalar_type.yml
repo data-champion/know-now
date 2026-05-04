@@ -1,0 +1,9 @@
+# Fixture: bad_scalar_type
+# Purpose: Deliberately invalid — non-string scalar key.
+# Expected error: META-PAR-SCALAR
+# DO NOT FIX: This file is intentionally malformed.
+entities:
+  - name: customer
+    attributes:
+      - name: id
+        type: [integer, string]

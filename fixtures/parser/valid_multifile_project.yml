@@ -1,0 +1,29 @@
+# Fixture: valid_multifile_project
+# Purpose: Larger valid metadata — multiple entities, sources, governance.
+# Expected: no errors
+entities:
+  - name: customer
+    attributes:
+      - name: id
+        type: integer
+      - name: email
+        type: string
+      - name: created_at
+        type: timestamp
+  - name: order
+    attributes:
+      - name: id
+        type: integer
+      - name: customer_id
+        type: integer
+      - name: total
+        type: decimal
+sources:
+  - name: crm_postgres
+    kind: postgres
+    entities:
+      - customer
+  - name: billing_api
+    kind: api
+    entities:
+      - order

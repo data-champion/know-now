@@ -1,0 +1,8 @@
+# Fixture: alias
+# Purpose: Deliberately invalid — YAML alias without anchor in scope.
+# Expected error: META-PAR-ALIAS
+# DO NOT FIX: This file is intentionally malformed.
+entities:
+  - name: customer
+    attributes:
+      - *missing_anchor

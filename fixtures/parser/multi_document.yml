@@ -1,0 +1,15 @@
+# Fixture: multi_document
+# Purpose: Deliberately invalid — multi-document YAML (banned by subset).
+# Expected error: META-PAR-MULTIDOC
+# DO NOT FIX: This file is intentionally malformed.
+entities:
+  - name: customer
+    attributes:
+      - name: id
+        type: integer
+---
+entities:
+  - name: order
+    attributes:
+      - name: id
+        type: integer

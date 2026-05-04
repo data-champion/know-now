@@ -1,0 +1,10 @@
+# Fixture: large_file
+# Purpose: Deliberately invalid — exceeds file size budget.
+# Expected error: META-PAR-SIZE (with a budget of max_file_bytes=50)
+# DO NOT FIX: This file is intentionally malformed.
+# Note: This file is small but tested with a budget low enough to reject it.
+entities:
+  - name: customer
+    attributes:
+      - name: id
+        type: integer

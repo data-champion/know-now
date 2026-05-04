@@ -1,0 +1,8 @@
+# Fixture: valid_minimal
+# Purpose: Minimal valid metadata — single entity, one attribute.
+# Expected: no errors
+entities:
+  - name: customer
+    attributes:
+      - name: id
+        type: integer

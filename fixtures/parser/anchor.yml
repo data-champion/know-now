@@ -1,0 +1,11 @@
+# Fixture: anchor
+# Purpose: Deliberately invalid — YAML anchor (banned by subset).
+# Expected error: META-PAR-ANCHOR
+# DO NOT FIX: This file is intentionally malformed.
+defaults: &defaults
+  type: string
+entities:
+  - name: customer
+    attributes:
+      - name: email
+        <<: *defaults

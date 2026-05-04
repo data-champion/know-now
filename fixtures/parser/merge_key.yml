@@ -1,0 +1,12 @@
+# Fixture: merge_key
+# Purpose: Deliberately invalid — YAML merge key (banned by subset).
+# Expected error: META-PAR-MERGE
+# DO NOT FIX: This file is intentionally malformed.
+base: &base
+  type: string
+  nullable: false
+entities:
+  - name: customer
+    attributes:
+      - name: email
+        <<: *base

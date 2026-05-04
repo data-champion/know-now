@@ -1,0 +1,10 @@
+# Fixture: unknown_field
+# Purpose: Deliberately invalid — unrecognized top-level field.
+# Expected error: META-PAR-UNKNOWN
+# DO NOT FIX: This file is intentionally malformed.
+entities:
+  - name: customer
+    attributes:
+      - name: id
+        type: integer
+foobar_unknown: this_field_does_not_exist

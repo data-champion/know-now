@@ -1,0 +1,9 @@
+# Fixture: custom_tag
+# Purpose: Deliberately invalid — YAML custom tag (banned by subset).
+# Expected error: META-PAR-TAG
+# DO NOT FIX: This file is intentionally malformed.
+entities:
+  - name: customer
+    attributes:
+      - name: id
+        type: !custom_type integer
