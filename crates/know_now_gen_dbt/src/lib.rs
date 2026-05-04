@@ -79,8 +79,12 @@ impl Generator for DbtGenerator {
 
         artifacts.push(emit_marts_schema_yml(
             &contract.entities,
+            &contract.relationships,
             &self.version,
         ));
+
+        let generic_tests = emit_generic_tests(&contract.entities, &self.version);
+        artifacts.extend(generic_tests);
 
         artifacts.sort_by(|a, b| a.path.cmp(&b.path));
         Ok(artifacts)
@@ -378,6 +382,7 @@ fn emit_mart_model(
 
 fn emit_marts_schema_yml(
     entities: &[ContractEntity],
+    relationships: &[ContractRelationship],
     version: &str,
 ) -> ArtifactDescriptor {
     let mut lines = vec![
@@ -399,7 +404,7 @@ fn emit_marts_schema_yml(
         if !entity.attributes.is_empty() {
             lines.push("    columns:".to_owned());
             for attr in &entity.attributes {
-                emit_column_entry(attr, &mut lines);
+                emit_column_entry(attr, &entity.name, relationships, &mut lines);
             }
         }
     }
@@ -419,24 +424,152 @@ fn emit_marts_schema_yml(
     }
 }
 
-fn emit_column_entry(attr: &ContractAttribute, lines: &mut Vec<String>) {
+fn emit_column_entry(
+    attr: &ContractAttribute,
+    entity_name: &str,
+    relationships: &[ContractRelationship],
+    lines: &mut Vec<String>,
+) {
     lines.push(format!("      - name: {}", attr.name));
     if let Some(ref desc) = attr.description {
         lines.push(format!("        description: \"{}\"", escape_yaml(desc)));
     }
-    let mut tests = Vec::new();
+
+    let mut simple_tests: Vec<&str> = Vec::new();
+    let mut complex_tests: Vec<String> = Vec::new();
+
     if attr.required == Some(true) {
-        tests.push("not_null");
+        simple_tests.push("not_null");
     }
     if attr.is_unique == Some(true) {
-        tests.push("unique");
+        simple_tests.push("unique");
     }
-    if !tests.is_empty() {
-        lines.push("        tests:".to_owned());
-        for test in tests {
-            lines.push(format!("          - {test}"));
+
+    if let Some(rel) = relationships.iter().find(|r| {
+        r.from_entity == entity_name && r.from_key.as_deref() == Some(&attr.name)
+    }) {
+        let to_key = rel.to_key.as_deref().unwrap_or("id");
+        complex_tests.push(format!(
+            "          - relationships:\n              to: ref('{}')\n              field: {to_key}",
+            rel.to_entity
+        ));
+    }
+
+    match attr.semantic_type.as_deref() {
+        Some("email") => simple_tests.push("is_valid_email"),
+        Some("country_code") => {
+            complex_tests.push(
+                "          - accepted_values:\n              values: ['US', 'GB', 'DE', 'FR', 'NL', 'JP', 'AU', 'CA', 'BR', 'IN', 'SE', 'NO', 'DK', 'FI', 'ES', 'IT', 'CH', 'AT', 'BE', 'PT']".to_owned()
+            );
+        }
+        Some("postal_code") => {
+            complex_tests.push(
+                "          - max_length:\n              max_value: 20".to_owned(),
+            );
+        }
+        _ => {}
+    }
+
+    if let Some(max_len) = parse_constraint_value(&attr.constraints, "max_length") {
+        complex_tests.push(format!(
+            "          - max_length:\n              max_value: {max_len}"
+        ));
+    }
+
+    if attr.semantic_type.as_deref() == Some("currency_amount") {
+        if let Some(min) = parse_constraint_value(&attr.constraints, "minimum") {
+            if min >= 0 {
+                simple_tests.push("not_negative");
+            }
         }
     }
+
+    if !simple_tests.is_empty() || !complex_tests.is_empty() {
+        lines.push("        tests:".to_owned());
+        for test in simple_tests {
+            lines.push(format!("          - {test}"));
+        }
+        for test in complex_tests {
+            lines.push(test);
+        }
+    }
+}
+
+fn parse_constraint_value(constraints: &[String], key: &str) -> Option<i64> {
+    let prefix = format!("{key}:");
+    constraints
+        .iter()
+        .find(|c| c.starts_with(&prefix))
+        .and_then(|c| c[prefix.len()..].trim().parse().ok())
+}
+
+fn needs_generic_test(entities: &[ContractEntity], test_name: &str) -> bool {
+    entities.iter().any(|e| {
+        e.attributes.iter().any(|a| match test_name {
+            "is_valid_email" => a.semantic_type.as_deref() == Some("email"),
+            "max_length" => {
+                parse_constraint_value(&a.constraints, "max_length").is_some()
+                    || a.semantic_type.as_deref() == Some("postal_code")
+            }
+            "not_negative" => {
+                a.semantic_type.as_deref() == Some("currency_amount")
+                    && parse_constraint_value(&a.constraints, "minimum")
+                        .is_some_and(|v| v >= 0)
+            }
+            _ => false,
+        })
+    })
+}
+
+fn emit_generic_tests(entities: &[ContractEntity], version: &str) -> Vec<ArtifactDescriptor> {
+    let mut artifacts = Vec::new();
+
+    if needs_generic_test(entities, "is_valid_email") {
+        artifacts.push(ArtifactDescriptor {
+            path: "dbt/tests/generic/is_valid_email.sql".into(),
+            kind: ArtifactKind::DbtTest,
+            artifact_id: "art_dbt_test_is_valid_email".into(),
+            generator: GENERATOR_NAME.into(),
+            generator_version: version.to_owned(),
+            content: format!(
+                "{comment}\n\n{{% test is_valid_email(model, column_name) %}}\n\nselect\n    {{{{ column_name }}}} as invalid_email\nfrom {{{{ model }}}}\nwhere {{{{ column_name }}}} is not null\n  and {{{{ column_name }}}} not similar to '[^\\s@]+@[^\\s@]+\\.[^\\s@]+'\n\n{{% endtest %}}\n",
+                comment = ownership_comment("art_dbt_test_is_valid_email", version),
+            ),
+            metadata_object_ids: vec![],
+        });
+    }
+
+    if needs_generic_test(entities, "max_length") {
+        artifacts.push(ArtifactDescriptor {
+            path: "dbt/tests/generic/max_length.sql".into(),
+            kind: ArtifactKind::DbtTest,
+            artifact_id: "art_dbt_test_max_length".into(),
+            generator: GENERATOR_NAME.into(),
+            generator_version: version.to_owned(),
+            content: format!(
+                "{comment}\n\n{{% test max_length(model, column_name, max_value) %}}\n\nselect\n    {{{{ column_name }}}} as overlength_value\nfrom {{{{ model }}}}\nwhere length(cast({{{{ column_name }}}} as varchar)) > {{{{ max_value }}}}\n\n{{% endtest %}}\n",
+                comment = ownership_comment("art_dbt_test_max_length", version),
+            ),
+            metadata_object_ids: vec![],
+        });
+    }
+
+    if needs_generic_test(entities, "not_negative") {
+        artifacts.push(ArtifactDescriptor {
+            path: "dbt/tests/generic/not_negative.sql".into(),
+            kind: ArtifactKind::DbtTest,
+            artifact_id: "art_dbt_test_not_negative".into(),
+            generator: GENERATOR_NAME.into(),
+            generator_version: version.to_owned(),
+            content: format!(
+                "{comment}\n\n{{% test not_negative(model, column_name) %}}\n\nselect\n    {{{{ column_name }}}} as negative_value\nfrom {{{{ model }}}}\nwhere {{{{ column_name }}}} < 0\n\n{{% endtest %}}\n",
+                comment = ownership_comment("art_dbt_test_not_negative", version),
+            ),
+            metadata_object_ids: vec![],
+        });
+    }
+
+    artifacts
 }
 
 fn escape_yaml(s: &str) -> String {
@@ -853,11 +986,211 @@ mod tests {
         let gen = DbtGenerator::new();
         let artifacts = gen.generate(&minimal_contract()).unwrap();
         for a in &artifacts {
-            if a.path.ends_with(".sql") || a.path.ends_with("dbt_project.yml") {
-                assert_eq!(a.kind, ArtifactKind::DbtModel);
+            if a.path.contains("tests/generic/") {
+                assert_eq!(a.kind, ArtifactKind::DbtTest, "wrong kind for {}", a.path);
+            } else if a.path.ends_with(".sql") || a.path.ends_with("dbt_project.yml") {
+                assert_eq!(a.kind, ArtifactKind::DbtModel, "wrong kind for {}", a.path);
             } else if a.path.ends_with("schema.yml") || a.path.ends_with("sources.yml") {
-                assert_eq!(a.kind, ArtifactKind::DbtSchema);
+                assert_eq!(a.kind, ArtifactKind::DbtSchema, "wrong kind for {}", a.path);
             }
         }
+    }
+
+    #[test]
+    fn email_generates_is_valid_email_test() {
+        let gen = DbtGenerator::new();
+        let artifacts = gen.generate(&minimal_contract()).unwrap();
+        let schema = artifacts
+            .iter()
+            .find(|a| a.path == "dbt/models/marts/schema.yml")
+            .unwrap();
+        assert!(
+            schema.content.contains("is_valid_email"),
+            "email semantic type should generate is_valid_email test"
+        );
+    }
+
+    #[test]
+    fn email_generates_generic_test_sql() {
+        let gen = DbtGenerator::new();
+        let artifacts = gen.generate(&minimal_contract()).unwrap();
+        let test = artifacts
+            .iter()
+            .find(|a| a.path == "dbt/tests/generic/is_valid_email.sql");
+        assert!(test.is_some(), "should generate is_valid_email.sql generic test");
+        let content = &test.unwrap().content;
+        assert!(content.contains("{% test is_valid_email(model, column_name) %}"));
+        assert!(content.contains("{% endtest %}"));
+    }
+
+    #[test]
+    fn relationship_generates_relationships_test() {
+        let gen = DbtGenerator::new();
+        let artifacts = gen.generate(&multi_entity_contract()).unwrap();
+        let schema = artifacts
+            .iter()
+            .find(|a| a.path == "dbt/models/marts/schema.yml")
+            .unwrap();
+        assert!(
+            schema.content.contains("relationships:"),
+            "FK should generate relationships test"
+        );
+        assert!(schema.content.contains("to: ref('customer')"));
+        assert!(schema.content.contains("field: id"));
+    }
+
+    fn entity_with_country_code() -> ContractEntity {
+        ContractEntity {
+            id: "ent_address".into(),
+            name: "address".into(),
+            display_name: None,
+            domain: None,
+            module: None,
+            owner: None,
+            steward: None,
+            classification: None,
+            retention_policy: None,
+            description: None,
+            entity_type: None,
+            tags: vec![],
+            business_key: vec!["id".into()],
+            attributes: vec![
+                ContractAttribute {
+                    id: "attr_addr_id".into(),
+                    name: "id".into(),
+                    logical_type: Some("integer".into()),
+                    semantic_type: None,
+                    sensitivity: None,
+                    pii: None,
+                    required: Some(true),
+                    is_unique: Some(true),
+                    constraints: vec![],
+                    description: None,
+                    attr_type: None,
+                },
+                ContractAttribute {
+                    id: "attr_country".into(),
+                    name: "country".into(),
+                    logical_type: Some("string".into()),
+                    semantic_type: Some("country_code".into()),
+                    sensitivity: None,
+                    pii: None,
+                    required: Some(true),
+                    is_unique: None,
+                    constraints: vec![],
+                    description: None,
+                    attr_type: None,
+                },
+            ],
+        }
+    }
+
+    #[test]
+    fn country_code_generates_accepted_values() {
+        let gen = DbtGenerator::new();
+        let mut contract = minimal_contract();
+        contract.entities = vec![entity_with_country_code()];
+        let artifacts = gen.generate(&contract).unwrap();
+        let schema = artifacts
+            .iter()
+            .find(|a| a.path == "dbt/models/marts/schema.yml")
+            .unwrap();
+        assert!(schema.content.contains("accepted_values:"));
+        assert!(schema.content.contains("'US'"));
+        assert!(schema.content.contains("'NL'"));
+    }
+
+    fn entity_with_max_length() -> ContractEntity {
+        ContractEntity {
+            id: "ent_product".into(),
+            name: "product".into(),
+            display_name: None,
+            domain: None,
+            module: None,
+            owner: None,
+            steward: None,
+            classification: None,
+            retention_policy: None,
+            description: None,
+            entity_type: None,
+            tags: vec![],
+            business_key: vec!["id".into()],
+            attributes: vec![
+                ContractAttribute {
+                    id: "attr_prod_id".into(),
+                    name: "id".into(),
+                    logical_type: Some("integer".into()),
+                    semantic_type: None,
+                    sensitivity: None,
+                    pii: None,
+                    required: Some(true),
+                    is_unique: Some(true),
+                    constraints: vec![],
+                    description: None,
+                    attr_type: None,
+                },
+                ContractAttribute {
+                    id: "attr_prod_name".into(),
+                    name: "product_name".into(),
+                    logical_type: Some("string".into()),
+                    semantic_type: None,
+                    sensitivity: None,
+                    pii: None,
+                    required: Some(true),
+                    is_unique: None,
+                    constraints: vec!["max_length:255".into()],
+                    description: None,
+                    attr_type: None,
+                },
+            ],
+        }
+    }
+
+    #[test]
+    fn max_length_constraint_generates_test() {
+        let gen = DbtGenerator::new();
+        let mut contract = minimal_contract();
+        contract.entities = vec![entity_with_max_length()];
+        let artifacts = gen.generate(&contract).unwrap();
+        let schema = artifacts
+            .iter()
+            .find(|a| a.path == "dbt/models/marts/schema.yml")
+            .unwrap();
+        assert!(schema.content.contains("max_length:"));
+        assert!(schema.content.contains("max_value: 255"));
+    }
+
+    #[test]
+    fn max_length_generates_generic_test_sql() {
+        let gen = DbtGenerator::new();
+        let mut contract = minimal_contract();
+        contract.entities = vec![entity_with_max_length()];
+        let artifacts = gen.generate(&contract).unwrap();
+        let test = artifacts
+            .iter()
+            .find(|a| a.path == "dbt/tests/generic/max_length.sql");
+        assert!(test.is_some(), "should generate max_length.sql generic test");
+        let content = &test.unwrap().content;
+        assert!(content.contains("{% test max_length(model, column_name, max_value) %}"));
+    }
+
+    #[test]
+    fn no_generic_tests_when_not_needed() {
+        let gen = DbtGenerator::new();
+        let mut contract = minimal_contract();
+        contract.entities = vec![order_entity()];
+        let artifacts = gen.generate(&contract).unwrap();
+        assert!(
+            !artifacts.iter().any(|a| a.path.contains("tests/generic/")),
+            "should not generate generic tests when no entity needs them"
+        );
+    }
+
+    #[test]
+    fn parse_constraint_extracts_value() {
+        let constraints = vec!["max_length:100".into(), "minimum:0".into()];
+        assert_eq!(parse_constraint_value(&constraints, "max_length"), Some(100));
+        assert_eq!(parse_constraint_value(&constraints, "minimum"), Some(0));
+        assert_eq!(parse_constraint_value(&constraints, "unknown"), None);
     }
 }

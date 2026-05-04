@@ -46,6 +46,7 @@ pub(crate) fn resolve_current_versions() -> ResolvedVersions {
     generators.insert("know_now_gen_docs".to_owned(), "0.1.0".to_owned());
     generators.insert("know_now_gen_er".to_owned(), "0.1.0".to_owned());
     generators.insert("know_now_gen_fixtures".to_owned(), "0.1.0".to_owned());
+    generators.insert("know_now_gen_quality".to_owned(), "0.1.0".to_owned());
 
     ResolvedVersions {
         engine_version: env!("CARGO_PKG_VERSION").to_owned(),

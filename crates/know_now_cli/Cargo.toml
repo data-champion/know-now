@@ -32,6 +32,7 @@ know_now_gen_docs = { version = "0.1.0", path = "../know_now_gen_docs" }
 know_now_gen_er = { version = "0.1.0", path = "../know_now_gen_er" }
 know_now_gen_fixtures = { version = "0.1.0", path = "../know_now_gen_fixtures" }
 know_now_gen_postgres = { version = "0.1.0", path = "../know_now_gen_postgres" }
+know_now_gen_quality = { version = "0.1.0", path = "../know_now_gen_quality" }
 know_now_identity = { version = "0.1.0", path = "../know_now_identity" }
 know_now_lock = { version = "0.1.0", path = "../know_now_lock" }
 know_now_toolchain = { version = "0.1.0", path = "../know_now_toolchain" }

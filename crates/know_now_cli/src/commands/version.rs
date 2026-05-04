@@ -91,6 +91,7 @@ struct VersionPayload {
     lockfile_schema_version: &'static str,
 }
 
+#[allow(clippy::too_many_lines)]
 pub(crate) fn build_registry() -> CapabilityRegistry {
     let mut reg = CapabilityRegistry::new();
 
@@ -185,6 +186,19 @@ pub(crate) fn build_registry() -> CapabilityRegistry {
     });
 
     reg.register(GeneratorCapability {
+        name: "know_now_gen_quality".into(),
+        version: "0.1.0".into(),
+        contract_versions: vec!["1.0".into()],
+        artifact_kinds: vec![ArtifactKind::QualityContract],
+        supported_dialects: vec![],
+        supported_logical_types: vec![],
+        supported_semantic_types: vec![],
+        validation_gates: vec!["parse_validation".into()],
+        unsupported_constructs: vec![],
+        experimental_features: vec![],
+    });
+
+    reg.register(GeneratorCapability {
         name: "know_now_gen_fixtures".into(),
         version: "0.1.0".into(),
         contract_versions: vec!["1.0".into()],
@@ -207,12 +221,13 @@ mod tests {
     #[test]
     fn registry_has_all_generators() {
         let reg = build_registry();
-        assert_eq!(reg.generators().len(), 5);
+        assert_eq!(reg.generators().len(), 6);
         assert!(reg.find_by_name("know_now_gen_postgres").is_some());
         assert!(reg.find_by_name("know_now_gen_dbt").is_some());
         assert!(reg.find_by_name("know_now_gen_docs").is_some());
         assert!(reg.find_by_name("know_now_gen_er").is_some());
         assert!(reg.find_by_name("know_now_gen_fixtures").is_some());
+        assert!(reg.find_by_name("know_now_gen_quality").is_some());
     }
 
     #[test]

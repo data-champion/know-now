@@ -12,6 +12,7 @@ use know_now_gen_docs::DocsGenerator;
 use know_now_gen_er::ErDiagramGenerator;
 use know_now_gen_fixtures::FixtureGenerator;
 use know_now_gen_postgres::PostgresGenerator;
+use know_now_gen_quality::QualityContractGenerator;
 use know_now_lock::check::{self, LOCK_CORRUPT_005, LOCK_MISSING_004, LOCK_STALE_003};
 use know_now_lock::lockfile::Lockfile;
 use know_now_lock::LOCKFILE_NAME;
@@ -311,6 +312,7 @@ fn resolve_targets(args: &GenerateArgs) -> Vec<GenerateTarget> {
             }
             GenerateTarget::Ddl
             | GenerateTarget::Dbt
+            | GenerateTarget::Quality
             | GenerateTarget::Docs
             | GenerateTarget::Diagrams
             | GenerateTarget::Fixtures => {
@@ -323,7 +325,7 @@ fn resolve_targets(args: &GenerateArgs) -> Vec<GenerateTarget> {
                     "Phase 3 feature: --target changed is not available in Phase 2A (track via S_P3_DIFF / S_P3_MIGRATIONS)",
                 );
             }
-            GenerateTarget::Quality | GenerateTarget::Review => {
+            GenerateTarget::Review => {
                 usage_error(
                     "Phase 2B feature: requested --target value is not available in this Phase 2A build",
                 );
@@ -338,6 +340,7 @@ fn supported_targets() -> Vec<GenerateTarget> {
     vec![
         GenerateTarget::Ddl,
         GenerateTarget::Dbt,
+        GenerateTarget::Quality,
         GenerateTarget::Docs,
         GenerateTarget::Diagrams,
     ]
@@ -397,6 +400,13 @@ fn run_generators(
             }
             GenerateTarget::Dbt => {
                 let generator = DbtGenerator::new();
+                let generated = generator
+                    .generate(contract)
+                    .map_err(|e| join_generation_errors(&e))?;
+                artifacts.extend(generated);
+            }
+            GenerateTarget::Quality => {
+                let generator = QualityContractGenerator::new();
                 let generated = generator
                     .generate(contract)
                     .map_err(|e| join_generation_errors(&e))?;
