@@ -1401,7 +1401,10 @@ fn examples_list_shows_all_profiles() {
     let assert = cmd().args(["examples", "list"]).assert().success();
     let stdout = String::from_utf8_lossy(&assert.get_output().stdout);
     for name in &expected {
-        assert!(stdout.contains(name), "examples list should contain '{name}'");
+        assert!(
+            stdout.contains(name),
+            "examples list should contain '{name}'"
+        );
     }
 }
 

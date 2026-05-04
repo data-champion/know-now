@@ -9,3 +9,4 @@ pub mod manifest_builder;
 pub mod ownership;
 pub mod path_safety;
 pub mod staging;
+pub mod stale_detection;
