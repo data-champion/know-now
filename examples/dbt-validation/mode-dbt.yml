@@ -1,0 +1,7 @@
+# dbt validation mode: dbt (auto-detect)
+# Accepts any dbt variant (core, fusion, compatible).
+# Runs: dbt parse → dbt compile.
+dbt:
+  mode: dbt
+  executable: dbt          # path or command name
+  required_in_ci: false    # set true to fail CI when dbt is missing

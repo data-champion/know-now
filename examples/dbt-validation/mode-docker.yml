@@ -1,0 +1,7 @@
+# dbt validation mode: docker
+# Runs dbt inside a Docker container. No local dbt installation needed.
+# In --locked mode, the image must use a digest pin (@sha256:...).
+dbt:
+  mode: docker
+  docker_image: ghcr.io/dbt-labs/dbt-core:1.7.0
+  required_in_ci: true

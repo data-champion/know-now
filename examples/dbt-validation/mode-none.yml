@@ -1,0 +1,5 @@
+# dbt validation mode: none
+# No dbt binary required. Structural validation only (YAML, SQL, Jinja).
+# This is the default — no configuration needed.
+dbt:
+  mode: none

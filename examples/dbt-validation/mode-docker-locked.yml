@@ -1,0 +1,7 @@
+# dbt validation mode: docker (locked)
+# For use with --locked. Image pinned by digest for reproducibility.
+# Replace the digest below with the actual sha256 of your chosen image.
+dbt:
+  mode: docker
+  docker_image: ghcr.io/dbt-labs/dbt-core@sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  required_in_ci: true

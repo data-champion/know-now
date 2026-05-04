@@ -1,0 +1,7 @@
+# dbt validation mode: dbt-core
+# Requires dbt-core specifically. Fails if dbt-fusion or another variant is detected.
+# Runs: dbt parse → dbt compile.
+dbt:
+  mode: dbt-core
+  executable: dbt
+  required_in_ci: true
