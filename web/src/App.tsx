@@ -11,8 +11,9 @@ import { HealthAdmin } from "./components/HealthAdmin";
 import { ManifestViewer } from "./components/ManifestViewer";
 import { RelationshipGraph } from "./components/RelationshipGraph";
 import { RelationshipTable } from "./components/RelationshipTable";
+import { ReviewSummary } from "./components/ReviewSummary";
 
-type View = "entities" | "graph" | "generation" | "docs" | "manifest" | "traceability" | "health";
+type View = "entities" | "graph" | "generation" | "docs" | "manifest" | "traceability" | "health" | "review";
 type GraphMode = "visual" | "table";
 
 export function App() {
@@ -44,6 +45,7 @@ export function App() {
           <NavTab view={view} target="manifest" label="Manifest" onClick={setView} />
           <NavTab view={view} target="traceability" label="Traceability" onClick={setView} />
           <NavTab view={view} target="health" label="Health" onClick={setView} />
+          <NavTab view={view} target="review" label="Review" onClick={setView} />
         </nav>
       </header>
 
@@ -123,6 +125,12 @@ export function App() {
         {view === "health" && (
           <div className="kn-page-content">
             <HealthAdmin />
+          </div>
+        )}
+
+        {view === "review" && (
+          <div className="kn-page-content">
+            <ReviewSummary />
           </div>
         )}
       </main>

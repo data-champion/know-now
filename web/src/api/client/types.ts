@@ -170,3 +170,19 @@ export interface DocsContentResponse {
   path: string;
   content: string;
 }
+
+export type ReviewItemStatus = "draft" | "needs-confirmation" | "confirmed" | "rejected" | "deferred";
+
+export interface ReviewItem {
+  id: string;
+  status: ReviewItemStatus;
+  notes: string;
+}
+
+export interface ReviewState {
+  items: Record<string, ReviewItem>;
+}
+
+export interface ReviewStateResponse {
+  review_state: ReviewState;
+}

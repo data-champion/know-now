@@ -794,3 +794,122 @@ code {
   color: #ffb347;
   border-bottom: 1px solid var(--kn-border);
 }
+
+/* Review */
+.kn-review__tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.kn-review__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.kn-btn {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: var(--kn-radius);
+  background: var(--kn-accent);
+  color: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.kn-btn:hover {
+  background: var(--kn-accent-hover);
+}
+
+.kn-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--kn-focus);
+}
+
+.kn-btn--secondary {
+  background: var(--kn-border);
+  color: var(--kn-text);
+}
+
+.kn-btn--secondary:hover {
+  background: var(--kn-surface);
+}
+
+.kn-review__stats {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.kn-review__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.kn-review__stat-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.kn-review__stat-label {
+  font-size: 0.75rem;
+  color: var(--kn-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kn-review__list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+}
+
+.kn-review__list li {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--kn-border);
+  font-size: 0.9rem;
+}
+
+.kn-review__desc {
+  color: var(--kn-text-muted);
+}
+
+.kn-review__filter {
+  margin-bottom: 1rem;
+}
+
+.kn-review__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.kn-review__table th,
+.kn-review__table td {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--kn-border);
+}
+
+.kn-review__table th {
+  font-size: 0.75rem;
+  color: var(--kn-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kn-review__status-select {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--kn-border);
+  border-radius: var(--kn-radius);
+  background: var(--kn-bg);
+  color: var(--kn-text);
+  font-size: 0.8rem;
+}
+
+.kn-review__status-select:focus {
+  outline: none;
+  box-shadow: var(--kn-focus);
+}

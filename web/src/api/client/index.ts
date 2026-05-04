@@ -25,6 +25,10 @@ export type {
   ProjectResponse,
   Relationship,
   RelationshipsResponse,
+  ReviewItem,
+  ReviewItemStatus,
+  ReviewState,
+  ReviewStateResponse,
   StatusResponse,
   VersionResponse,
 } from "./types";

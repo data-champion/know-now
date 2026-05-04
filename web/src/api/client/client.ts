@@ -13,6 +13,7 @@ import type {
   OpenQuestionsResponse,
   ProjectResponse,
   RelationshipsResponse,
+  ReviewStateResponse,
   StatusResponse,
   VersionResponse,
 } from "./types";
@@ -92,6 +93,10 @@ export class KnowNowClient {
     return this.get<DocsContentResponse>(
       `/api/v1/docs/content?path=${encodeURIComponent(path)}`,
     );
+  }
+
+  async getReviewState(): Promise<ReviewStateResponse> {
+    return this.get<ReviewStateResponse>("/api/v1/review-state");
   }
 
   private async get<T>(path: string): Promise<T> {

@@ -30,6 +30,7 @@ pub fn router() -> Router<AppState> {
         .route("/api/v1/manifest", get(handle_manifest))
         .route("/api/v1/docs", get(handle_docs_list))
         .route("/api/v1/docs/content", get(handle_docs_content))
+        .route("/api/v1/review-state", get(handle_get_review_state))
 }
 
 #[allow(clippy::result_large_err)]
@@ -354,4 +355,25 @@ fn collect_docs(base: &Path, dir: &Path, out: &mut Vec<serde_json::Value>) {
             }
         }
     }
+}
+
+async fn handle_get_review_state(
+    State(state): State<AppState>,
+    jar: CookieJar,
+) -> Response {
+    if let Err(e) = require_session(&state, &jar) {
+        return e;
+    }
+
+    let review_path = state
+        .config
+        .project_root
+        .join(".knownow")
+        .join("review_state.json");
+
+    let content = std::fs::read_to_string(&review_path).unwrap_or_else(|_| "{}".to_string());
+    let value: serde_json::Value =
+        serde_json::from_str(&content).unwrap_or(serde_json::json!({}));
+
+    axum::Json(serde_json::json!({ "review_state": value })).into_response()
 }
