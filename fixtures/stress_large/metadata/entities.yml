@@ -1,0 +1,4824 @@
+entities:
+  - id: ent_account
+    name: account
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_account_name
+        name: account_name
+        logical_type: string
+        required: true
+      - id: attr_account_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_account_email
+        name: account_email
+        logical_type: string
+      - id: attr_account_description
+        name: account_description
+        logical_type: text
+      - id: attr_account_status
+        name: account_status
+        logical_type: string
+        required: true
+      - id: attr_account_updated_at
+        name: account_updated_at
+        logical_type: timestamp
+      - id: attr_account_code
+        name: account_code
+        logical_type: string
+      - id: attr_account_quantity
+        name: account_quantity
+        logical_type: integer
+  - id: ent_transaction
+    name: transaction
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_transaction_email
+        name: transaction_email
+        logical_type: string
+      - id: attr_transaction_date
+        name: transaction_date
+        logical_type: date
+      - id: attr_transaction_name
+        name: transaction_name
+        logical_type: string
+        required: true
+      - id: attr_transaction_created_at
+        name: transaction_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_transaction_count
+        name: transaction_count
+        logical_type: integer
+      - id: attr_transaction_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_transaction_quantity
+        name: transaction_quantity
+        logical_type: integer
+      - id: attr_transaction_reference
+        name: transaction_reference
+        logical_type: uuid
+  - id: ent_product
+    name: product
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_product_status
+        name: product_status
+        logical_type: string
+        required: true
+      - id: attr_product_date
+        name: product_date
+        logical_type: date
+      - id: attr_product_created_at
+        name: product_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_product_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_customer
+    name: customer
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_customer_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_customer_email
+        name: customer_email
+        logical_type: string
+      - id: attr_customer_updated_at
+        name: customer_updated_at
+        logical_type: timestamp
+      - id: attr_customer_score
+        name: customer_score
+        logical_type: float
+      - id: attr_customer_date
+        name: customer_date
+        logical_type: date
+      - id: attr_customer_count
+        name: customer_count
+        logical_type: integer
+      - id: attr_customer_quantity
+        name: customer_quantity
+        logical_type: integer
+  - id: ent_invoice
+    name: invoice
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_invoice_created_at
+        name: invoice_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_invoice_description
+        name: invoice_description
+        logical_type: text
+      - id: attr_invoice_reference
+        name: invoice_reference
+        logical_type: uuid
+      - id: attr_invoice_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_invoice_code
+        name: invoice_code
+        logical_type: string
+      - id: attr_invoice_count
+        name: invoice_count
+        logical_type: integer
+  - id: ent_payment
+    name: payment
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_payment_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_payment_code
+        name: payment_code
+        logical_type: string
+      - id: attr_payment_status
+        name: payment_status
+        logical_type: string
+        required: true
+      - id: attr_payment_amount
+        name: payment_amount
+        logical_type: decimal
+      - id: attr_payment_name
+        name: payment_name
+        logical_type: string
+        required: true
+  - id: ent_shipment
+    name: shipment
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_shipment_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_shipment_name
+        name: shipment_name
+        logical_type: string
+        required: true
+      - id: attr_shipment_amount
+        name: shipment_amount
+        logical_type: decimal
+  - id: ent_warehouse
+    name: warehouse
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_warehouse_created_at
+        name: warehouse_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_warehouse_description
+        name: warehouse_description
+        logical_type: text
+      - id: attr_warehouse_reference
+        name: warehouse_reference
+        logical_type: uuid
+      - id: attr_warehouse_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_warehouse_flag
+        name: warehouse_flag
+        logical_type: boolean
+  - id: ent_employee
+    name: employee
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_employee_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_employee_count
+        name: employee_count
+        logical_type: integer
+      - id: attr_employee_quantity
+        name: employee_quantity
+        logical_type: integer
+      - id: attr_employee_date
+        name: employee_date
+        logical_type: date
+      - id: attr_employee_description
+        name: employee_description
+        logical_type: text
+      - id: attr_employee_created_at
+        name: employee_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_employee_amount
+        name: employee_amount
+        logical_type: decimal
+  - id: ent_department
+    name: department
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_department_status
+        name: department_status
+        logical_type: string
+        required: true
+      - id: attr_department_email
+        name: department_email
+        logical_type: string
+      - id: attr_department_name
+        name: department_name
+        logical_type: string
+        required: true
+      - id: attr_department_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_department_updated_at
+        name: department_updated_at
+        logical_type: timestamp
+      - id: attr_department_quantity
+        name: department_quantity
+        logical_type: integer
+      - id: attr_department_description
+        name: department_description
+        logical_type: text
+  - id: ent_project
+    name: project
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_project_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_project_status
+        name: project_status
+        logical_type: string
+        required: true
+      - id: attr_project_name
+        name: project_name
+        logical_type: string
+        required: true
+  - id: ent_task
+    name: task
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_task_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_task_flag
+        name: task_flag
+        logical_type: boolean
+      - id: attr_task_updated_at
+        name: task_updated_at
+        logical_type: timestamp
+      - id: attr_task_amount
+        name: task_amount
+        logical_type: decimal
+      - id: attr_task_code
+        name: task_code
+        logical_type: string
+      - id: attr_task_email
+        name: task_email
+        logical_type: string
+  - id: ent_ticket
+    name: ticket
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_ticket_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_ticket_updated_at
+        name: ticket_updated_at
+        logical_type: timestamp
+      - id: attr_ticket_description
+        name: ticket_description
+        logical_type: text
+      - id: attr_ticket_email
+        name: ticket_email
+        logical_type: string
+      - id: attr_ticket_score
+        name: ticket_score
+        logical_type: float
+  - id: ent_event
+    name: event
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_event_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_event_created_at
+        name: event_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_event_updated_at
+        name: event_updated_at
+        logical_type: timestamp
+      - id: attr_event_code
+        name: event_code
+        logical_type: string
+      - id: attr_event_date
+        name: event_date
+        logical_type: date
+      - id: attr_event_status
+        name: event_status
+        logical_type: string
+        required: true
+      - id: attr_event_email
+        name: event_email
+        logical_type: string
+      - id: attr_event_flag
+        name: event_flag
+        logical_type: boolean
+  - id: ent_session
+    name: session
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_session_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_session_updated_at
+        name: session_updated_at
+        logical_type: timestamp
+      - id: attr_session_email
+        name: session_email
+        logical_type: string
+      - id: attr_session_date
+        name: session_date
+        logical_type: date
+      - id: attr_session_status
+        name: session_status
+        logical_type: string
+        required: true
+      - id: attr_session_amount
+        name: session_amount
+        logical_type: decimal
+  - id: ent_campaign
+    name: campaign
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_campaign_status
+        name: campaign_status
+        logical_type: string
+        required: true
+      - id: attr_campaign_score
+        name: campaign_score
+        logical_type: float
+      - id: attr_campaign_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_channel
+    name: channel
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_channel_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_channel_description
+        name: channel_description
+        logical_type: text
+      - id: attr_channel_name
+        name: channel_name
+        logical_type: string
+        required: true
+      - id: attr_channel_status
+        name: channel_status
+        logical_type: string
+        required: true
+      - id: attr_channel_created_at
+        name: channel_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_region
+    name: region
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_region_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_region_status
+        name: region_status
+        logical_type: string
+        required: true
+      - id: attr_region_updated_at
+        name: region_updated_at
+        logical_type: timestamp
+      - id: attr_region_flag
+        name: region_flag
+        logical_type: boolean
+      - id: attr_region_count
+        name: region_count
+        logical_type: integer
+      - id: attr_region_email
+        name: region_email
+        logical_type: string
+      - id: attr_region_code
+        name: region_code
+        logical_type: string
+      - id: attr_region_description
+        name: region_description
+        logical_type: text
+  - id: ent_store
+    name: store
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_store_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_store_email
+        name: store_email
+        logical_type: string
+      - id: attr_store_date
+        name: store_date
+        logical_type: date
+      - id: attr_store_reference
+        name: store_reference
+        logical_type: uuid
+  - id: ent_supplier
+    name: supplier
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_supplier_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_supplier_created_at
+        name: supplier_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_supplier_count
+        name: supplier_count
+        logical_type: integer
+      - id: attr_supplier_score
+        name: supplier_score
+        logical_type: float
+      - id: attr_supplier_reference
+        name: supplier_reference
+        logical_type: uuid
+  - id: ent_category
+    name: category
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_category_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_category_code
+        name: category_code
+        logical_type: string
+      - id: attr_category_date
+        name: category_date
+        logical_type: date
+      - id: attr_category_flag
+        name: category_flag
+        logical_type: boolean
+      - id: attr_category_name
+        name: category_name
+        logical_type: string
+        required: true
+  - id: ent_tag
+    name: tag
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_tag_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_tag_name
+        name: tag_name
+        logical_type: string
+        required: true
+      - id: attr_tag_code
+        name: tag_code
+        logical_type: string
+  - id: ent_comment
+    name: comment
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_comment_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_comment_reference
+        name: comment_reference
+        logical_type: uuid
+      - id: attr_comment_updated_at
+        name: comment_updated_at
+        logical_type: timestamp
+      - id: attr_comment_count
+        name: comment_count
+        logical_type: integer
+      - id: attr_comment_created_at
+        name: comment_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_comment_name
+        name: comment_name
+        logical_type: string
+        required: true
+      - id: attr_comment_email
+        name: comment_email
+        logical_type: string
+      - id: attr_comment_date
+        name: comment_date
+        logical_type: date
+  - id: ent_review
+    name: review
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_review_flag
+        name: review_flag
+        logical_type: boolean
+      - id: attr_review_date
+        name: review_date
+        logical_type: date
+      - id: attr_review_description
+        name: review_description
+        logical_type: text
+      - id: attr_review_score
+        name: review_score
+        logical_type: float
+      - id: attr_review_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_review_name
+        name: review_name
+        logical_type: string
+        required: true
+      - id: attr_review_email
+        name: review_email
+        logical_type: string
+  - id: ent_rating
+    name: rating
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_rating_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_rating_updated_at
+        name: rating_updated_at
+        logical_type: timestamp
+      - id: attr_rating_amount
+        name: rating_amount
+        logical_type: decimal
+      - id: attr_rating_name
+        name: rating_name
+        logical_type: string
+        required: true
+      - id: attr_rating_description
+        name: rating_description
+        logical_type: text
+  - id: ent_subscription
+    name: subscription
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_subscription_code
+        name: subscription_code
+        logical_type: string
+      - id: attr_subscription_flag
+        name: subscription_flag
+        logical_type: boolean
+      - id: attr_subscription_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_subscription_email
+        name: subscription_email
+        logical_type: string
+      - id: attr_subscription_description
+        name: subscription_description
+        logical_type: text
+      - id: attr_subscription_date
+        name: subscription_date
+        logical_type: date
+  - id: ent_plan
+    name: plan
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_plan_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_plan_name
+        name: plan_name
+        logical_type: string
+        required: true
+      - id: attr_plan_updated_at
+        name: plan_updated_at
+        logical_type: timestamp
+      - id: attr_plan_description
+        name: plan_description
+        logical_type: text
+  - id: ent_feature
+    name: feature
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_feature_date
+        name: feature_date
+        logical_type: date
+      - id: attr_feature_created_at
+        name: feature_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_feature_status
+        name: feature_status
+        logical_type: string
+        required: true
+      - id: attr_feature_code
+        name: feature_code
+        logical_type: string
+      - id: attr_feature_amount
+        name: feature_amount
+        logical_type: decimal
+      - id: attr_feature_email
+        name: feature_email
+        logical_type: string
+      - id: attr_feature_quantity
+        name: feature_quantity
+        logical_type: integer
+      - id: attr_feature_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_license
+    name: license
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_license_amount
+        name: license_amount
+        logical_type: decimal
+      - id: attr_license_flag
+        name: license_flag
+        logical_type: boolean
+      - id: attr_license_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_license_name
+        name: license_name
+        logical_type: string
+        required: true
+      - id: attr_license_quantity
+        name: license_quantity
+        logical_type: integer
+      - id: attr_license_description
+        name: license_description
+        logical_type: text
+      - id: attr_license_status
+        name: license_status
+        logical_type: string
+        required: true
+  - id: ent_contract
+    name: contract
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_contract_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_contract_created_at
+        name: contract_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_contract_name
+        name: contract_name
+        logical_type: string
+        required: true
+  - id: ent_budget
+    name: budget
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_budget_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_budget_flag
+        name: budget_flag
+        logical_type: boolean
+      - id: attr_budget_name
+        name: budget_name
+        logical_type: string
+        required: true
+  - id: ent_expense
+    name: expense
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_expense_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_expense_code
+        name: expense_code
+        logical_type: string
+      - id: attr_expense_score
+        name: expense_score
+        logical_type: float
+      - id: attr_expense_updated_at
+        name: expense_updated_at
+        logical_type: timestamp
+      - id: attr_expense_flag
+        name: expense_flag
+        logical_type: boolean
+      - id: attr_expense_date
+        name: expense_date
+        logical_type: date
+      - id: attr_expense_quantity
+        name: expense_quantity
+        logical_type: integer
+  - id: ent_revenue
+    name: revenue
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_revenue_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_revenue_score
+        name: revenue_score
+        logical_type: float
+      - id: attr_revenue_created_at
+        name: revenue_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_revenue_count
+        name: revenue_count
+        logical_type: integer
+      - id: attr_revenue_status
+        name: revenue_status
+        logical_type: string
+        required: true
+  - id: ent_forecast
+    name: forecast
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_forecast_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_forecast_email
+        name: forecast_email
+        logical_type: string
+      - id: attr_forecast_score
+        name: forecast_score
+        logical_type: float
+      - id: attr_forecast_status
+        name: forecast_status
+        logical_type: string
+        required: true
+      - id: attr_forecast_description
+        name: forecast_description
+        logical_type: text
+      - id: attr_forecast_count
+        name: forecast_count
+        logical_type: integer
+      - id: attr_forecast_amount
+        name: forecast_amount
+        logical_type: decimal
+  - id: ent_target
+    name: target
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_target_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_target_date
+        name: target_date
+        logical_type: date
+      - id: attr_target_flag
+        name: target_flag
+        logical_type: boolean
+      - id: attr_target_name
+        name: target_name
+        logical_type: string
+        required: true
+      - id: attr_target_status
+        name: target_status
+        logical_type: string
+        required: true
+      - id: attr_target_updated_at
+        name: target_updated_at
+        logical_type: timestamp
+  - id: ent_metric
+    name: metric
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_metric_amount
+        name: metric_amount
+        logical_type: decimal
+      - id: attr_metric_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_metric_created_at
+        name: metric_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_report
+    name: report
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_report_status
+        name: report_status
+        logical_type: string
+        required: true
+      - id: attr_report_created_at
+        name: report_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_report_quantity
+        name: report_quantity
+        logical_type: integer
+      - id: attr_report_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_report_name
+        name: report_name
+        logical_type: string
+        required: true
+      - id: attr_report_email
+        name: report_email
+        logical_type: string
+      - id: attr_report_reference
+        name: report_reference
+        logical_type: uuid
+  - id: ent_dashboard
+    name: dashboard
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_dashboard_quantity
+        name: dashboard_quantity
+        logical_type: integer
+      - id: attr_dashboard_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_dashboard_amount
+        name: dashboard_amount
+        logical_type: decimal
+  - id: ent_alert
+    name: alert
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_alert_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_alert_status
+        name: alert_status
+        logical_type: string
+        required: true
+      - id: attr_alert_description
+        name: alert_description
+        logical_type: text
+  - id: ent_notification
+    name: notification
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_notification_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_notification_status
+        name: notification_status
+        logical_type: string
+        required: true
+      - id: attr_notification_date
+        name: notification_date
+        logical_type: date
+      - id: attr_notification_code
+        name: notification_code
+        logical_type: string
+      - id: attr_notification_created_at
+        name: notification_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_notification_updated_at
+        name: notification_updated_at
+        logical_type: timestamp
+      - id: attr_notification_quantity
+        name: notification_quantity
+        logical_type: integer
+      - id: attr_notification_score
+        name: notification_score
+        logical_type: float
+  - id: ent_message
+    name: message
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_message_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_message_count
+        name: message_count
+        logical_type: integer
+      - id: attr_message_status
+        name: message_status
+        logical_type: string
+        required: true
+      - id: attr_message_name
+        name: message_name
+        logical_type: string
+        required: true
+      - id: attr_message_email
+        name: message_email
+        logical_type: string
+      - id: attr_message_score
+        name: message_score
+        logical_type: float
+  - id: ent_thread
+    name: thread
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_thread_count
+        name: thread_count
+        logical_type: integer
+      - id: attr_thread_quantity
+        name: thread_quantity
+        logical_type: integer
+      - id: attr_thread_flag
+        name: thread_flag
+        logical_type: boolean
+      - id: attr_thread_email
+        name: thread_email
+        logical_type: string
+      - id: attr_thread_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_group
+    name: group
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_group_updated_at
+        name: group_updated_at
+        logical_type: timestamp
+      - id: attr_group_quantity
+        name: group_quantity
+        logical_type: integer
+      - id: attr_group_name
+        name: group_name
+        logical_type: string
+        required: true
+      - id: attr_group_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_group_count
+        name: group_count
+        logical_type: integer
+      - id: attr_group_amount
+        name: group_amount
+        logical_type: decimal
+      - id: attr_group_reference
+        name: group_reference
+        logical_type: uuid
+      - id: attr_group_status
+        name: group_status
+        logical_type: string
+        required: true
+  - id: ent_role
+    name: role
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_role_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_role_date
+        name: role_date
+        logical_type: date
+      - id: attr_role_flag
+        name: role_flag
+        logical_type: boolean
+      - id: attr_role_code
+        name: role_code
+        logical_type: string
+  - id: ent_permission
+    name: permission
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_permission_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_permission_description
+        name: permission_description
+        logical_type: text
+      - id: attr_permission_flag
+        name: permission_flag
+        logical_type: boolean
+      - id: attr_permission_status
+        name: permission_status
+        logical_type: string
+        required: true
+      - id: attr_permission_name
+        name: permission_name
+        logical_type: string
+        required: true
+      - id: attr_permission_reference
+        name: permission_reference
+        logical_type: uuid
+  - id: ent_audit_log
+    name: audit_log
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_audit_log_name
+        name: audit_log_name
+        logical_type: string
+        required: true
+      - id: attr_audit_log_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_audit_log_updated_at
+        name: audit_log_updated_at
+        logical_type: timestamp
+      - id: attr_audit_log_date
+        name: audit_log_date
+        logical_type: date
+      - id: attr_audit_log_score
+        name: audit_log_score
+        logical_type: float
+      - id: attr_audit_log_quantity
+        name: audit_log_quantity
+        logical_type: integer
+      - id: attr_audit_log_status
+        name: audit_log_status
+        logical_type: string
+        required: true
+  - id: ent_changelog
+    name: changelog
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_changelog_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_changelog_flag
+        name: changelog_flag
+        logical_type: boolean
+      - id: attr_changelog_score
+        name: changelog_score
+        logical_type: float
+      - id: attr_changelog_status
+        name: changelog_status
+        logical_type: string
+        required: true
+  - id: ent_snapshot
+    name: snapshot
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_snapshot_quantity
+        name: snapshot_quantity
+        logical_type: integer
+      - id: attr_snapshot_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_snapshot_code
+        name: snapshot_code
+        logical_type: string
+      - id: attr_snapshot_count
+        name: snapshot_count
+        logical_type: integer
+      - id: attr_snapshot_score
+        name: snapshot_score
+        logical_type: float
+      - id: attr_snapshot_email
+        name: snapshot_email
+        logical_type: string
+  - id: ent_archive
+    name: archive
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_archive_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_archive_reference
+        name: archive_reference
+        logical_type: uuid
+      - id: attr_archive_score
+        name: archive_score
+        logical_type: float
+      - id: attr_archive_flag
+        name: archive_flag
+        logical_type: boolean
+      - id: attr_archive_description
+        name: archive_description
+        logical_type: text
+  - id: ent_backup
+    name: backup
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_backup_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_backup_quantity
+        name: backup_quantity
+        logical_type: integer
+      - id: attr_backup_reference
+        name: backup_reference
+        logical_type: uuid
+      - id: attr_backup_date
+        name: backup_date
+        logical_type: date
+      - id: attr_backup_updated_at
+        name: backup_updated_at
+        logical_type: timestamp
+      - id: attr_backup_flag
+        name: backup_flag
+        logical_type: boolean
+  - id: ent_config
+    name: config
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_config_status
+        name: config_status
+        logical_type: string
+        required: true
+      - id: attr_config_description
+        name: config_description
+        logical_type: text
+      - id: attr_config_quantity
+        name: config_quantity
+        logical_type: integer
+      - id: attr_config_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_setting
+    name: setting
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_setting_email
+        name: setting_email
+        logical_type: string
+      - id: attr_setting_date
+        name: setting_date
+        logical_type: date
+      - id: attr_setting_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_setting_quantity
+        name: setting_quantity
+        logical_type: integer
+      - id: attr_setting_amount
+        name: setting_amount
+        logical_type: decimal
+      - id: attr_setting_reference
+        name: setting_reference
+        logical_type: uuid
+      - id: attr_setting_created_at
+        name: setting_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_preference
+    name: preference
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_preference_flag
+        name: preference_flag
+        logical_type: boolean
+      - id: attr_preference_date
+        name: preference_date
+        logical_type: date
+      - id: attr_preference_score
+        name: preference_score
+        logical_type: float
+      - id: attr_preference_code
+        name: preference_code
+        logical_type: string
+      - id: attr_preference_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_preference_reference
+        name: preference_reference
+        logical_type: uuid
+      - id: attr_preference_name
+        name: preference_name
+        logical_type: string
+        required: true
+  - id: ent_template
+    name: template
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_template_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_template_created_at
+        name: template_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_template_quantity
+        name: template_quantity
+        logical_type: integer
+      - id: attr_template_updated_at
+        name: template_updated_at
+        logical_type: timestamp
+  - id: ent_workflow
+    name: workflow
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_workflow_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_workflow_name
+        name: workflow_name
+        logical_type: string
+        required: true
+      - id: attr_workflow_created_at
+        name: workflow_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_workflow_status
+        name: workflow_status
+        logical_type: string
+        required: true
+  - id: ent_approval
+    name: approval
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_approval_created_at
+        name: approval_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_approval_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_approval_quantity
+        name: approval_quantity
+        logical_type: integer
+      - id: attr_approval_name
+        name: approval_name
+        logical_type: string
+        required: true
+      - id: attr_approval_count
+        name: approval_count
+        logical_type: integer
+      - id: attr_approval_reference
+        name: approval_reference
+        logical_type: uuid
+      - id: attr_approval_date
+        name: approval_date
+        logical_type: date
+  - id: ent_request
+    name: request
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_request_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_request_description
+        name: request_description
+        logical_type: text
+      - id: attr_request_status
+        name: request_status
+        logical_type: string
+        required: true
+      - id: attr_request_updated_at
+        name: request_updated_at
+        logical_type: timestamp
+      - id: attr_request_amount
+        name: request_amount
+        logical_type: decimal
+  - id: ent_response
+    name: response
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_response_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_response_count
+        name: response_count
+        logical_type: integer
+      - id: attr_response_code
+        name: response_code
+        logical_type: string
+      - id: attr_response_updated_at
+        name: response_updated_at
+        logical_type: timestamp
+  - id: ent_feedback
+    name: feedback
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_feedback_description
+        name: feedback_description
+        logical_type: text
+      - id: attr_feedback_flag
+        name: feedback_flag
+        logical_type: boolean
+      - id: attr_feedback_amount
+        name: feedback_amount
+        logical_type: decimal
+      - id: attr_feedback_name
+        name: feedback_name
+        logical_type: string
+        required: true
+      - id: attr_feedback_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_feedback_score
+        name: feedback_score
+        logical_type: float
+      - id: attr_feedback_email
+        name: feedback_email
+        logical_type: string
+      - id: attr_feedback_date
+        name: feedback_date
+        logical_type: date
+  - id: ent_survey
+    name: survey
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_survey_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_survey_date
+        name: survey_date
+        logical_type: date
+      - id: attr_survey_description
+        name: survey_description
+        logical_type: text
+      - id: attr_survey_code
+        name: survey_code
+        logical_type: string
+      - id: attr_survey_amount
+        name: survey_amount
+        logical_type: decimal
+      - id: attr_survey_name
+        name: survey_name
+        logical_type: string
+        required: true
+      - id: attr_survey_quantity
+        name: survey_quantity
+        logical_type: integer
+  - id: ent_question
+    name: question
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_question_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_question_code
+        name: question_code
+        logical_type: string
+      - id: attr_question_flag
+        name: question_flag
+        logical_type: boolean
+      - id: attr_question_date
+        name: question_date
+        logical_type: date
+      - id: attr_question_quantity
+        name: question_quantity
+        logical_type: integer
+  - id: ent_answer
+    name: answer
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_answer_reference
+        name: answer_reference
+        logical_type: uuid
+      - id: attr_answer_updated_at
+        name: answer_updated_at
+        logical_type: timestamp
+      - id: attr_answer_date
+        name: answer_date
+        logical_type: date
+      - id: attr_answer_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_answer_score
+        name: answer_score
+        logical_type: float
+      - id: attr_answer_quantity
+        name: answer_quantity
+        logical_type: integer
+      - id: attr_answer_description
+        name: answer_description
+        logical_type: text
+  - id: ent_quiz
+    name: quiz
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_quiz_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_quiz_code
+        name: quiz_code
+        logical_type: string
+      - id: attr_quiz_description
+        name: quiz_description
+        logical_type: text
+      - id: attr_quiz_quantity
+        name: quiz_quantity
+        logical_type: integer
+      - id: attr_quiz_email
+        name: quiz_email
+        logical_type: string
+      - id: attr_quiz_date
+        name: quiz_date
+        logical_type: date
+      - id: attr_quiz_score
+        name: quiz_score
+        logical_type: float
+      - id: attr_quiz_reference
+        name: quiz_reference
+        logical_type: uuid
+  - id: ent_course
+    name: course
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_course_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_course_status
+        name: course_status
+        logical_type: string
+        required: true
+      - id: attr_course_email
+        name: course_email
+        logical_type: string
+      - id: attr_course_amount
+        name: course_amount
+        logical_type: decimal
+      - id: attr_course_score
+        name: course_score
+        logical_type: float
+  - id: ent_lesson
+    name: lesson
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_lesson_updated_at
+        name: lesson_updated_at
+        logical_type: timestamp
+      - id: attr_lesson_score
+        name: lesson_score
+        logical_type: float
+      - id: attr_lesson_description
+        name: lesson_description
+        logical_type: text
+      - id: attr_lesson_date
+        name: lesson_date
+        logical_type: date
+      - id: attr_lesson_flag
+        name: lesson_flag
+        logical_type: boolean
+      - id: attr_lesson_reference
+        name: lesson_reference
+        logical_type: uuid
+      - id: attr_lesson_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_lesson_name
+        name: lesson_name
+        logical_type: string
+        required: true
+  - id: ent_student
+    name: student
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_student_count
+        name: student_count
+        logical_type: integer
+      - id: attr_student_score
+        name: student_score
+        logical_type: float
+      - id: attr_student_description
+        name: student_description
+        logical_type: text
+      - id: attr_student_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_student_email
+        name: student_email
+        logical_type: string
+      - id: attr_student_amount
+        name: student_amount
+        logical_type: decimal
+      - id: attr_student_code
+        name: student_code
+        logical_type: string
+      - id: attr_student_reference
+        name: student_reference
+        logical_type: uuid
+  - id: ent_instructor
+    name: instructor
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_instructor_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_instructor_flag
+        name: instructor_flag
+        logical_type: boolean
+      - id: attr_instructor_date
+        name: instructor_date
+        logical_type: date
+      - id: attr_instructor_quantity
+        name: instructor_quantity
+        logical_type: integer
+  - id: ent_grade
+    name: grade
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_grade_date
+        name: grade_date
+        logical_type: date
+      - id: attr_grade_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_grade_name
+        name: grade_name
+        logical_type: string
+        required: true
+      - id: attr_grade_reference
+        name: grade_reference
+        logical_type: uuid
+      - id: attr_grade_code
+        name: grade_code
+        logical_type: string
+      - id: attr_grade_quantity
+        name: grade_quantity
+        logical_type: integer
+  - id: ent_certificate
+    name: certificate
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_certificate_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_certificate_amount
+        name: certificate_amount
+        logical_type: decimal
+      - id: attr_certificate_created_at
+        name: certificate_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_badge
+    name: badge
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_badge_code
+        name: badge_code
+        logical_type: string
+      - id: attr_badge_count
+        name: badge_count
+        logical_type: integer
+      - id: attr_badge_quantity
+        name: badge_quantity
+        logical_type: integer
+      - id: attr_badge_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_badge_description
+        name: badge_description
+        logical_type: text
+      - id: attr_badge_amount
+        name: badge_amount
+        logical_type: decimal
+      - id: attr_badge_email
+        name: badge_email
+        logical_type: string
+  - id: ent_achievement
+    name: achievement
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_achievement_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_achievement_updated_at
+        name: achievement_updated_at
+        logical_type: timestamp
+      - id: attr_achievement_quantity
+        name: achievement_quantity
+        logical_type: integer
+      - id: attr_achievement_score
+        name: achievement_score
+        logical_type: float
+      - id: attr_achievement_name
+        name: achievement_name
+        logical_type: string
+        required: true
+  - id: ent_reward
+    name: reward
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_reward_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_reward_date
+        name: reward_date
+        logical_type: date
+      - id: attr_reward_count
+        name: reward_count
+        logical_type: integer
+      - id: attr_reward_created_at
+        name: reward_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_reward_code
+        name: reward_code
+        logical_type: string
+  - id: ent_coupon
+    name: coupon
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_coupon_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_coupon_code
+        name: coupon_code
+        logical_type: string
+      - id: attr_coupon_reference
+        name: coupon_reference
+        logical_type: uuid
+      - id: attr_coupon_quantity
+        name: coupon_quantity
+        logical_type: integer
+  - id: ent_discount
+    name: discount
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_discount_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_discount_code
+        name: discount_code
+        logical_type: string
+      - id: attr_discount_email
+        name: discount_email
+        logical_type: string
+      - id: attr_discount_amount
+        name: discount_amount
+        logical_type: decimal
+      - id: attr_discount_count
+        name: discount_count
+        logical_type: integer
+      - id: attr_discount_status
+        name: discount_status
+        logical_type: string
+        required: true
+  - id: ent_promotion
+    name: promotion
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_promotion_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_promotion_reference
+        name: promotion_reference
+        logical_type: uuid
+      - id: attr_promotion_email
+        name: promotion_email
+        logical_type: string
+      - id: attr_promotion_name
+        name: promotion_name
+        logical_type: string
+        required: true
+      - id: attr_promotion_count
+        name: promotion_count
+        logical_type: integer
+  - id: ent_offer
+    name: offer
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_offer_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_offer_flag
+        name: offer_flag
+        logical_type: boolean
+      - id: attr_offer_status
+        name: offer_status
+        logical_type: string
+        required: true
+  - id: ent_deal
+    name: deal
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_deal_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_deal_flag
+        name: deal_flag
+        logical_type: boolean
+      - id: attr_deal_amount
+        name: deal_amount
+        logical_type: decimal
+      - id: attr_deal_description
+        name: deal_description
+        logical_type: text
+  - id: ent_lead
+    name: lead
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_lead_status
+        name: lead_status
+        logical_type: string
+        required: true
+      - id: attr_lead_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_lead_updated_at
+        name: lead_updated_at
+        logical_type: timestamp
+      - id: attr_lead_quantity
+        name: lead_quantity
+        logical_type: integer
+  - id: ent_opportunity
+    name: opportunity
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_opportunity_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_opportunity_description
+        name: opportunity_description
+        logical_type: text
+      - id: attr_opportunity_name
+        name: opportunity_name
+        logical_type: string
+        required: true
+      - id: attr_opportunity_score
+        name: opportunity_score
+        logical_type: float
+      - id: attr_opportunity_quantity
+        name: opportunity_quantity
+        logical_type: integer
+      - id: attr_opportunity_date
+        name: opportunity_date
+        logical_type: date
+  - id: ent_pipeline
+    name: pipeline
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_pipeline_updated_at
+        name: pipeline_updated_at
+        logical_type: timestamp
+      - id: attr_pipeline_score
+        name: pipeline_score
+        logical_type: float
+      - id: attr_pipeline_date
+        name: pipeline_date
+        logical_type: date
+      - id: attr_pipeline_amount
+        name: pipeline_amount
+        logical_type: decimal
+      - id: attr_pipeline_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_pipeline_name
+        name: pipeline_name
+        logical_type: string
+        required: true
+  - id: ent_stage
+    name: stage
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_stage_code
+        name: stage_code
+        logical_type: string
+      - id: attr_stage_created_at
+        name: stage_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_stage_description
+        name: stage_description
+        logical_type: text
+      - id: attr_stage_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_stage_name
+        name: stage_name
+        logical_type: string
+        required: true
+  - id: ent_milestone
+    name: milestone
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_milestone_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_milestone_amount
+        name: milestone_amount
+        logical_type: decimal
+      - id: attr_milestone_email
+        name: milestone_email
+        logical_type: string
+      - id: attr_milestone_score
+        name: milestone_score
+        logical_type: float
+      - id: attr_milestone_quantity
+        name: milestone_quantity
+        logical_type: integer
+      - id: attr_milestone_created_at
+        name: milestone_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_milestone_date
+        name: milestone_date
+        logical_type: date
+  - id: ent_deliverable
+    name: deliverable
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_deliverable_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_deliverable_created_at
+        name: deliverable_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_deliverable_status
+        name: deliverable_status
+        logical_type: string
+        required: true
+  - id: ent_artifact
+    name: artifact
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_artifact_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_artifact_email
+        name: artifact_email
+        logical_type: string
+      - id: attr_artifact_count
+        name: artifact_count
+        logical_type: integer
+      - id: attr_artifact_quantity
+        name: artifact_quantity
+        logical_type: integer
+      - id: attr_artifact_date
+        name: artifact_date
+        logical_type: date
+  - id: ent_asset
+    name: asset
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_asset_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_asset_email
+        name: asset_email
+        logical_type: string
+      - id: attr_asset_score
+        name: asset_score
+        logical_type: float
+      - id: attr_asset_reference
+        name: asset_reference
+        logical_type: uuid
+      - id: attr_asset_quantity
+        name: asset_quantity
+        logical_type: integer
+      - id: attr_asset_status
+        name: asset_status
+        logical_type: string
+        required: true
+      - id: attr_asset_amount
+        name: asset_amount
+        logical_type: decimal
+  - id: ent_resource
+    name: resource
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_resource_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_resource_updated_at
+        name: resource_updated_at
+        logical_type: timestamp
+      - id: attr_resource_amount
+        name: resource_amount
+        logical_type: decimal
+      - id: attr_resource_created_at
+        name: resource_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_resource_reference
+        name: resource_reference
+        logical_type: uuid
+      - id: attr_resource_quantity
+        name: resource_quantity
+        logical_type: integer
+  - id: ent_allocation
+    name: allocation
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_allocation_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_allocation_description
+        name: allocation_description
+        logical_type: text
+      - id: attr_allocation_date
+        name: allocation_date
+        logical_type: date
+      - id: attr_allocation_score
+        name: allocation_score
+        logical_type: float
+      - id: attr_allocation_updated_at
+        name: allocation_updated_at
+        logical_type: timestamp
+      - id: attr_allocation_count
+        name: allocation_count
+        logical_type: integer
+      - id: attr_allocation_amount
+        name: allocation_amount
+        logical_type: decimal
+      - id: attr_allocation_created_at
+        name: allocation_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_schedule
+    name: schedule
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_schedule_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_schedule_date
+        name: schedule_date
+        logical_type: date
+      - id: attr_schedule_code
+        name: schedule_code
+        logical_type: string
+      - id: attr_schedule_status
+        name: schedule_status
+        logical_type: string
+        required: true
+      - id: attr_schedule_count
+        name: schedule_count
+        logical_type: integer
+      - id: attr_schedule_updated_at
+        name: schedule_updated_at
+        logical_type: timestamp
+      - id: attr_schedule_reference
+        name: schedule_reference
+        logical_type: uuid
+      - id: attr_schedule_quantity
+        name: schedule_quantity
+        logical_type: integer
+  - id: ent_calendar
+    name: calendar
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_calendar_date
+        name: calendar_date
+        logical_type: date
+      - id: attr_calendar_score
+        name: calendar_score
+        logical_type: float
+      - id: attr_calendar_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_calendar_description
+        name: calendar_description
+        logical_type: text
+      - id: attr_calendar_email
+        name: calendar_email
+        logical_type: string
+      - id: attr_calendar_status
+        name: calendar_status
+        logical_type: string
+        required: true
+  - id: ent_booking
+    name: booking
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_booking_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_booking_created_at
+        name: booking_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_booking_score
+        name: booking_score
+        logical_type: float
+      - id: attr_booking_updated_at
+        name: booking_updated_at
+        logical_type: timestamp
+      - id: attr_booking_amount
+        name: booking_amount
+        logical_type: decimal
+      - id: attr_booking_flag
+        name: booking_flag
+        logical_type: boolean
+  - id: ent_reservation
+    name: reservation
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_reservation_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_reservation_updated_at
+        name: reservation_updated_at
+        logical_type: timestamp
+      - id: attr_reservation_status
+        name: reservation_status
+        logical_type: string
+        required: true
+      - id: attr_reservation_date
+        name: reservation_date
+        logical_type: date
+      - id: attr_reservation_quantity
+        name: reservation_quantity
+        logical_type: integer
+      - id: attr_reservation_code
+        name: reservation_code
+        logical_type: string
+  - id: ent_venue
+    name: venue
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_venue_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_venue_description
+        name: venue_description
+        logical_type: text
+      - id: attr_venue_date
+        name: venue_date
+        logical_type: date
+      - id: attr_venue_updated_at
+        name: venue_updated_at
+        logical_type: timestamp
+      - id: attr_venue_email
+        name: venue_email
+        logical_type: string
+      - id: attr_venue_created_at
+        name: venue_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_venue_amount
+        name: venue_amount
+        logical_type: decimal
+      - id: attr_venue_quantity
+        name: venue_quantity
+        logical_type: integer
+  - id: ent_room
+    name: room
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_room_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_room_description
+        name: room_description
+        logical_type: text
+      - id: attr_room_status
+        name: room_status
+        logical_type: string
+        required: true
+      - id: attr_room_reference
+        name: room_reference
+        logical_type: uuid
+  - id: ent_equipment
+    name: equipment
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_equipment_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_equipment_quantity
+        name: equipment_quantity
+        logical_type: integer
+      - id: attr_equipment_status
+        name: equipment_status
+        logical_type: string
+        required: true
+      - id: attr_equipment_flag
+        name: equipment_flag
+        logical_type: boolean
+  - id: ent_inventory
+    name: inventory
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_inventory_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_inventory_reference
+        name: inventory_reference
+        logical_type: uuid
+      - id: attr_inventory_name
+        name: inventory_name
+        logical_type: string
+        required: true
+      - id: attr_inventory_flag
+        name: inventory_flag
+        logical_type: boolean
+      - id: attr_inventory_count
+        name: inventory_count
+        logical_type: integer
+      - id: attr_inventory_created_at
+        name: inventory_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_inventory_status
+        name: inventory_status
+        logical_type: string
+        required: true
+  - id: ent_stock
+    name: stock
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_stock_email
+        name: stock_email
+        logical_type: string
+      - id: attr_stock_count
+        name: stock_count
+        logical_type: integer
+      - id: attr_stock_flag
+        name: stock_flag
+        logical_type: boolean
+      - id: attr_stock_score
+        name: stock_score
+        logical_type: float
+      - id: attr_stock_status
+        name: stock_status
+        logical_type: string
+        required: true
+      - id: attr_stock_code
+        name: stock_code
+        logical_type: string
+      - id: attr_stock_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_stock_name
+        name: stock_name
+        logical_type: string
+        required: true
+  - id: ent_order_line
+    name: order_line
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_order_line_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_order_line_code
+        name: order_line_code
+        logical_type: string
+      - id: attr_order_line_reference
+        name: order_line_reference
+        logical_type: uuid
+      - id: attr_order_line_email
+        name: order_line_email
+        logical_type: string
+      - id: attr_order_line_date
+        name: order_line_date
+        logical_type: date
+      - id: attr_order_line_flag
+        name: order_line_flag
+        logical_type: boolean
+  - id: ent_return_item
+    name: return_item
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_return_item_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_return_item_status
+        name: return_item_status
+        logical_type: string
+        required: true
+      - id: attr_return_item_name
+        name: return_item_name
+        logical_type: string
+        required: true
+  - id: ent_refund
+    name: refund
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_refund_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_refund_reference
+        name: refund_reference
+        logical_type: uuid
+      - id: attr_refund_flag
+        name: refund_flag
+        logical_type: boolean
+      - id: attr_refund_updated_at
+        name: refund_updated_at
+        logical_type: timestamp
+      - id: attr_refund_date
+        name: refund_date
+        logical_type: date
+      - id: attr_refund_email
+        name: refund_email
+        logical_type: string
+  - id: ent_credit
+    name: credit
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_credit_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_credit_reference
+        name: credit_reference
+        logical_type: uuid
+      - id: attr_credit_flag
+        name: credit_flag
+        logical_type: boolean
+      - id: attr_credit_created_at
+        name: credit_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_credit_date
+        name: credit_date
+        logical_type: date
+      - id: attr_credit_count
+        name: credit_count
+        logical_type: integer
+      - id: attr_credit_updated_at
+        name: credit_updated_at
+        logical_type: timestamp
+  - id: ent_debit
+    name: debit
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_debit_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_debit_code
+        name: debit_code
+        logical_type: string
+      - id: attr_debit_email
+        name: debit_email
+        logical_type: string
+      - id: attr_debit_flag
+        name: debit_flag
+        logical_type: boolean
+      - id: attr_debit_reference
+        name: debit_reference
+        logical_type: uuid
+      - id: attr_debit_description
+        name: debit_description
+        logical_type: text
+  - id: ent_transfer
+    name: transfer
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_transfer_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_transfer_updated_at
+        name: transfer_updated_at
+        logical_type: timestamp
+      - id: attr_transfer_description
+        name: transfer_description
+        logical_type: text
+      - id: attr_transfer_date
+        name: transfer_date
+        logical_type: date
+  - id: ent_reconciliation
+    name: reconciliation
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_reconciliation_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_reconciliation_status
+        name: reconciliation_status
+        logical_type: string
+        required: true
+      - id: attr_reconciliation_description
+        name: reconciliation_description
+        logical_type: text
+      - id: attr_reconciliation_flag
+        name: reconciliation_flag
+        logical_type: boolean
+      - id: attr_reconciliation_name
+        name: reconciliation_name
+        logical_type: string
+        required: true
+      - id: attr_reconciliation_reference
+        name: reconciliation_reference
+        logical_type: uuid
+  - id: ent_journal
+    name: journal
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_journal_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_journal_amount
+        name: journal_amount
+        logical_type: decimal
+      - id: attr_journal_score
+        name: journal_score
+        logical_type: float
+      - id: attr_journal_date
+        name: journal_date
+        logical_type: date
+  - id: ent_ledger
+    name: ledger
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_ledger_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_ledger_quantity
+        name: ledger_quantity
+        logical_type: integer
+      - id: attr_ledger_status
+        name: ledger_status
+        logical_type: string
+        required: true
+  - id: ent_batch
+    name: batch
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_batch_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_batch_code
+        name: batch_code
+        logical_type: string
+      - id: attr_batch_quantity
+        name: batch_quantity
+        logical_type: integer
+      - id: attr_batch_status
+        name: batch_status
+        logical_type: string
+        required: true
+      - id: attr_batch_name
+        name: batch_name
+        logical_type: string
+        required: true
+      - id: attr_batch_count
+        name: batch_count
+        logical_type: integer
+  - id: ent_queue
+    name: queue
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_queue_amount
+        name: queue_amount
+        logical_type: decimal
+      - id: attr_queue_date
+        name: queue_date
+        logical_type: date
+      - id: attr_queue_flag
+        name: queue_flag
+        logical_type: boolean
+      - id: attr_queue_count
+        name: queue_count
+        logical_type: integer
+      - id: attr_queue_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_queue_status
+        name: queue_status
+        logical_type: string
+        required: true
+  - id: ent_worker
+    name: worker
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_worker_count
+        name: worker_count
+        logical_type: integer
+      - id: attr_worker_reference
+        name: worker_reference
+        logical_type: uuid
+      - id: attr_worker_created_at
+        name: worker_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_worker_email
+        name: worker_email
+        logical_type: string
+      - id: attr_worker_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_worker_score
+        name: worker_score
+        logical_type: float
+  - id: ent_job
+    name: job
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_job_flag
+        name: job_flag
+        logical_type: boolean
+      - id: attr_job_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_job_amount
+        name: job_amount
+        logical_type: decimal
+      - id: attr_job_description
+        name: job_description
+        logical_type: text
+      - id: attr_job_count
+        name: job_count
+        logical_type: integer
+      - id: attr_job_updated_at
+        name: job_updated_at
+        logical_type: timestamp
+  - id: ent_result
+    name: result
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_result_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_result_quantity
+        name: result_quantity
+        logical_type: integer
+      - id: attr_result_date
+        name: result_date
+        logical_type: date
+      - id: attr_result_created_at
+        name: result_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_result_status
+        name: result_status
+        logical_type: string
+        required: true
+      - id: attr_result_flag
+        name: result_flag
+        logical_type: boolean
+      - id: attr_result_updated_at
+        name: result_updated_at
+        logical_type: timestamp
+  - id: ent_schema
+    name: schema
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_schema_count
+        name: schema_count
+        logical_type: integer
+      - id: attr_schema_flag
+        name: schema_flag
+        logical_type: boolean
+      - id: attr_schema_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_schema_quantity
+        name: schema_quantity
+        logical_type: integer
+      - id: attr_schema_amount
+        name: schema_amount
+        logical_type: decimal
+  - id: ent_index
+    name: index
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_index_updated_at
+        name: index_updated_at
+        logical_type: timestamp
+      - id: attr_index_reference
+        name: index_reference
+        logical_type: uuid
+      - id: attr_index_count
+        name: index_count
+        logical_type: integer
+      - id: attr_index_email
+        name: index_email
+        logical_type: string
+      - id: attr_index_code
+        name: index_code
+        logical_type: string
+      - id: attr_index_flag
+        name: index_flag
+        logical_type: boolean
+      - id: attr_index_quantity
+        name: index_quantity
+        logical_type: integer
+      - id: attr_index_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_partition
+    name: partition
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_partition_created_at
+        name: partition_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_partition_quantity
+        name: partition_quantity
+        logical_type: integer
+      - id: attr_partition_updated_at
+        name: partition_updated_at
+        logical_type: timestamp
+      - id: attr_partition_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_partition_name
+        name: partition_name
+        logical_type: string
+        required: true
+      - id: attr_partition_count
+        name: partition_count
+        logical_type: integer
+  - id: ent_replica
+    name: replica
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_replica_score
+        name: replica_score
+        logical_type: float
+      - id: attr_replica_flag
+        name: replica_flag
+        logical_type: boolean
+      - id: attr_replica_code
+        name: replica_code
+        logical_type: string
+      - id: attr_replica_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_shard
+    name: shard
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_shard_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_shard_amount
+        name: shard_amount
+        logical_type: decimal
+      - id: attr_shard_status
+        name: shard_status
+        logical_type: string
+        required: true
+      - id: attr_shard_flag
+        name: shard_flag
+        logical_type: boolean
+      - id: attr_shard_score
+        name: shard_score
+        logical_type: float
+  - id: ent_tenant
+    name: tenant
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_tenant_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_tenant_count
+        name: tenant_count
+        logical_type: integer
+      - id: attr_tenant_description
+        name: tenant_description
+        logical_type: text
+      - id: attr_tenant_score
+        name: tenant_score
+        logical_type: float
+      - id: attr_tenant_quantity
+        name: tenant_quantity
+        logical_type: integer
+  - id: ent_org
+    name: org
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_org_flag
+        name: org_flag
+        logical_type: boolean
+      - id: attr_org_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_org_email
+        name: org_email
+        logical_type: string
+  - id: ent_team
+    name: team
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_team_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_team_amount
+        name: team_amount
+        logical_type: decimal
+      - id: attr_team_status
+        name: team_status
+        logical_type: string
+        required: true
+      - id: attr_team_updated_at
+        name: team_updated_at
+        logical_type: timestamp
+      - id: attr_team_name
+        name: team_name
+        logical_type: string
+        required: true
+      - id: attr_team_quantity
+        name: team_quantity
+        logical_type: integer
+      - id: attr_team_created_at
+        name: team_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_member
+    name: member
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_member_status
+        name: member_status
+        logical_type: string
+        required: true
+      - id: attr_member_score
+        name: member_score
+        logical_type: float
+      - id: attr_member_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_member_created_at
+        name: member_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_invite
+    name: invite
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_invite_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_invite_code
+        name: invite_code
+        logical_type: string
+      - id: attr_invite_flag
+        name: invite_flag
+        logical_type: boolean
+      - id: attr_invite_updated_at
+        name: invite_updated_at
+        logical_type: timestamp
+  - id: ent_token
+    name: token
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_token_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_token_status
+        name: token_status
+        logical_type: string
+        required: true
+      - id: attr_token_flag
+        name: token_flag
+        logical_type: boolean
+  - id: ent_scope
+    name: scope
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_scope_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_scope_reference
+        name: scope_reference
+        logical_type: uuid
+      - id: attr_scope_amount
+        name: scope_amount
+        logical_type: decimal
+      - id: attr_scope_code
+        name: scope_code
+        logical_type: string
+      - id: attr_scope_created_at
+        name: scope_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_scope_updated_at
+        name: scope_updated_at
+        logical_type: timestamp
+      - id: attr_scope_name
+        name: scope_name
+        logical_type: string
+        required: true
+      - id: attr_scope_email
+        name: scope_email
+        logical_type: string
+  - id: ent_policy
+    name: policy
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_policy_name
+        name: policy_name
+        logical_type: string
+        required: true
+      - id: attr_policy_created_at
+        name: policy_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_policy_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_policy_description
+        name: policy_description
+        logical_type: text
+      - id: attr_policy_score
+        name: policy_score
+        logical_type: float
+  - id: ent_rule
+    name: rule
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_rule_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_rule_count
+        name: rule_count
+        logical_type: integer
+      - id: attr_rule_score
+        name: rule_score
+        logical_type: float
+      - id: attr_rule_email
+        name: rule_email
+        logical_type: string
+      - id: attr_rule_status
+        name: rule_status
+        logical_type: string
+        required: true
+      - id: attr_rule_name
+        name: rule_name
+        logical_type: string
+        required: true
+      - id: attr_rule_updated_at
+        name: rule_updated_at
+        logical_type: timestamp
+      - id: attr_rule_created_at
+        name: rule_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_condition
+    name: condition
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_condition_reference
+        name: condition_reference
+        logical_type: uuid
+      - id: attr_condition_description
+        name: condition_description
+        logical_type: text
+      - id: attr_condition_updated_at
+        name: condition_updated_at
+        logical_type: timestamp
+      - id: attr_condition_created_at
+        name: condition_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_condition_name
+        name: condition_name
+        logical_type: string
+        required: true
+      - id: attr_condition_email
+        name: condition_email
+        logical_type: string
+      - id: attr_condition_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_condition_amount
+        name: condition_amount
+        logical_type: decimal
+  - id: ent_action
+    name: action
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_action_count
+        name: action_count
+        logical_type: integer
+      - id: attr_action_updated_at
+        name: action_updated_at
+        logical_type: timestamp
+      - id: attr_action_amount
+        name: action_amount
+        logical_type: decimal
+      - id: attr_action_name
+        name: action_name
+        logical_type: string
+        required: true
+      - id: attr_action_date
+        name: action_date
+        logical_type: date
+      - id: attr_action_reference
+        name: action_reference
+        logical_type: uuid
+      - id: attr_action_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_trigger
+    name: trigger
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_trigger_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_trigger_flag
+        name: trigger_flag
+        logical_type: boolean
+      - id: attr_trigger_name
+        name: trigger_name
+        logical_type: string
+        required: true
+      - id: attr_trigger_count
+        name: trigger_count
+        logical_type: integer
+      - id: attr_trigger_amount
+        name: trigger_amount
+        logical_type: decimal
+      - id: attr_trigger_quantity
+        name: trigger_quantity
+        logical_type: integer
+  - id: ent_handler
+    name: handler
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_handler_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_handler_count
+        name: handler_count
+        logical_type: integer
+      - id: attr_handler_quantity
+        name: handler_quantity
+        logical_type: integer
+      - id: attr_handler_email
+        name: handler_email
+        logical_type: string
+      - id: attr_handler_date
+        name: handler_date
+        logical_type: date
+      - id: attr_handler_description
+        name: handler_description
+        logical_type: text
+      - id: attr_handler_updated_at
+        name: handler_updated_at
+        logical_type: timestamp
+      - id: attr_handler_flag
+        name: handler_flag
+        logical_type: boolean
+  - id: ent_middleware
+    name: middleware
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_middleware_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_middleware_score
+        name: middleware_score
+        logical_type: float
+      - id: attr_middleware_email
+        name: middleware_email
+        logical_type: string
+      - id: attr_middleware_created_at
+        name: middleware_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_middleware_description
+        name: middleware_description
+        logical_type: text
+      - id: attr_middleware_amount
+        name: middleware_amount
+        logical_type: decimal
+  - id: ent_plugin
+    name: plugin
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_plugin_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_plugin_name
+        name: plugin_name
+        logical_type: string
+        required: true
+      - id: attr_plugin_description
+        name: plugin_description
+        logical_type: text
+      - id: attr_plugin_flag
+        name: plugin_flag
+        logical_type: boolean
+  - id: ent_registry
+    name: registry
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_registry_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_registry_flag
+        name: registry_flag
+        logical_type: boolean
+      - id: attr_registry_created_at
+        name: registry_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_registry_quantity
+        name: registry_quantity
+        logical_type: integer
+  - id: ent_catalog
+    name: catalog
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_catalog_count
+        name: catalog_count
+        logical_type: integer
+      - id: attr_catalog_amount
+        name: catalog_amount
+        logical_type: decimal
+      - id: attr_catalog_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_catalog_flag
+        name: catalog_flag
+        logical_type: boolean
+      - id: attr_catalog_score
+        name: catalog_score
+        logical_type: float
+      - id: attr_catalog_code
+        name: catalog_code
+        logical_type: string
+      - id: attr_catalog_email
+        name: catalog_email
+        logical_type: string
+      - id: attr_catalog_status
+        name: catalog_status
+        logical_type: string
+        required: true
+  - id: ent_manifest
+    name: manifest
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_manifest_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_manifest_description
+        name: manifest_description
+        logical_type: text
+      - id: attr_manifest_amount
+        name: manifest_amount
+        logical_type: decimal
+      - id: attr_manifest_score
+        name: manifest_score
+        logical_type: float
+      - id: attr_manifest_created_at
+        name: manifest_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_release
+    name: release
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_release_quantity
+        name: release_quantity
+        logical_type: integer
+      - id: attr_release_description
+        name: release_description
+        logical_type: text
+      - id: attr_release_date
+        name: release_date
+        logical_type: date
+      - id: attr_release_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_release_reference
+        name: release_reference
+        logical_type: uuid
+      - id: attr_release_status
+        name: release_status
+        logical_type: string
+        required: true
+      - id: attr_release_name
+        name: release_name
+        logical_type: string
+        required: true
+      - id: attr_release_created_at
+        name: release_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_version
+    name: version
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_version_count
+        name: version_count
+        logical_type: integer
+      - id: attr_version_flag
+        name: version_flag
+        logical_type: boolean
+      - id: attr_version_date
+        name: version_date
+        logical_type: date
+      - id: attr_version_status
+        name: version_status
+        logical_type: string
+        required: true
+      - id: attr_version_score
+        name: version_score
+        logical_type: float
+      - id: attr_version_updated_at
+        name: version_updated_at
+        logical_type: timestamp
+      - id: attr_version_created_at
+        name: version_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_version_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_patch
+    name: patch
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_patch_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_patch_status
+        name: patch_status
+        logical_type: string
+        required: true
+      - id: attr_patch_count
+        name: patch_count
+        logical_type: integer
+  - id: ent_hotfix
+    name: hotfix
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_hotfix_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_hotfix_description
+        name: hotfix_description
+        logical_type: text
+      - id: attr_hotfix_updated_at
+        name: hotfix_updated_at
+        logical_type: timestamp
+      - id: attr_hotfix_created_at
+        name: hotfix_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_hotfix_amount
+        name: hotfix_amount
+        logical_type: decimal
+      - id: attr_hotfix_flag
+        name: hotfix_flag
+        logical_type: boolean
+      - id: attr_hotfix_date
+        name: hotfix_date
+        logical_type: date
+      - id: attr_hotfix_reference
+        name: hotfix_reference
+        logical_type: uuid
+  - id: ent_branch
+    name: branch
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_branch_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_branch_date
+        name: branch_date
+        logical_type: date
+      - id: attr_branch_amount
+        name: branch_amount
+        logical_type: decimal
+      - id: attr_branch_reference
+        name: branch_reference
+        logical_type: uuid
+      - id: attr_branch_flag
+        name: branch_flag
+        logical_type: boolean
+      - id: attr_branch_description
+        name: branch_description
+        logical_type: text
+  - id: ent_commit
+    name: commit
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_commit_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_commit_status
+        name: commit_status
+        logical_type: string
+        required: true
+      - id: attr_commit_name
+        name: commit_name
+        logical_type: string
+        required: true
+      - id: attr_commit_email
+        name: commit_email
+        logical_type: string
+      - id: attr_commit_score
+        name: commit_score
+        logical_type: float
+  - id: ent_diff
+    name: diff
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_diff_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_diff_email
+        name: diff_email
+        logical_type: string
+      - id: attr_diff_date
+        name: diff_date
+        logical_type: date
+      - id: attr_diff_score
+        name: diff_score
+        logical_type: float
+      - id: attr_diff_code
+        name: diff_code
+        logical_type: string
+  - id: ent_pull_request
+    name: pull_request
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_pull_request_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_pull_request_email
+        name: pull_request_email
+        logical_type: string
+      - id: attr_pull_request_flag
+        name: pull_request_flag
+        logical_type: boolean
+      - id: attr_pull_request_description
+        name: pull_request_description
+        logical_type: text
+  - id: ent_merge
+    name: merge
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_merge_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_merge_reference
+        name: merge_reference
+        logical_type: uuid
+      - id: attr_merge_date
+        name: merge_date
+        logical_type: date
+      - id: attr_merge_quantity
+        name: merge_quantity
+        logical_type: integer
+      - id: attr_merge_description
+        name: merge_description
+        logical_type: text
+      - id: attr_merge_name
+        name: merge_name
+        logical_type: string
+        required: true
+      - id: attr_merge_status
+        name: merge_status
+        logical_type: string
+        required: true
+      - id: attr_merge_updated_at
+        name: merge_updated_at
+        logical_type: timestamp
+  - id: ent_conflict
+    name: conflict
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_conflict_amount
+        name: conflict_amount
+        logical_type: decimal
+      - id: attr_conflict_code
+        name: conflict_code
+        logical_type: string
+      - id: attr_conflict_description
+        name: conflict_description
+        logical_type: text
+      - id: attr_conflict_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_resolution
+    name: resolution
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_resolution_date
+        name: resolution_date
+        logical_type: date
+      - id: attr_resolution_code
+        name: resolution_code
+        logical_type: string
+      - id: attr_resolution_description
+        name: resolution_description
+        logical_type: text
+      - id: attr_resolution_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_resolution_email
+        name: resolution_email
+        logical_type: string
+      - id: attr_resolution_quantity
+        name: resolution_quantity
+        logical_type: integer
+      - id: attr_resolution_reference
+        name: resolution_reference
+        logical_type: uuid
+      - id: attr_resolution_score
+        name: resolution_score
+        logical_type: float
+  - id: ent_rollback
+    name: rollback
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_rollback_score
+        name: rollback_score
+        logical_type: float
+      - id: attr_rollback_reference
+        name: rollback_reference
+        logical_type: uuid
+      - id: attr_rollback_flag
+        name: rollback_flag
+        logical_type: boolean
+      - id: attr_rollback_name
+        name: rollback_name
+        logical_type: string
+        required: true
+      - id: attr_rollback_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_rollback_created_at
+        name: rollback_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_rollback_description
+        name: rollback_description
+        logical_type: text
+      - id: attr_rollback_quantity
+        name: rollback_quantity
+        logical_type: integer
+  - id: ent_deployment
+    name: deployment
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_deployment_flag
+        name: deployment_flag
+        logical_type: boolean
+      - id: attr_deployment_amount
+        name: deployment_amount
+        logical_type: decimal
+      - id: attr_deployment_code
+        name: deployment_code
+        logical_type: string
+      - id: attr_deployment_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_deployment_description
+        name: deployment_description
+        logical_type: text
+      - id: attr_deployment_quantity
+        name: deployment_quantity
+        logical_type: integer
+  - id: ent_environment
+    name: environment
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_environment_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_environment_name
+        name: environment_name
+        logical_type: string
+        required: true
+      - id: attr_environment_count
+        name: environment_count
+        logical_type: integer
+  - id: ent_cluster
+    name: cluster
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_cluster_name
+        name: cluster_name
+        logical_type: string
+        required: true
+      - id: attr_cluster_created_at
+        name: cluster_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_cluster_updated_at
+        name: cluster_updated_at
+        logical_type: timestamp
+      - id: attr_cluster_reference
+        name: cluster_reference
+        logical_type: uuid
+      - id: attr_cluster_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_cluster_code
+        name: cluster_code
+        logical_type: string
+  - id: ent_node
+    name: node
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_node_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_node_created_at
+        name: node_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_node_description
+        name: node_description
+        logical_type: text
+      - id: attr_node_name
+        name: node_name
+        logical_type: string
+        required: true
+  - id: ent_pod
+    name: pod
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_pod_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_pod_date
+        name: pod_date
+        logical_type: date
+      - id: attr_pod_reference
+        name: pod_reference
+        logical_type: uuid
+      - id: attr_pod_count
+        name: pod_count
+        logical_type: integer
+  - id: ent_service
+    name: service
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_service_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_service_reference
+        name: service_reference
+        logical_type: uuid
+      - id: attr_service_quantity
+        name: service_quantity
+        logical_type: integer
+      - id: attr_service_status
+        name: service_status
+        logical_type: string
+        required: true
+      - id: attr_service_date
+        name: service_date
+        logical_type: date
+      - id: attr_service_count
+        name: service_count
+        logical_type: integer
+      - id: attr_service_flag
+        name: service_flag
+        logical_type: boolean
+  - id: ent_endpoint
+    name: endpoint
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_endpoint_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_endpoint_score
+        name: endpoint_score
+        logical_type: float
+      - id: attr_endpoint_created_at
+        name: endpoint_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_endpoint_count
+        name: endpoint_count
+        logical_type: integer
+      - id: attr_endpoint_quantity
+        name: endpoint_quantity
+        logical_type: integer
+      - id: attr_endpoint_reference
+        name: endpoint_reference
+        logical_type: uuid
+  - id: ent_route
+    name: route
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_route_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_route_created_at
+        name: route_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_route_email
+        name: route_email
+        logical_type: string
+      - id: attr_route_name
+        name: route_name
+        logical_type: string
+        required: true
+      - id: attr_route_status
+        name: route_status
+        logical_type: string
+        required: true
+      - id: attr_route_updated_at
+        name: route_updated_at
+        logical_type: timestamp
+      - id: attr_route_description
+        name: route_description
+        logical_type: text
+  - id: ent_gateway
+    name: gateway
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_gateway_name
+        name: gateway_name
+        logical_type: string
+        required: true
+      - id: attr_gateway_code
+        name: gateway_code
+        logical_type: string
+      - id: attr_gateway_status
+        name: gateway_status
+        logical_type: string
+        required: true
+      - id: attr_gateway_score
+        name: gateway_score
+        logical_type: float
+      - id: attr_gateway_date
+        name: gateway_date
+        logical_type: date
+      - id: attr_gateway_quantity
+        name: gateway_quantity
+        logical_type: integer
+      - id: attr_gateway_email
+        name: gateway_email
+        logical_type: string
+      - id: attr_gateway_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_proxy
+    name: proxy
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_proxy_flag
+        name: proxy_flag
+        logical_type: boolean
+      - id: attr_proxy_email
+        name: proxy_email
+        logical_type: string
+      - id: attr_proxy_created_at
+        name: proxy_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_proxy_quantity
+        name: proxy_quantity
+        logical_type: integer
+      - id: attr_proxy_description
+        name: proxy_description
+        logical_type: text
+      - id: attr_proxy_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_cache
+    name: cache
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_cache_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_cache_email
+        name: cache_email
+        logical_type: string
+      - id: attr_cache_quantity
+        name: cache_quantity
+        logical_type: integer
+      - id: attr_cache_score
+        name: cache_score
+        logical_type: float
+  - id: ent_buffer
+    name: buffer
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_buffer_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_buffer_updated_at
+        name: buffer_updated_at
+        logical_type: timestamp
+      - id: attr_buffer_status
+        name: buffer_status
+        logical_type: string
+        required: true
+      - id: attr_buffer_description
+        name: buffer_description
+        logical_type: text
+      - id: attr_buffer_score
+        name: buffer_score
+        logical_type: float
+      - id: attr_buffer_created_at
+        name: buffer_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_stream
+    name: stream
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_stream_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_stream_status
+        name: stream_status
+        logical_type: string
+        required: true
+      - id: attr_stream_count
+        name: stream_count
+        logical_type: integer
+      - id: attr_stream_name
+        name: stream_name
+        logical_type: string
+        required: true
+      - id: attr_stream_date
+        name: stream_date
+        logical_type: date
+      - id: attr_stream_score
+        name: stream_score
+        logical_type: float
+      - id: attr_stream_code
+        name: stream_code
+        logical_type: string
+      - id: attr_stream_description
+        name: stream_description
+        logical_type: text
+  - id: ent_sink
+    name: sink
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_sink_name
+        name: sink_name
+        logical_type: string
+        required: true
+      - id: attr_sink_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_sink_code
+        name: sink_code
+        logical_type: string
+      - id: attr_sink_description
+        name: sink_description
+        logical_type: text
+  - id: ent_source
+    name: source
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_source_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_source_score
+        name: source_score
+        logical_type: float
+      - id: attr_source_created_at
+        name: source_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_source_description
+        name: source_description
+        logical_type: text
+      - id: attr_source_flag
+        name: source_flag
+        logical_type: boolean
+      - id: attr_source_name
+        name: source_name
+        logical_type: string
+        required: true
+      - id: attr_source_updated_at
+        name: source_updated_at
+        logical_type: timestamp
+  - id: ent_connector
+    name: connector
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_connector_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_connector_email
+        name: connector_email
+        logical_type: string
+      - id: attr_connector_count
+        name: connector_count
+        logical_type: integer
+      - id: attr_connector_quantity
+        name: connector_quantity
+        logical_type: integer
+      - id: attr_connector_date
+        name: connector_date
+        logical_type: date
+      - id: attr_connector_updated_at
+        name: connector_updated_at
+        logical_type: timestamp
+      - id: attr_connector_flag
+        name: connector_flag
+        logical_type: boolean
+      - id: attr_connector_created_at
+        name: connector_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_adapter
+    name: adapter
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_adapter_created_at
+        name: adapter_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_adapter_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_adapter_count
+        name: adapter_count
+        logical_type: integer
+  - id: ent_bridge
+    name: bridge
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_bridge_amount
+        name: bridge_amount
+        logical_type: decimal
+      - id: attr_bridge_created_at
+        name: bridge_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_bridge_description
+        name: bridge_description
+        logical_type: text
+      - id: attr_bridge_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_bridge_name
+        name: bridge_name
+        logical_type: string
+        required: true
+      - id: attr_bridge_status
+        name: bridge_status
+        logical_type: string
+        required: true
+      - id: attr_bridge_email
+        name: bridge_email
+        logical_type: string
+      - id: attr_bridge_reference
+        name: bridge_reference
+        logical_type: uuid
+  - id: ent_transformer
+    name: transformer
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_transformer_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_transformer_reference
+        name: transformer_reference
+        logical_type: uuid
+      - id: attr_transformer_score
+        name: transformer_score
+        logical_type: float
+      - id: attr_transformer_code
+        name: transformer_code
+        logical_type: string
+      - id: attr_transformer_flag
+        name: transformer_flag
+        logical_type: boolean
+      - id: attr_transformer_date
+        name: transformer_date
+        logical_type: date
+      - id: attr_transformer_updated_at
+        name: transformer_updated_at
+        logical_type: timestamp
+  - id: ent_enricher
+    name: enricher
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_enricher_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_enricher_created_at
+        name: enricher_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_enricher_count
+        name: enricher_count
+        logical_type: integer
+      - id: attr_enricher_updated_at
+        name: enricher_updated_at
+        logical_type: timestamp
+      - id: attr_enricher_flag
+        name: enricher_flag
+        logical_type: boolean
+  - id: ent_validator
+    name: validator
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_validator_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_validator_amount
+        name: validator_amount
+        logical_type: decimal
+      - id: attr_validator_count
+        name: validator_count
+        logical_type: integer
+  - id: ent_sanitizer
+    name: sanitizer
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_sanitizer_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_sanitizer_updated_at
+        name: sanitizer_updated_at
+        logical_type: timestamp
+      - id: attr_sanitizer_name
+        name: sanitizer_name
+        logical_type: string
+        required: true
+      - id: attr_sanitizer_code
+        name: sanitizer_code
+        logical_type: string
+      - id: attr_sanitizer_quantity
+        name: sanitizer_quantity
+        logical_type: integer
+  - id: ent_encoder
+    name: encoder
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_encoder_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_encoder_flag
+        name: encoder_flag
+        logical_type: boolean
+      - id: attr_encoder_description
+        name: encoder_description
+        logical_type: text
+      - id: attr_encoder_updated_at
+        name: encoder_updated_at
+        logical_type: timestamp
+      - id: attr_encoder_count
+        name: encoder_count
+        logical_type: integer
+      - id: attr_encoder_date
+        name: encoder_date
+        logical_type: date
+  - id: ent_decoder
+    name: decoder
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_decoder_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_decoder_name
+        name: decoder_name
+        logical_type: string
+        required: true
+      - id: attr_decoder_amount
+        name: decoder_amount
+        logical_type: decimal
+  - id: ent_compressor
+    name: compressor
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_compressor_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_compressor_name
+        name: compressor_name
+        logical_type: string
+        required: true
+      - id: attr_compressor_reference
+        name: compressor_reference
+        logical_type: uuid
+      - id: attr_compressor_count
+        name: compressor_count
+        logical_type: integer
+      - id: attr_compressor_date
+        name: compressor_date
+        logical_type: date
+  - id: ent_encryptor
+    name: encryptor
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_encryptor_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_encryptor_score
+        name: encryptor_score
+        logical_type: float
+      - id: attr_encryptor_date
+        name: encryptor_date
+        logical_type: date
+  - id: ent_signer
+    name: signer
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_signer_count
+        name: signer_count
+        logical_type: integer
+      - id: attr_signer_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_signer_status
+        name: signer_status
+        logical_type: string
+        required: true
+      - id: attr_signer_date
+        name: signer_date
+        logical_type: date
+      - id: attr_signer_amount
+        name: signer_amount
+        logical_type: decimal
+      - id: attr_signer_created_at
+        name: signer_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_verifier
+    name: verifier
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_verifier_updated_at
+        name: verifier_updated_at
+        logical_type: timestamp
+      - id: attr_verifier_flag
+        name: verifier_flag
+        logical_type: boolean
+      - id: attr_verifier_reference
+        name: verifier_reference
+        logical_type: uuid
+      - id: attr_verifier_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_verifier_status
+        name: verifier_status
+        logical_type: string
+        required: true
+      - id: attr_verifier_description
+        name: verifier_description
+        logical_type: text
+  - id: ent_authenticator
+    name: authenticator
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_authenticator_code
+        name: authenticator_code
+        logical_type: string
+      - id: attr_authenticator_description
+        name: authenticator_description
+        logical_type: text
+      - id: attr_authenticator_flag
+        name: authenticator_flag
+        logical_type: boolean
+      - id: attr_authenticator_email
+        name: authenticator_email
+        logical_type: string
+      - id: attr_authenticator_reference
+        name: authenticator_reference
+        logical_type: uuid
+      - id: attr_authenticator_name
+        name: authenticator_name
+        logical_type: string
+        required: true
+      - id: attr_authenticator_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_authorizer
+    name: authorizer
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_authorizer_created_at
+        name: authorizer_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_authorizer_reference
+        name: authorizer_reference
+        logical_type: uuid
+      - id: attr_authorizer_status
+        name: authorizer_status
+        logical_type: string
+        required: true
+      - id: attr_authorizer_email
+        name: authorizer_email
+        logical_type: string
+      - id: attr_authorizer_code
+        name: authorizer_code
+        logical_type: string
+      - id: attr_authorizer_description
+        name: authorizer_description
+        logical_type: text
+      - id: attr_authorizer_date
+        name: authorizer_date
+        logical_type: date
+      - id: attr_authorizer_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_scheduler
+    name: scheduler
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_scheduler_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_scheduler_name
+        name: scheduler_name
+        logical_type: string
+        required: true
+      - id: attr_scheduler_status
+        name: scheduler_status
+        logical_type: string
+        required: true
+      - id: attr_scheduler_score
+        name: scheduler_score
+        logical_type: float
+      - id: attr_scheduler_flag
+        name: scheduler_flag
+        logical_type: boolean
+      - id: attr_scheduler_email
+        name: scheduler_email
+        logical_type: string
+      - id: attr_scheduler_code
+        name: scheduler_code
+        logical_type: string
+  - id: ent_dispatcher
+    name: dispatcher
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_dispatcher_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_dispatcher_email
+        name: dispatcher_email
+        logical_type: string
+      - id: attr_dispatcher_description
+        name: dispatcher_description
+        logical_type: text
+      - id: attr_dispatcher_date
+        name: dispatcher_date
+        logical_type: date
+      - id: attr_dispatcher_reference
+        name: dispatcher_reference
+        logical_type: uuid
+      - id: attr_dispatcher_count
+        name: dispatcher_count
+        logical_type: integer
+  - id: ent_collector
+    name: collector
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_collector_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_collector_status
+        name: collector_status
+        logical_type: string
+        required: true
+      - id: attr_collector_quantity
+        name: collector_quantity
+        logical_type: integer
+      - id: attr_collector_date
+        name: collector_date
+        logical_type: date
+      - id: attr_collector_code
+        name: collector_code
+        logical_type: string
+      - id: attr_collector_count
+        name: collector_count
+        logical_type: integer
+  - id: ent_aggregator
+    name: aggregator
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_aggregator_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_aggregator_created_at
+        name: aggregator_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_aggregator_date
+        name: aggregator_date
+        logical_type: date
+      - id: attr_aggregator_email
+        name: aggregator_email
+        logical_type: string
+  - id: ent_sampler
+    name: sampler
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_sampler_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_sampler_name
+        name: sampler_name
+        logical_type: string
+        required: true
+      - id: attr_sampler_description
+        name: sampler_description
+        logical_type: text
+      - id: attr_sampler_count
+        name: sampler_count
+        logical_type: integer
+  - id: ent_profiler
+    name: profiler
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_profiler_quantity
+        name: profiler_quantity
+        logical_type: integer
+      - id: attr_profiler_reference
+        name: profiler_reference
+        logical_type: uuid
+      - id: attr_profiler_date
+        name: profiler_date
+        logical_type: date
+      - id: attr_profiler_description
+        name: profiler_description
+        logical_type: text
+      - id: attr_profiler_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_tracer
+    name: tracer
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_tracer_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_tracer_description
+        name: tracer_description
+        logical_type: text
+      - id: attr_tracer_created_at
+        name: tracer_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_tracer_reference
+        name: tracer_reference
+        logical_type: uuid
+      - id: attr_tracer_updated_at
+        name: tracer_updated_at
+        logical_type: timestamp
+  - id: ent_monitor
+    name: monitor
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_monitor_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_monitor_code
+        name: monitor_code
+        logical_type: string
+      - id: attr_monitor_flag
+        name: monitor_flag
+        logical_type: boolean
+      - id: attr_monitor_date
+        name: monitor_date
+        logical_type: date
+      - id: attr_monitor_reference
+        name: monitor_reference
+        logical_type: uuid
+      - id: attr_monitor_amount
+        name: monitor_amount
+        logical_type: decimal
+  - id: ent_observer
+    name: observer
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_observer_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_observer_reference
+        name: observer_reference
+        logical_type: uuid
+      - id: attr_observer_quantity
+        name: observer_quantity
+        logical_type: integer
+      - id: attr_observer_count
+        name: observer_count
+        logical_type: integer
+      - id: attr_observer_flag
+        name: observer_flag
+        logical_type: boolean
+  - id: ent_inspector
+    name: inspector
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_inspector_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_inspector_status
+        name: inspector_status
+        logical_type: string
+        required: true
+      - id: attr_inspector_email
+        name: inspector_email
+        logical_type: string
+      - id: attr_inspector_quantity
+        name: inspector_quantity
+        logical_type: integer
+      - id: attr_inspector_created_at
+        name: inspector_created_at
+        logical_type: timestamp
+        required: true
+  - id: ent_analyzer
+    name: analyzer
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_analyzer_status
+        name: analyzer_status
+        logical_type: string
+        required: true
+      - id: attr_analyzer_score
+        name: analyzer_score
+        logical_type: float
+      - id: attr_analyzer_reference
+        name: analyzer_reference
+        logical_type: uuid
+      - id: attr_analyzer_count
+        name: analyzer_count
+        logical_type: integer
+      - id: attr_analyzer_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_analyzer_amount
+        name: analyzer_amount
+        logical_type: decimal
+  - id: ent_classifier
+    name: classifier
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_classifier_flag
+        name: classifier_flag
+        logical_type: boolean
+      - id: attr_classifier_email
+        name: classifier_email
+        logical_type: string
+      - id: attr_classifier_reference
+        name: classifier_reference
+        logical_type: uuid
+      - id: attr_classifier_count
+        name: classifier_count
+        logical_type: integer
+      - id: attr_classifier_score
+        name: classifier_score
+        logical_type: float
+      - id: attr_classifier_code
+        name: classifier_code
+        logical_type: string
+      - id: attr_classifier_quantity
+        name: classifier_quantity
+        logical_type: integer
+      - id: attr_classifier_id
+        name: id
+        logical_type: integer
+        required: true
+  - id: ent_predictor
+    name: predictor
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_predictor_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_predictor_created_at
+        name: predictor_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_predictor_amount
+        name: predictor_amount
+        logical_type: decimal
+      - id: attr_predictor_name
+        name: predictor_name
+        logical_type: string
+        required: true
+  - id: ent_recommender
+    name: recommender
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_recommender_name
+        name: recommender_name
+        logical_type: string
+        required: true
+      - id: attr_recommender_date
+        name: recommender_date
+        logical_type: date
+      - id: attr_recommender_flag
+        name: recommender_flag
+        logical_type: boolean
+      - id: attr_recommender_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_recommender_code
+        name: recommender_code
+        logical_type: string
+      - id: attr_recommender_count
+        name: recommender_count
+        logical_type: integer
+  - id: ent_ranker
+    name: ranker
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_ranker_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_ranker_name
+        name: ranker_name
+        logical_type: string
+        required: true
+      - id: attr_ranker_flag
+        name: ranker_flag
+        logical_type: boolean
+      - id: attr_ranker_description
+        name: ranker_description
+        logical_type: text
+      - id: attr_ranker_amount
+        name: ranker_amount
+        logical_type: decimal
+      - id: attr_ranker_created_at
+        name: ranker_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_ranker_count
+        name: ranker_count
+        logical_type: integer
+      - id: attr_ranker_score
+        name: ranker_score
+        logical_type: float
+  - id: ent_scorer
+    name: scorer
+    domain: sales
+    business_key: [id]
+    attributes:
+      - id: attr_scorer_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_scorer_updated_at
+        name: scorer_updated_at
+        logical_type: timestamp
+      - id: attr_scorer_date
+        name: scorer_date
+        logical_type: date
+      - id: attr_scorer_count
+        name: scorer_count
+        logical_type: integer
+      - id: attr_scorer_amount
+        name: scorer_amount
+        logical_type: decimal
+  - id: ent_indexer
+    name: indexer
+    domain: operations
+    business_key: [id]
+    attributes:
+      - id: attr_indexer_email
+        name: indexer_email
+        logical_type: string
+      - id: attr_indexer_reference
+        name: indexer_reference
+        logical_type: uuid
+      - id: attr_indexer_flag
+        name: indexer_flag
+        logical_type: boolean
+      - id: attr_indexer_date
+        name: indexer_date
+        logical_type: date
+      - id: attr_indexer_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_indexer_created_at
+        name: indexer_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_indexer_name
+        name: indexer_name
+        logical_type: string
+        required: true
+      - id: attr_indexer_status
+        name: indexer_status
+        logical_type: string
+        required: true
+  - id: ent_crawler
+    name: crawler
+    domain: finance
+    business_key: [id]
+    attributes:
+      - id: attr_crawler_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_crawler_description
+        name: crawler_description
+        logical_type: text
+      - id: attr_crawler_status
+        name: crawler_status
+        logical_type: string
+        required: true
+      - id: attr_crawler_email
+        name: crawler_email
+        logical_type: string
+      - id: attr_crawler_name
+        name: crawler_name
+        logical_type: string
+        required: true
+      - id: attr_crawler_count
+        name: crawler_count
+        logical_type: integer
+      - id: attr_crawler_quantity
+        name: crawler_quantity
+        logical_type: integer
+      - id: attr_crawler_date
+        name: crawler_date
+        logical_type: date
+  - id: ent_scraper
+    name: scraper
+    domain: hr
+    business_key: [id]
+    attributes:
+      - id: attr_scraper_code
+        name: scraper_code
+        logical_type: string
+      - id: attr_scraper_email
+        name: scraper_email
+        logical_type: string
+      - id: attr_scraper_description
+        name: scraper_description
+        logical_type: text
+      - id: attr_scraper_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_scraper_score
+        name: scraper_score
+        logical_type: float
+      - id: attr_scraper_amount
+        name: scraper_amount
+        logical_type: decimal
+  - id: ent_parser
+    name: parser
+    domain: logistics
+    business_key: [id]
+    attributes:
+      - id: attr_parser_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_parser_amount
+        name: parser_amount
+        logical_type: decimal
+      - id: attr_parser_score
+        name: parser_score
+        logical_type: float
+  - id: ent_formatter
+    name: formatter
+    domain: marketing
+    business_key: [id]
+    attributes:
+      - id: attr_formatter_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_formatter_status
+        name: formatter_status
+        logical_type: string
+        required: true
+      - id: attr_formatter_date
+        name: formatter_date
+        logical_type: date
+      - id: attr_formatter_count
+        name: formatter_count
+        logical_type: integer
+      - id: attr_formatter_created_at
+        name: formatter_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_formatter_quantity
+        name: formatter_quantity
+        logical_type: integer
+  - id: ent_renderer
+    name: renderer
+    domain: engineering
+    business_key: [id]
+    attributes:
+      - id: attr_renderer_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_renderer_name
+        name: renderer_name
+        logical_type: string
+        required: true
+      - id: attr_renderer_created_at
+        name: renderer_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_renderer_count
+        name: renderer_count
+        logical_type: integer
+  - id: ent_presenter
+    name: presenter
+    domain: support
+    business_key: [id]
+    attributes:
+      - id: attr_presenter_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_presenter_status
+        name: presenter_status
+        logical_type: string
+        required: true
+      - id: attr_presenter_flag
+        name: presenter_flag
+        logical_type: boolean
+      - id: attr_presenter_created_at
+        name: presenter_created_at
+        logical_type: timestamp
+        required: true
+      - id: attr_presenter_code
+        name: presenter_code
+        logical_type: string
+      - id: attr_presenter_score
+        name: presenter_score
+        logical_type: float
+      - id: attr_presenter_reference
+        name: presenter_reference
+        logical_type: uuid
+  - id: ent_exporter
+    name: exporter
+    domain: analytics
+    business_key: [id]
+    attributes:
+      - id: attr_exporter_description
+        name: exporter_description
+        logical_type: text
+      - id: attr_exporter_flag
+        name: exporter_flag
+        logical_type: boolean
+      - id: attr_exporter_quantity
+        name: exporter_quantity
+        logical_type: integer
+      - id: attr_exporter_updated_at
+        name: exporter_updated_at
+        logical_type: timestamp
+      - id: attr_exporter_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_exporter_score
+        name: exporter_score
+        logical_type: float
+      - id: attr_exporter_reference
+        name: exporter_reference
+        logical_type: uuid
+      - id: attr_exporter_code
+        name: exporter_code
+        logical_type: string
+  - id: ent_importer
+    name: importer
+    domain: compliance
+    business_key: [id]
+    attributes:
+      - id: attr_importer_id
+        name: id
+        logical_type: integer
+        required: true
+      - id: attr_importer_amount
+        name: importer_amount
+        logical_type: decimal
+      - id: attr_importer_created_at
+        name: importer_created_at
+        logical_type: timestamp
+        required: true

@@ -1,0 +1,21 @@
+domains:
+  - id: sales
+    name: sales
+  - id: operations
+    name: operations
+  - id: finance
+    name: finance
+  - id: hr
+    name: hr
+  - id: logistics
+    name: logistics
+  - id: marketing
+    name: marketing
+  - id: engineering
+    name: engineering
+  - id: support
+    name: support
+  - id: analytics
+    name: analytics
+  - id: compliance
+    name: compliance

@@ -1,0 +1,4001 @@
+relationships:
+  - id: rel_deal_transformer
+    from_entity: deal
+    to_entity: transformer
+    cardinality: one_to_many
+  - id: rel_dispatcher_lesson
+    from_entity: dispatcher
+    to_entity: lesson
+    cardinality: one_to_many
+  - id: rel_lead_config
+    from_entity: lead
+    to_entity: config
+    cardinality: one_to_many
+  - id: rel_rule_feature
+    from_entity: rule
+    to_entity: feature
+    cardinality: many_to_one
+  - id: rel_return_item_environment
+    from_entity: return_item
+    to_entity: environment
+    cardinality: one_to_many
+  - id: rel_cluster_offer
+    from_entity: cluster
+    to_entity: offer
+    cardinality: many_to_many
+  - id: rel_offer_payment
+    from_entity: offer
+    to_entity: payment
+    cardinality: many_to_many
+  - id: rel_transfer_achievement
+    from_entity: transfer
+    to_entity: achievement
+    cardinality: many_to_one
+  - id: rel_rollback_scheduler
+    from_entity: rollback
+    to_entity: scheduler
+    cardinality: many_to_many
+  - id: rel_ticket_cache
+    from_entity: ticket
+    to_entity: cache
+    cardinality: many_to_many
+  - id: rel_handler_discount
+    from_entity: handler
+    to_entity: discount
+    cardinality: many_to_one
+  - id: rel_cache_reservation
+    from_entity: cache
+    to_entity: reservation
+    cardinality: many_to_one
+  - id: rel_bridge_archive
+    from_entity: bridge
+    to_entity: archive
+    cardinality: many_to_many
+  - id: rel_lesson_authenticator
+    from_entity: lesson
+    to_entity: authenticator
+    cardinality: many_to_many
+  - id: rel_renderer_decoder
+    from_entity: renderer
+    to_entity: decoder
+    cardinality: many_to_many
+  - id: rel_metric_connector
+    from_entity: metric
+    to_entity: connector
+    cardinality: many_to_one
+  - id: rel_connector_validator
+    from_entity: connector
+    to_entity: validator
+    cardinality: many_to_one
+  - id: rel_pipeline_partition
+    from_entity: pipeline
+    to_entity: partition
+    cardinality: many_to_one
+  - id: rel_node_equipment
+    from_entity: node
+    to_entity: equipment
+    cardinality: many_to_many
+  - id: rel_forecast_review
+    from_entity: forecast
+    to_entity: review
+    cardinality: one_to_many
+  - id: rel_artifact_indexer
+    from_entity: artifact
+    to_entity: indexer
+    cardinality: one_to_many
+  - id: rel_permission_setting
+    from_entity: permission
+    to_entity: setting
+    cardinality: many_to_one
+  - id: rel_commit_equipment
+    from_entity: commit
+    to_entity: equipment
+    cardinality: many_to_many
+  - id: rel_middleware_badge
+    from_entity: middleware
+    to_entity: badge
+    cardinality: many_to_one
+  - id: rel_student_rule
+    from_entity: student
+    to_entity: rule
+    cardinality: one_to_many
+  - id: rel_indexer_allocation
+    from_entity: indexer
+    to_entity: allocation
+    cardinality: many_to_one
+  - id: rel_invite_supplier
+    from_entity: invite
+    to_entity: supplier
+    cardinality: many_to_one
+  - id: rel_scraper_response
+    from_entity: scraper
+    to_entity: response
+    cardinality: many_to_many
+  - id: rel_analyzer_verifier
+    from_entity: analyzer
+    to_entity: verifier
+    cardinality: one_to_many
+  - id: rel_conflict_equipment
+    from_entity: conflict
+    to_entity: equipment
+    cardinality: many_to_one
+  - id: rel_transfer_customer
+    from_entity: transfer
+    to_entity: customer
+    cardinality: one_to_many
+  - id: rel_branch_expense
+    from_entity: branch
+    to_entity: expense
+    cardinality: one_to_many
+  - id: rel_inventory_verifier
+    from_entity: inventory
+    to_entity: verifier
+    cardinality: many_to_many
+  - id: rel_verifier_grade
+    from_entity: verifier
+    to_entity: grade
+    cardinality: many_to_many
+  - id: rel_return_item_transformer
+    from_entity: return_item
+    to_entity: transformer
+    cardinality: one_to_many
+  - id: rel_feature_verifier
+    from_entity: feature
+    to_entity: verifier
+    cardinality: many_to_one
+  - id: rel_token_shipment
+    from_entity: token
+    to_entity: shipment
+    cardinality: many_to_many
+  - id: rel_resolution_artifact
+    from_entity: resolution
+    to_entity: artifact
+    cardinality: many_to_many
+  - id: rel_request_validator
+    from_entity: request
+    to_entity: validator
+    cardinality: many_to_one
+  - id: rel_bridge_member
+    from_entity: bridge
+    to_entity: member
+    cardinality: many_to_many
+  - id: rel_lead_sanitizer
+    from_entity: lead
+    to_entity: sanitizer
+    cardinality: one_to_many
+  - id: rel_contract_metric
+    from_entity: contract
+    to_entity: metric
+    cardinality: many_to_one
+  - id: rel_department_lead
+    from_entity: department
+    to_entity: lead
+    cardinality: one_to_many
+  - id: rel_contract_rating
+    from_entity: contract
+    to_entity: rating
+    cardinality: many_to_one
+  - id: rel_branch_target
+    from_entity: branch
+    to_entity: target
+    cardinality: one_to_many
+  - id: rel_org_inventory
+    from_entity: org
+    to_entity: inventory
+    cardinality: many_to_many
+  - id: rel_scorer_aggregator
+    from_entity: scorer
+    to_entity: aggregator
+    cardinality: many_to_many
+  - id: rel_worker_service
+    from_entity: worker
+    to_entity: service
+    cardinality: many_to_many
+  - id: rel_classifier_notification
+    from_entity: classifier
+    to_entity: notification
+    cardinality: one_to_many
+  - id: rel_encoder_subscription
+    from_entity: encoder
+    to_entity: subscription
+    cardinality: one_to_many
+  - id: rel_stream_ledger
+    from_entity: stream
+    to_entity: ledger
+    cardinality: one_to_many
+  - id: rel_employee_dispatcher
+    from_entity: employee
+    to_entity: dispatcher
+    cardinality: one_to_many
+  - id: rel_approval_replica
+    from_entity: approval
+    to_entity: replica
+    cardinality: one_to_many
+  - id: rel_question_room
+    from_entity: question
+    to_entity: room
+    cardinality: many_to_one
+  - id: rel_scheduler_inventory
+    from_entity: scheduler
+    to_entity: inventory
+    cardinality: many_to_many
+  - id: rel_validator_venue
+    from_entity: validator
+    to_entity: venue
+    cardinality: many_to_one
+  - id: rel_archive_expense
+    from_entity: archive
+    to_entity: expense
+    cardinality: one_to_many
+  - id: rel_review_compressor
+    from_entity: review
+    to_entity: compressor
+    cardinality: many_to_one
+  - id: rel_enricher_transformer
+    from_entity: enricher
+    to_entity: transformer
+    cardinality: many_to_many
+  - id: rel_payment_ticket
+    from_entity: payment
+    to_entity: ticket
+    cardinality: one_to_many
+  - id: rel_quiz_revenue
+    from_entity: quiz
+    to_entity: revenue
+    cardinality: many_to_many
+  - id: rel_preference_region
+    from_entity: preference
+    to_entity: region
+    cardinality: many_to_many
+  - id: rel_template_service
+    from_entity: template
+    to_entity: service
+    cardinality: many_to_one
+  - id: rel_survey_asset
+    from_entity: survey
+    to_entity: asset
+    cardinality: many_to_one
+  - id: rel_route_account
+    from_entity: route
+    to_entity: account
+    cardinality: one_to_many
+  - id: rel_dashboard_forecast
+    from_entity: dashboard
+    to_entity: forecast
+    cardinality: many_to_many
+  - id: rel_lesson_permission
+    from_entity: lesson
+    to_entity: permission
+    cardinality: many_to_one
+  - id: rel_compressor_shipment
+    from_entity: compressor
+    to_entity: shipment
+    cardinality: many_to_one
+  - id: rel_customer_venue
+    from_entity: customer
+    to_entity: venue
+    cardinality: many_to_one
+  - id: rel_service_deliverable
+    from_entity: service
+    to_entity: deliverable
+    cardinality: many_to_one
+  - id: rel_permission_grade
+    from_entity: permission
+    to_entity: grade
+    cardinality: many_to_one
+  - id: rel_revenue_ranker
+    from_entity: revenue
+    to_entity: ranker
+    cardinality: one_to_many
+  - id: rel_version_contract
+    from_entity: version
+    to_entity: contract
+    cardinality: many_to_many
+  - id: rel_channel_scope
+    from_entity: channel
+    to_entity: scope
+    cardinality: one_to_many
+  - id: rel_importer_room
+    from_entity: importer
+    to_entity: room
+    cardinality: many_to_many
+  - id: rel_endpoint_feature
+    from_entity: endpoint
+    to_entity: feature
+    cardinality: one_to_many
+  - id: rel_middleware_request
+    from_entity: middleware
+    to_entity: request
+    cardinality: many_to_many
+  - id: rel_task_classifier
+    from_entity: task
+    to_entity: classifier
+    cardinality: many_to_many
+  - id: rel_release_lead
+    from_entity: release
+    to_entity: lead
+    cardinality: one_to_many
+  - id: rel_enricher_warehouse
+    from_entity: enricher
+    to_entity: warehouse
+    cardinality: many_to_one
+  - id: rel_policy_reconciliation
+    from_entity: policy
+    to_entity: reconciliation
+    cardinality: one_to_many
+  - id: rel_scheduler_feature
+    from_entity: scheduler
+    to_entity: feature
+    cardinality: one_to_many
+  - id: rel_monitor_replica
+    from_entity: monitor
+    to_entity: replica
+    cardinality: many_to_one
+  - id: rel_category_deliverable
+    from_entity: category
+    to_entity: deliverable
+    cardinality: many_to_many
+  - id: rel_dashboard_channel
+    from_entity: dashboard
+    to_entity: channel
+    cardinality: many_to_one
+  - id: rel_achievement_source
+    from_entity: achievement
+    to_entity: source
+    cardinality: many_to_many
+  - id: rel_pod_pull_request
+    from_entity: pod
+    to_entity: pull_request
+    cardinality: many_to_many
+  - id: rel_artifact_return_item
+    from_entity: artifact
+    to_entity: return_item
+    cardinality: many_to_many
+  - id: rel_patch_offer
+    from_entity: patch
+    to_entity: offer
+    cardinality: one_to_many
+  - id: rel_plugin_proxy
+    from_entity: plugin
+    to_entity: proxy
+    cardinality: one_to_many
+  - id: rel_subscription_sampler
+    from_entity: subscription
+    to_entity: sampler
+    cardinality: many_to_one
+  - id: rel_encoder_sanitizer
+    from_entity: encoder
+    to_entity: sanitizer
+    cardinality: many_to_many
+  - id: rel_inspector_approval
+    from_entity: inspector
+    to_entity: approval
+    cardinality: one_to_many
+  - id: rel_tenant_feedback
+    from_entity: tenant
+    to_entity: feedback
+    cardinality: one_to_many
+  - id: rel_allocation_org
+    from_entity: allocation
+    to_entity: org
+    cardinality: one_to_many
+  - id: rel_queue_classifier
+    from_entity: queue
+    to_entity: classifier
+    cardinality: many_to_one
+  - id: rel_stage_result
+    from_entity: stage
+    to_entity: result
+    cardinality: one_to_many
+  - id: rel_encryptor_student
+    from_entity: encryptor
+    to_entity: student
+    cardinality: one_to_many
+  - id: rel_notification_scheduler
+    from_entity: notification
+    to_entity: scheduler
+    cardinality: one_to_many
+  - id: rel_region_review
+    from_entity: region
+    to_entity: review
+    cardinality: many_to_one
+  - id: rel_review_schema
+    from_entity: review
+    to_entity: schema
+    cardinality: many_to_one
+  - id: rel_scorer_ranker
+    from_entity: scorer
+    to_entity: ranker
+    cardinality: one_to_many
+  - id: rel_forecast_conflict
+    from_entity: forecast
+    to_entity: conflict
+    cardinality: many_to_one
+  - id: rel_service_resolution
+    from_entity: service
+    to_entity: resolution
+    cardinality: many_to_many
+  - id: rel_asset_signer
+    from_entity: asset
+    to_entity: signer
+    cardinality: many_to_one
+  - id: rel_batch_reservation
+    from_entity: batch
+    to_entity: reservation
+    cardinality: many_to_many
+  - id: rel_crawler_job
+    from_entity: crawler
+    to_entity: job
+    cardinality: many_to_many
+  - id: rel_event_discount
+    from_entity: event
+    to_entity: discount
+    cardinality: many_to_many
+  - id: rel_pipeline_reservation
+    from_entity: pipeline
+    to_entity: reservation
+    cardinality: many_to_one
+  - id: rel_cluster_plugin
+    from_entity: cluster
+    to_entity: plugin
+    cardinality: many_to_one
+  - id: rel_notification_decoder
+    from_entity: notification
+    to_entity: decoder
+    cardinality: one_to_many
+  - id: rel_response_feature
+    from_entity: response
+    to_entity: feature
+    cardinality: one_to_many
+  - id: rel_conflict_inventory
+    from_entity: conflict
+    to_entity: inventory
+    cardinality: many_to_one
+  - id: rel_formatter_reward
+    from_entity: formatter
+    to_entity: reward
+    cardinality: many_to_many
+  - id: rel_response_result
+    from_entity: response
+    to_entity: result
+    cardinality: many_to_many
+  - id: rel_renderer_source
+    from_entity: renderer
+    to_entity: source
+    cardinality: many_to_many
+  - id: rel_verifier_enricher
+    from_entity: verifier
+    to_entity: enricher
+    cardinality: many_to_many
+  - id: rel_shipment_cache
+    from_entity: shipment
+    to_entity: cache
+    cardinality: many_to_many
+  - id: rel_collector_certificate
+    from_entity: collector
+    to_entity: certificate
+    cardinality: many_to_one
+  - id: rel_changelog_badge
+    from_entity: changelog
+    to_entity: badge
+    cardinality: many_to_many
+  - id: rel_formatter_pipeline
+    from_entity: formatter
+    to_entity: pipeline
+    cardinality: one_to_many
+  - id: rel_booking_transaction
+    from_entity: booking
+    to_entity: transaction
+    cardinality: many_to_one
+  - id: rel_report_rollback
+    from_entity: report
+    to_entity: rollback
+    cardinality: many_to_many
+  - id: rel_reconciliation_region
+    from_entity: reconciliation
+    to_entity: region
+    cardinality: many_to_one
+  - id: rel_ranker_bridge
+    from_entity: ranker
+    to_entity: bridge
+    cardinality: many_to_one
+  - id: rel_review_indexer
+    from_entity: review
+    to_entity: indexer
+    cardinality: many_to_many
+  - id: rel_approval_order_line
+    from_entity: approval
+    to_entity: order_line
+    cardinality: one_to_many
+  - id: rel_org_schedule
+    from_entity: org
+    to_entity: schedule
+    cardinality: many_to_one
+  - id: rel_inventory_pipeline
+    from_entity: inventory
+    to_entity: pipeline
+    cardinality: many_to_many
+  - id: rel_artifact_exporter
+    from_entity: artifact
+    to_entity: exporter
+    cardinality: many_to_many
+  - id: rel_route_tag
+    from_entity: route
+    to_entity: tag
+    cardinality: many_to_one
+  - id: rel_notification_message
+    from_entity: notification
+    to_entity: message
+    cardinality: many_to_many
+  - id: rel_ticket_verifier
+    from_entity: ticket
+    to_entity: verifier
+    cardinality: many_to_one
+  - id: rel_badge_replica
+    from_entity: badge
+    to_entity: replica
+    cardinality: many_to_many
+  - id: rel_job_condition
+    from_entity: job
+    to_entity: condition
+    cardinality: many_to_many
+  - id: rel_replica_queue
+    from_entity: replica
+    to_entity: queue
+    cardinality: one_to_many
+  - id: rel_approval_scraper
+    from_entity: approval
+    to_entity: scraper
+    cardinality: many_to_many
+  - id: rel_contract_calendar
+    from_entity: contract
+    to_entity: calendar
+    cardinality: one_to_many
+  - id: rel_license_coupon
+    from_entity: license
+    to_entity: coupon
+    cardinality: many_to_many
+  - id: rel_authenticator_endpoint
+    from_entity: authenticator
+    to_entity: endpoint
+    cardinality: one_to_many
+  - id: rel_version_encryptor
+    from_entity: version
+    to_entity: encryptor
+    cardinality: one_to_many
+  - id: rel_task_request
+    from_entity: task
+    to_entity: request
+    cardinality: one_to_many
+  - id: rel_gateway_session
+    from_entity: gateway
+    to_entity: session
+    cardinality: many_to_one
+  - id: rel_preference_lead
+    from_entity: preference
+    to_entity: lead
+    cardinality: many_to_one
+  - id: rel_renderer_metric
+    from_entity: renderer
+    to_entity: metric
+    cardinality: one_to_many
+  - id: rel_promotion_artifact
+    from_entity: promotion
+    to_entity: artifact
+    cardinality: many_to_one
+  - id: rel_transaction_handler
+    from_entity: transaction
+    to_entity: handler
+    cardinality: many_to_many
+  - id: rel_schema_permission
+    from_entity: schema
+    to_entity: permission
+    cardinality: many_to_one
+  - id: rel_return_item_hotfix
+    from_entity: return_item
+    to_entity: hotfix
+    cardinality: many_to_many
+  - id: rel_feedback_middleware
+    from_entity: feedback
+    to_entity: middleware
+    cardinality: many_to_many
+  - id: rel_signer_reservation
+    from_entity: signer
+    to_entity: reservation
+    cardinality: many_to_one
+  - id: rel_transfer_ranker
+    from_entity: transfer
+    to_entity: ranker
+    cardinality: many_to_one
+  - id: rel_index_invoice
+    from_entity: index
+    to_entity: invoice
+    cardinality: one_to_many
+  - id: rel_supplier_stage
+    from_entity: supplier
+    to_entity: stage
+    cardinality: many_to_many
+  - id: rel_result_environment
+    from_entity: result
+    to_entity: environment
+    cardinality: one_to_many
+  - id: rel_tracer_transformer
+    from_entity: tracer
+    to_entity: transformer
+    cardinality: one_to_many
+  - id: rel_promotion_contract
+    from_entity: promotion
+    to_entity: contract
+    cardinality: one_to_many
+  - id: rel_payment_artifact
+    from_entity: payment
+    to_entity: artifact
+    cardinality: many_to_one
+  - id: rel_sink_team
+    from_entity: sink
+    to_entity: team
+    cardinality: many_to_many
+  - id: rel_room_comment
+    from_entity: room
+    to_entity: comment
+    cardinality: one_to_many
+  - id: rel_feature_quiz
+    from_entity: feature
+    to_entity: quiz
+    cardinality: one_to_many
+  - id: rel_service_reconciliation
+    from_entity: service
+    to_entity: reconciliation
+    cardinality: many_to_many
+  - id: rel_category_transfer
+    from_entity: category
+    to_entity: transfer
+    cardinality: one_to_many
+  - id: rel_scorer_allocation
+    from_entity: scorer
+    to_entity: allocation
+    cardinality: many_to_one
+  - id: rel_resource_importer
+    from_entity: resource
+    to_entity: importer
+    cardinality: many_to_one
+  - id: rel_supplier_registry
+    from_entity: supplier
+    to_entity: registry
+    cardinality: many_to_many
+  - id: rel_contract_patch
+    from_entity: contract
+    to_entity: patch
+    cardinality: many_to_many
+  - id: rel_backup_exporter
+    from_entity: backup
+    to_entity: exporter
+    cardinality: one_to_many
+  - id: rel_booking_classifier
+    from_entity: booking
+    to_entity: classifier
+    cardinality: many_to_many
+  - id: rel_dashboard_question
+    from_entity: dashboard
+    to_entity: question
+    cardinality: many_to_one
+  - id: rel_dashboard_student
+    from_entity: dashboard
+    to_entity: student
+    cardinality: many_to_one
+  - id: rel_permission_proxy
+    from_entity: permission
+    to_entity: proxy
+    cardinality: many_to_one
+  - id: rel_encoder_supplier
+    from_entity: encoder
+    to_entity: supplier
+    cardinality: many_to_one
+  - id: rel_presenter_connector
+    from_entity: presenter
+    to_entity: connector
+    cardinality: one_to_many
+  - id: rel_member_scraper
+    from_entity: member
+    to_entity: scraper
+    cardinality: many_to_many
+  - id: rel_parser_node
+    from_entity: parser
+    to_entity: node
+    cardinality: one_to_many
+  - id: rel_authorizer_rollback
+    from_entity: authorizer
+    to_entity: rollback
+    cardinality: many_to_many
+  - id: rel_bridge_source
+    from_entity: bridge
+    to_entity: source
+    cardinality: one_to_many
+  - id: rel_connector_stage
+    from_entity: connector
+    to_entity: stage
+    cardinality: many_to_one
+  - id: rel_partition_region
+    from_entity: partition
+    to_entity: region
+    cardinality: one_to_many
+  - id: rel_replica_adapter
+    from_entity: replica
+    to_entity: adapter
+    cardinality: one_to_many
+  - id: rel_achievement_endpoint
+    from_entity: achievement
+    to_entity: endpoint
+    cardinality: many_to_one
+  - id: rel_reservation_plugin
+    from_entity: reservation
+    to_entity: plugin
+    cardinality: many_to_one
+  - id: rel_pipeline_member
+    from_entity: pipeline
+    to_entity: member
+    cardinality: one_to_many
+  - id: rel_department_session
+    from_entity: department
+    to_entity: session
+    cardinality: one_to_many
+  - id: rel_discount_supplier
+    from_entity: discount
+    to_entity: supplier
+    cardinality: many_to_many
+  - id: rel_review_stream
+    from_entity: review
+    to_entity: stream
+    cardinality: many_to_many
+  - id: rel_plugin_refund
+    from_entity: plugin
+    to_entity: refund
+    cardinality: one_to_many
+  - id: rel_node_merge
+    from_entity: node
+    to_entity: merge
+    cardinality: many_to_many
+  - id: rel_project_tenant
+    from_entity: project
+    to_entity: tenant
+    cardinality: many_to_many
+  - id: rel_sanitizer_archive
+    from_entity: sanitizer
+    to_entity: archive
+    cardinality: one_to_many
+  - id: rel_proxy_scope
+    from_entity: proxy
+    to_entity: scope
+    cardinality: many_to_many
+  - id: rel_alert_campaign
+    from_entity: alert
+    to_entity: campaign
+    cardinality: one_to_many
+  - id: rel_plan_schedule
+    from_entity: plan
+    to_entity: schedule
+    cardinality: many_to_many
+  - id: rel_tag_plugin
+    from_entity: tag
+    to_entity: plugin
+    cardinality: many_to_many
+  - id: rel_permission_project
+    from_entity: permission
+    to_entity: project
+    cardinality: many_to_one
+  - id: rel_tracer_partition
+    from_entity: tracer
+    to_entity: partition
+    cardinality: one_to_many
+  - id: rel_version_release
+    from_entity: version
+    to_entity: release
+    cardinality: many_to_many
+  - id: rel_message_equipment
+    from_entity: message
+    to_entity: equipment
+    cardinality: one_to_many
+  - id: rel_coupon_credit
+    from_entity: coupon
+    to_entity: credit
+    cardinality: one_to_many
+  - id: rel_exporter_allocation
+    from_entity: exporter
+    to_entity: allocation
+    cardinality: many_to_many
+  - id: rel_gateway_event
+    from_entity: gateway
+    to_entity: event
+    cardinality: many_to_many
+  - id: rel_validator_resource
+    from_entity: validator
+    to_entity: resource
+    cardinality: many_to_one
+  - id: rel_asset_rating
+    from_entity: asset
+    to_entity: rating
+    cardinality: many_to_many
+  - id: rel_authenticator_refund
+    from_entity: authenticator
+    to_entity: refund
+    cardinality: one_to_many
+  - id: rel_lesson_analyzer
+    from_entity: lesson
+    to_entity: analyzer
+    cardinality: many_to_many
+  - id: rel_proxy_alert
+    from_entity: proxy
+    to_entity: alert
+    cardinality: one_to_many
+  - id: rel_category_pod
+    from_entity: category
+    to_entity: pod
+    cardinality: many_to_many
+  - id: rel_report_booking
+    from_entity: report
+    to_entity: booking
+    cardinality: one_to_many
+  - id: rel_encoder_aggregator
+    from_entity: encoder
+    to_entity: aggregator
+    cardinality: many_to_many
+  - id: rel_debit_forecast
+    from_entity: debit
+    to_entity: forecast
+    cardinality: many_to_many
+  - id: rel_tracer_tag
+    from_entity: tracer
+    to_entity: tag
+    cardinality: one_to_many
+  - id: rel_resolution_order_line
+    from_entity: resolution
+    to_entity: order_line
+    cardinality: many_to_many
+  - id: rel_asset_revenue
+    from_entity: asset
+    to_entity: revenue
+    cardinality: many_to_many
+  - id: rel_sampler_ranker
+    from_entity: sampler
+    to_entity: ranker
+    cardinality: many_to_many
+  - id: rel_version_review
+    from_entity: version
+    to_entity: review
+    cardinality: many_to_many
+  - id: rel_signer_job
+    from_entity: signer
+    to_entity: job
+    cardinality: many_to_many
+  - id: rel_room_invoice
+    from_entity: room
+    to_entity: invoice
+    cardinality: one_to_many
+  - id: rel_pipeline_changelog
+    from_entity: pipeline
+    to_entity: changelog
+    cardinality: many_to_one
+  - id: rel_schedule_renderer
+    from_entity: schedule
+    to_entity: renderer
+    cardinality: one_to_many
+  - id: rel_backup_response
+    from_entity: backup
+    to_entity: response
+    cardinality: many_to_one
+  - id: rel_notification_supplier
+    from_entity: notification
+    to_entity: supplier
+    cardinality: one_to_many
+  - id: rel_subscription_plugin
+    from_entity: subscription
+    to_entity: plugin
+    cardinality: many_to_many
+  - id: rel_ranker_version
+    from_entity: ranker
+    to_entity: version
+    cardinality: many_to_one
+  - id: rel_compressor_allocation
+    from_entity: compressor
+    to_entity: allocation
+    cardinality: many_to_many
+  - id: rel_forecast_route
+    from_entity: forecast
+    to_entity: route
+    cardinality: one_to_many
+  - id: rel_notification_thread
+    from_entity: notification
+    to_entity: thread
+    cardinality: many_to_one
+  - id: rel_collector_presenter
+    from_entity: collector
+    to_entity: presenter
+    cardinality: many_to_many
+  - id: rel_group_inspector
+    from_entity: group
+    to_entity: inspector
+    cardinality: one_to_many
+  - id: rel_task_batch
+    from_entity: task
+    to_entity: batch
+    cardinality: one_to_many
+  - id: rel_authenticator_inspector
+    from_entity: authenticator
+    to_entity: inspector
+    cardinality: many_to_one
+  - id: rel_replica_buffer
+    from_entity: replica
+    to_entity: buffer
+    cardinality: one_to_many
+  - id: rel_crawler_indexer
+    from_entity: crawler
+    to_entity: indexer
+    cardinality: one_to_many
+  - id: rel_survey_hotfix
+    from_entity: survey
+    to_entity: hotfix
+    cardinality: many_to_one
+  - id: rel_pipeline_token
+    from_entity: pipeline
+    to_entity: token
+    cardinality: many_to_one
+  - id: rel_inventory_authenticator
+    from_entity: inventory
+    to_entity: authenticator
+    cardinality: many_to_many
+  - id: rel_partition_member
+    from_entity: partition
+    to_entity: member
+    cardinality: one_to_many
+  - id: rel_importer_return_item
+    from_entity: importer
+    to_entity: return_item
+    cardinality: many_to_many
+  - id: rel_patch_worker
+    from_entity: patch
+    to_entity: worker
+    cardinality: many_to_one
+  - id: rel_setting_proxy
+    from_entity: setting
+    to_entity: proxy
+    cardinality: many_to_one
+  - id: rel_lesson_event
+    from_entity: lesson
+    to_entity: event
+    cardinality: many_to_many
+  - id: rel_rule_stock
+    from_entity: rule
+    to_entity: stock
+    cardinality: many_to_many
+  - id: rel_plan_monitor
+    from_entity: plan
+    to_entity: monitor
+    cardinality: many_to_many
+  - id: rel_expense_coupon
+    from_entity: expense
+    to_entity: coupon
+    cardinality: many_to_one
+  - id: rel_formatter_thread
+    from_entity: formatter
+    to_entity: thread
+    cardinality: one_to_many
+  - id: rel_tenant_catalog
+    from_entity: tenant
+    to_entity: catalog
+    cardinality: many_to_one
+  - id: rel_index_review
+    from_entity: index
+    to_entity: review
+    cardinality: many_to_one
+  - id: rel_tenant_booking
+    from_entity: tenant
+    to_entity: booking
+    cardinality: many_to_one
+  - id: rel_queue_event
+    from_entity: queue
+    to_entity: event
+    cardinality: one_to_many
+  - id: rel_middleware_stock
+    from_entity: middleware
+    to_entity: stock
+    cardinality: many_to_one
+  - id: rel_refund_category
+    from_entity: refund
+    to_entity: category
+    cardinality: one_to_many
+  - id: rel_response_warehouse
+    from_entity: response
+    to_entity: warehouse
+    cardinality: one_to_many
+  - id: rel_subscription_monitor
+    from_entity: subscription
+    to_entity: monitor
+    cardinality: many_to_many
+  - id: rel_resource_dashboard
+    from_entity: resource
+    to_entity: dashboard
+    cardinality: many_to_one
+  - id: rel_department_discount
+    from_entity: department
+    to_entity: discount
+    cardinality: one_to_many
+  - id: rel_aggregator_metric
+    from_entity: aggregator
+    to_entity: metric
+    cardinality: many_to_many
+  - id: rel_token_shard
+    from_entity: token
+    to_entity: shard
+    cardinality: many_to_many
+  - id: rel_transaction_category
+    from_entity: transaction
+    to_entity: category
+    cardinality: many_to_one
+  - id: rel_student_approval
+    from_entity: student
+    to_entity: approval
+    cardinality: many_to_one
+  - id: rel_pull_request_classifier
+    from_entity: pull_request
+    to_entity: classifier
+    cardinality: many_to_many
+  - id: rel_patch_job
+    from_entity: patch
+    to_entity: job
+    cardinality: many_to_one
+  - id: rel_exporter_discount
+    from_entity: exporter
+    to_entity: discount
+    cardinality: many_to_one
+  - id: rel_lead_expense
+    from_entity: lead
+    to_entity: expense
+    cardinality: many_to_one
+  - id: rel_answer_worker
+    from_entity: answer
+    to_entity: worker
+    cardinality: many_to_many
+  - id: rel_source_team
+    from_entity: source
+    to_entity: team
+    cardinality: many_to_one
+  - id: rel_license_handler
+    from_entity: license
+    to_entity: handler
+    cardinality: many_to_many
+  - id: rel_branch_invoice
+    from_entity: branch
+    to_entity: invoice
+    cardinality: many_to_many
+  - id: rel_catalog_cluster
+    from_entity: catalog
+    to_entity: cluster
+    cardinality: many_to_one
+  - id: rel_observer_report
+    from_entity: observer
+    to_entity: report
+    cardinality: one_to_many
+  - id: rel_result_account
+    from_entity: result
+    to_entity: account
+    cardinality: many_to_many
+  - id: rel_reservation_answer
+    from_entity: reservation
+    to_entity: answer
+    cardinality: many_to_many
+  - id: rel_queue_snapshot
+    from_entity: queue
+    to_entity: snapshot
+    cardinality: many_to_many
+  - id: rel_signer_tag
+    from_entity: signer
+    to_entity: tag
+    cardinality: many_to_many
+  - id: rel_room_region
+    from_entity: room
+    to_entity: region
+    cardinality: many_to_many
+  - id: rel_diff_plugin
+    from_entity: diff
+    to_entity: plugin
+    cardinality: many_to_many
+  - id: rel_merge_payment
+    from_entity: merge
+    to_entity: payment
+    cardinality: one_to_many
+  - id: rel_token_task
+    from_entity: token
+    to_entity: task
+    cardinality: many_to_many
+  - id: rel_credit_stock
+    from_entity: credit
+    to_entity: stock
+    cardinality: one_to_many
+  - id: rel_indexer_invoice
+    from_entity: indexer
+    to_entity: invoice
+    cardinality: one_to_many
+  - id: rel_region_calendar
+    from_entity: region
+    to_entity: calendar
+    cardinality: many_to_one
+  - id: rel_predictor_decoder
+    from_entity: predictor
+    to_entity: decoder
+    cardinality: many_to_many
+  - id: rel_plan_presenter
+    from_entity: plan
+    to_entity: presenter
+    cardinality: many_to_many
+  - id: rel_recommender_scraper
+    from_entity: recommender
+    to_entity: scraper
+    cardinality: one_to_many
+  - id: rel_target_task
+    from_entity: target
+    to_entity: task
+    cardinality: one_to_many
+  - id: rel_diff_allocation
+    from_entity: diff
+    to_entity: allocation
+    cardinality: many_to_many
+  - id: rel_permission_importer
+    from_entity: permission
+    to_entity: importer
+    cardinality: many_to_many
+  - id: rel_member_aggregator
+    from_entity: member
+    to_entity: aggregator
+    cardinality: one_to_many
+  - id: rel_adapter_changelog
+    from_entity: adapter
+    to_entity: changelog
+    cardinality: many_to_one
+  - id: rel_channel_observer
+    from_entity: channel
+    to_entity: observer
+    cardinality: one_to_many
+  - id: rel_department_offer
+    from_entity: department
+    to_entity: offer
+    cardinality: many_to_one
+  - id: rel_task_setting
+    from_entity: task
+    to_entity: setting
+    cardinality: many_to_one
+  - id: rel_stage_pipeline
+    from_entity: stage
+    to_entity: pipeline
+    cardinality: many_to_many
+  - id: rel_transfer_diff
+    from_entity: transfer
+    to_entity: diff
+    cardinality: one_to_many
+  - id: rel_lesson_department
+    from_entity: lesson
+    to_entity: department
+    cardinality: many_to_many
+  - id: rel_archive_discount
+    from_entity: archive
+    to_entity: discount
+    cardinality: one_to_many
+  - id: rel_importer_ticket
+    from_entity: importer
+    to_entity: ticket
+    cardinality: many_to_many
+  - id: rel_asset_badge
+    from_entity: asset
+    to_entity: badge
+    cardinality: many_to_one
+  - id: rel_inventory_index
+    from_entity: inventory
+    to_entity: index
+    cardinality: one_to_many
+  - id: rel_scorer_partition
+    from_entity: scorer
+    to_entity: partition
+    cardinality: one_to_many
+  - id: rel_allocation_snapshot
+    from_entity: allocation
+    to_entity: snapshot
+    cardinality: one_to_many
+  - id: rel_collector_handler
+    from_entity: collector
+    to_entity: handler
+    cardinality: one_to_many
+  - id: rel_manifest_certificate
+    from_entity: manifest
+    to_entity: certificate
+    cardinality: many_to_one
+  - id: rel_classifier_job
+    from_entity: classifier
+    to_entity: job
+    cardinality: many_to_one
+  - id: rel_schema_proxy
+    from_entity: schema
+    to_entity: proxy
+    cardinality: many_to_one
+  - id: rel_diff_offer
+    from_entity: diff
+    to_entity: offer
+    cardinality: one_to_many
+  - id: rel_plan_category
+    from_entity: plan
+    to_entity: category
+    cardinality: one_to_many
+  - id: rel_compressor_offer
+    from_entity: compressor
+    to_entity: offer
+    cardinality: one_to_many
+  - id: rel_shard_proxy
+    from_entity: shard
+    to_entity: proxy
+    cardinality: many_to_many
+  - id: rel_result_group
+    from_entity: result
+    to_entity: group
+    cardinality: many_to_many
+  - id: rel_replica_booking
+    from_entity: replica
+    to_entity: booking
+    cardinality: one_to_many
+  - id: rel_project_classifier
+    from_entity: project
+    to_entity: classifier
+    cardinality: one_to_many
+  - id: rel_stream_index
+    from_entity: stream
+    to_entity: index
+    cardinality: one_to_many
+  - id: rel_transformer_session
+    from_entity: transformer
+    to_entity: session
+    cardinality: many_to_one
+  - id: rel_signer_transformer
+    from_entity: signer
+    to_entity: transformer
+    cardinality: one_to_many
+  - id: rel_equipment_catalog
+    from_entity: equipment
+    to_entity: catalog
+    cardinality: many_to_many
+  - id: rel_authenticator_message
+    from_entity: authenticator
+    to_entity: message
+    cardinality: many_to_one
+  - id: rel_report_cache
+    from_entity: report
+    to_entity: cache
+    cardinality: many_to_many
+  - id: rel_partition_employee
+    from_entity: partition
+    to_entity: employee
+    cardinality: many_to_one
+  - id: rel_region_question
+    from_entity: region
+    to_entity: question
+    cardinality: many_to_many
+  - id: rel_equipment_room
+    from_entity: equipment
+    to_entity: room
+    cardinality: one_to_many
+  - id: rel_deployment_employee
+    from_entity: deployment
+    to_entity: employee
+    cardinality: many_to_many
+  - id: rel_notification_authenticator
+    from_entity: notification
+    to_entity: authenticator
+    cardinality: one_to_many
+  - id: rel_inventory_stock
+    from_entity: inventory
+    to_entity: stock
+    cardinality: one_to_many
+  - id: rel_formatter_supplier
+    from_entity: formatter
+    to_entity: supplier
+    cardinality: many_to_many
+  - id: rel_metric_patch
+    from_entity: metric
+    to_entity: patch
+    cardinality: one_to_many
+  - id: rel_transfer_stage
+    from_entity: transfer
+    to_entity: stage
+    cardinality: many_to_many
+  - id: rel_reward_course
+    from_entity: reward
+    to_entity: course
+    cardinality: many_to_one
+  - id: rel_shipment_recommender
+    from_entity: shipment
+    to_entity: recommender
+    cardinality: many_to_one
+  - id: rel_handler_manifest
+    from_entity: handler
+    to_entity: manifest
+    cardinality: one_to_many
+  - id: rel_resolution_budget
+    from_entity: resolution
+    to_entity: budget
+    cardinality: one_to_many
+  - id: rel_exporter_instructor
+    from_entity: exporter
+    to_entity: instructor
+    cardinality: many_to_many
+  - id: rel_shard_workflow
+    from_entity: shard
+    to_entity: workflow
+    cardinality: many_to_many
+  - id: rel_discount_collector
+    from_entity: discount
+    to_entity: collector
+    cardinality: one_to_many
+  - id: rel_setting_expense
+    from_entity: setting
+    to_entity: expense
+    cardinality: many_to_one
+  - id: rel_store_tenant
+    from_entity: store
+    to_entity: tenant
+    cardinality: many_to_one
+  - id: rel_comment_authorizer
+    from_entity: comment
+    to_entity: authorizer
+    cardinality: one_to_many
+  - id: rel_encryptor_calendar
+    from_entity: encryptor
+    to_entity: calendar
+    cardinality: many_to_many
+  - id: rel_channel_pull_request
+    from_entity: channel
+    to_entity: pull_request
+    cardinality: many_to_many
+  - id: rel_promotion_deal
+    from_entity: promotion
+    to_entity: deal
+    cardinality: many_to_one
+  - id: rel_monitor_tracer
+    from_entity: monitor
+    to_entity: tracer
+    cardinality: many_to_many
+  - id: rel_transformer_permission
+    from_entity: transformer
+    to_entity: permission
+    cardinality: one_to_many
+  - id: rel_registry_response
+    from_entity: registry
+    to_entity: response
+    cardinality: many_to_one
+  - id: rel_setting_metric
+    from_entity: setting
+    to_entity: metric
+    cardinality: many_to_one
+  - id: rel_trigger_shipment
+    from_entity: trigger
+    to_entity: shipment
+    cardinality: one_to_many
+  - id: rel_merge_environment
+    from_entity: merge
+    to_entity: environment
+    cardinality: one_to_many
+  - id: rel_invite_merge
+    from_entity: invite
+    to_entity: merge
+    cardinality: many_to_one
+  - id: rel_buffer_comment
+    from_entity: buffer
+    to_entity: comment
+    cardinality: many_to_one
+  - id: rel_pipeline_transfer
+    from_entity: pipeline
+    to_entity: transfer
+    cardinality: many_to_many
+  - id: rel_inspector_policy
+    from_entity: inspector
+    to_entity: policy
+    cardinality: many_to_many
+  - id: rel_batch_renderer
+    from_entity: batch
+    to_entity: renderer
+    cardinality: one_to_many
+  - id: rel_cluster_store
+    from_entity: cluster
+    to_entity: store
+    cardinality: many_to_one
+  - id: rel_milestone_enricher
+    from_entity: milestone
+    to_entity: enricher
+    cardinality: many_to_one
+  - id: rel_tenant_invite
+    from_entity: tenant
+    to_entity: invite
+    cardinality: many_to_many
+  - id: rel_manifest_calendar
+    from_entity: manifest
+    to_entity: calendar
+    cardinality: many_to_one
+  - id: rel_importer_merge
+    from_entity: importer
+    to_entity: merge
+    cardinality: many_to_many
+  - id: rel_service_changelog
+    from_entity: service
+    to_entity: changelog
+    cardinality: many_to_one
+  - id: rel_schema_middleware
+    from_entity: schema
+    to_entity: middleware
+    cardinality: many_to_one
+  - id: rel_expense_manifest
+    from_entity: expense
+    to_entity: manifest
+    cardinality: many_to_one
+  - id: rel_lead_group
+    from_entity: lead
+    to_entity: group
+    cardinality: many_to_one
+  - id: rel_deliverable_tracer
+    from_entity: deliverable
+    to_entity: tracer
+    cardinality: many_to_one
+  - id: rel_calendar_manifest
+    from_entity: calendar
+    to_entity: manifest
+    cardinality: one_to_many
+  - id: rel_category_lesson
+    from_entity: category
+    to_entity: lesson
+    cardinality: many_to_one
+  - id: rel_bridge_merge
+    from_entity: bridge
+    to_entity: merge
+    cardinality: one_to_many
+  - id: rel_revenue_connector
+    from_entity: revenue
+    to_entity: connector
+    cardinality: one_to_many
+  - id: rel_stream_hotfix
+    from_entity: stream
+    to_entity: hotfix
+    cardinality: many_to_one
+  - id: rel_middleware_enricher
+    from_entity: middleware
+    to_entity: enricher
+    cardinality: many_to_one
+  - id: rel_endpoint_node
+    from_entity: endpoint
+    to_entity: node
+    cardinality: many_to_one
+  - id: rel_role_decoder
+    from_entity: role
+    to_entity: decoder
+    cardinality: many_to_many
+  - id: rel_inspector_proxy
+    from_entity: inspector
+    to_entity: proxy
+    cardinality: one_to_many
+  - id: rel_rollback_project
+    from_entity: rollback
+    to_entity: project
+    cardinality: many_to_one
+  - id: rel_category_task
+    from_entity: category
+    to_entity: task
+    cardinality: many_to_many
+  - id: rel_presenter_cluster
+    from_entity: presenter
+    to_entity: cluster
+    cardinality: one_to_many
+  - id: rel_sanitizer_template
+    from_entity: sanitizer
+    to_entity: template
+    cardinality: many_to_many
+  - id: rel_queue_sink
+    from_entity: queue
+    to_entity: sink
+    cardinality: many_to_many
+  - id: rel_warehouse_handler
+    from_entity: warehouse
+    to_entity: handler
+    cardinality: many_to_many
+  - id: rel_diff_promotion
+    from_entity: diff
+    to_entity: promotion
+    cardinality: many_to_many
+  - id: rel_lead_rule
+    from_entity: lead
+    to_entity: rule
+    cardinality: many_to_one
+  - id: rel_scheduler_journal
+    from_entity: scheduler
+    to_entity: journal
+    cardinality: one_to_many
+  - id: rel_org_store
+    from_entity: org
+    to_entity: store
+    cardinality: many_to_many
+  - id: rel_campaign_message
+    from_entity: campaign
+    to_entity: message
+    cardinality: one_to_many
+  - id: rel_queue_rule
+    from_entity: queue
+    to_entity: rule
+    cardinality: one_to_many
+  - id: rel_preference_schedule
+    from_entity: preference
+    to_entity: schedule
+    cardinality: many_to_many
+  - id: rel_report_stage
+    from_entity: report
+    to_entity: stage
+    cardinality: many_to_many
+  - id: rel_milestone_predictor
+    from_entity: milestone
+    to_entity: predictor
+    cardinality: one_to_many
+  - id: rel_reconciliation_forecast
+    from_entity: reconciliation
+    to_entity: forecast
+    cardinality: one_to_many
+  - id: rel_catalog_resolution
+    from_entity: catalog
+    to_entity: resolution
+    cardinality: many_to_one
+  - id: rel_milestone_answer
+    from_entity: milestone
+    to_entity: answer
+    cardinality: one_to_many
+  - id: rel_expense_certificate
+    from_entity: expense
+    to_entity: certificate
+    cardinality: one_to_many
+  - id: rel_course_report
+    from_entity: course
+    to_entity: report
+    cardinality: many_to_one
+  - id: rel_ticket_promotion
+    from_entity: ticket
+    to_entity: promotion
+    cardinality: one_to_many
+  - id: rel_stream_worker
+    from_entity: stream
+    to_entity: worker
+    cardinality: many_to_one
+  - id: rel_message_artifact
+    from_entity: message
+    to_entity: artifact
+    cardinality: many_to_many
+  - id: rel_inspector_stage
+    from_entity: inspector
+    to_entity: stage
+    cardinality: many_to_one
+  - id: rel_formatter_message
+    from_entity: formatter
+    to_entity: message
+    cardinality: one_to_many
+  - id: rel_catalog_invite
+    from_entity: catalog
+    to_entity: invite
+    cardinality: one_to_many
+  - id: rel_opportunity_handler
+    from_entity: opportunity
+    to_entity: handler
+    cardinality: many_to_one
+  - id: rel_review_debit
+    from_entity: review
+    to_entity: debit
+    cardinality: many_to_many
+  - id: rel_team_answer
+    from_entity: team
+    to_entity: answer
+    cardinality: many_to_one
+  - id: rel_pod_reservation
+    from_entity: pod
+    to_entity: reservation
+    cardinality: many_to_one
+  - id: rel_ticket_coupon
+    from_entity: ticket
+    to_entity: coupon
+    cardinality: one_to_many
+  - id: rel_route_encoder
+    from_entity: route
+    to_entity: encoder
+    cardinality: many_to_many
+  - id: rel_token_discount
+    from_entity: token
+    to_entity: discount
+    cardinality: many_to_many
+  - id: rel_product_feature
+    from_entity: product
+    to_entity: feature
+    cardinality: one_to_many
+  - id: rel_target_grade
+    from_entity: target
+    to_entity: grade
+    cardinality: many_to_many
+  - id: rel_equipment_formatter
+    from_entity: equipment
+    to_entity: formatter
+    cardinality: one_to_many
+  - id: rel_equipment_task
+    from_entity: equipment
+    to_entity: task
+    cardinality: one_to_many
+  - id: rel_event_deployment
+    from_entity: event
+    to_entity: deployment
+    cardinality: many_to_many
+  - id: rel_backup_room
+    from_entity: backup
+    to_entity: room
+    cardinality: many_to_many
+  - id: rel_discount_store
+    from_entity: discount
+    to_entity: store
+    cardinality: one_to_many
+  - id: rel_plugin_tenant
+    from_entity: plugin
+    to_entity: tenant
+    cardinality: many_to_many
+  - id: rel_reward_source
+    from_entity: reward
+    to_entity: source
+    cardinality: many_to_many
+  - id: rel_buffer_budget
+    from_entity: buffer
+    to_entity: budget
+    cardinality: many_to_one
+  - id: rel_rating_debit
+    from_entity: rating
+    to_entity: debit
+    cardinality: one_to_many
+  - id: rel_allocation_conflict
+    from_entity: allocation
+    to_entity: conflict
+    cardinality: one_to_many
+  - id: rel_scraper_report
+    from_entity: scraper
+    to_entity: report
+    cardinality: many_to_one
+  - id: rel_proxy_registry
+    from_entity: proxy
+    to_entity: registry
+    cardinality: one_to_many
+  - id: rel_middleware_project
+    from_entity: middleware
+    to_entity: project
+    cardinality: many_to_one
+  - id: rel_department_metric
+    from_entity: department
+    to_entity: metric
+    cardinality: many_to_many
+  - id: rel_resource_scope
+    from_entity: resource
+    to_entity: scope
+    cardinality: many_to_many
+  - id: rel_org_alert
+    from_entity: org
+    to_entity: alert
+    cardinality: many_to_many
+  - id: rel_catalog_metric
+    from_entity: catalog
+    to_entity: metric
+    cardinality: one_to_many
+  - id: rel_buffer_milestone
+    from_entity: buffer
+    to_entity: milestone
+    cardinality: many_to_one
+  - id: rel_debit_stream
+    from_entity: debit
+    to_entity: stream
+    cardinality: many_to_many
+  - id: rel_deal_endpoint
+    from_entity: deal
+    to_entity: endpoint
+    cardinality: one_to_many
+  - id: rel_plugin_registry
+    from_entity: plugin
+    to_entity: registry
+    cardinality: many_to_many
+  - id: rel_action_tracer
+    from_entity: action
+    to_entity: tracer
+    cardinality: many_to_many
+  - id: rel_deal_scope
+    from_entity: deal
+    to_entity: scope
+    cardinality: many_to_one
+  - id: rel_inventory_asset
+    from_entity: inventory
+    to_entity: asset
+    cardinality: many_to_many
+  - id: rel_license_queue
+    from_entity: license
+    to_entity: queue
+    cardinality: many_to_many
+  - id: rel_opportunity_analyzer
+    from_entity: opportunity
+    to_entity: analyzer
+    cardinality: many_to_many
+  - id: rel_adapter_shipment
+    from_entity: adapter
+    to_entity: shipment
+    cardinality: many_to_many
+  - id: rel_scope_grade
+    from_entity: scope
+    to_entity: grade
+    cardinality: many_to_many
+  - id: rel_exporter_node
+    from_entity: exporter
+    to_entity: node
+    cardinality: many_to_many
+  - id: rel_feedback_inspector
+    from_entity: feedback
+    to_entity: inspector
+    cardinality: many_to_one
+  - id: rel_pod_policy
+    from_entity: pod
+    to_entity: policy
+    cardinality: many_to_one
+  - id: rel_version_adapter
+    from_entity: version
+    to_entity: adapter
+    cardinality: many_to_many
+  - id: rel_sink_exporter
+    from_entity: sink
+    to_entity: exporter
+    cardinality: one_to_many
+  - id: rel_dashboard_authorizer
+    from_entity: dashboard
+    to_entity: authorizer
+    cardinality: many_to_one
+  - id: rel_employee_environment
+    from_entity: employee
+    to_entity: environment
+    cardinality: many_to_many
+  - id: rel_license_archive
+    from_entity: license
+    to_entity: archive
+    cardinality: many_to_one
+  - id: rel_partition_stage
+    from_entity: partition
+    to_entity: stage
+    cardinality: one_to_many
+  - id: rel_alert_batch
+    from_entity: alert
+    to_entity: batch
+    cardinality: many_to_many
+  - id: rel_preference_batch
+    from_entity: preference
+    to_entity: batch
+    cardinality: many_to_many
+  - id: rel_exporter_buffer
+    from_entity: exporter
+    to_entity: buffer
+    cardinality: one_to_many
+  - id: rel_recommender_classifier
+    from_entity: recommender
+    to_entity: classifier
+    cardinality: many_to_one
+  - id: rel_profiler_metric
+    from_entity: profiler
+    to_entity: metric
+    cardinality: many_to_many
+  - id: rel_template_resolution
+    from_entity: template
+    to_entity: resolution
+    cardinality: one_to_many
+  - id: rel_compressor_policy
+    from_entity: compressor
+    to_entity: policy
+    cardinality: many_to_many
+  - id: rel_order_line_stage
+    from_entity: order_line
+    to_entity: stage
+    cardinality: many_to_one
+  - id: rel_team_hotfix
+    from_entity: team
+    to_entity: hotfix
+    cardinality: one_to_many
+  - id: rel_diff_reservation
+    from_entity: diff
+    to_entity: reservation
+    cardinality: many_to_many
+  - id: rel_presenter_inspector
+    from_entity: presenter
+    to_entity: inspector
+    cardinality: many_to_many
+  - id: rel_enricher_collector
+    from_entity: enricher
+    to_entity: collector
+    cardinality: one_to_many
+  - id: rel_buffer_rule
+    from_entity: buffer
+    to_entity: rule
+    cardinality: many_to_one
+  - id: rel_course_reward
+    from_entity: course
+    to_entity: reward
+    cardinality: many_to_many
+  - id: rel_deal_response
+    from_entity: deal
+    to_entity: response
+    cardinality: one_to_many
+  - id: rel_presenter_discount
+    from_entity: presenter
+    to_entity: discount
+    cardinality: many_to_many
+  - id: rel_template_dispatcher
+    from_entity: template
+    to_entity: dispatcher
+    cardinality: many_to_many
+  - id: rel_action_milestone
+    from_entity: action
+    to_entity: milestone
+    cardinality: one_to_many
+  - id: rel_booking_resolution
+    from_entity: booking
+    to_entity: resolution
+    cardinality: many_to_many
+  - id: rel_achievement_discount
+    from_entity: achievement
+    to_entity: discount
+    cardinality: many_to_one
+  - id: rel_environment_authenticator
+    from_entity: environment
+    to_entity: authenticator
+    cardinality: many_to_many
+  - id: rel_return_item_transfer
+    from_entity: return_item
+    to_entity: transfer
+    cardinality: one_to_many
+  - id: rel_presenter_dashboard
+    from_entity: presenter
+    to_entity: dashboard
+    cardinality: one_to_many
+  - id: rel_project_discount
+    from_entity: project
+    to_entity: discount
+    cardinality: many_to_many
+  - id: rel_category_calendar
+    from_entity: category
+    to_entity: calendar
+    cardinality: one_to_many
+  - id: rel_encoder_student
+    from_entity: encoder
+    to_entity: student
+    cardinality: many_to_many
+  - id: rel_policy_workflow
+    from_entity: policy
+    to_entity: workflow
+    cardinality: many_to_one
+  - id: rel_branch_badge
+    from_entity: branch
+    to_entity: badge
+    cardinality: many_to_many
+  - id: rel_aggregator_badge
+    from_entity: aggregator
+    to_entity: badge
+    cardinality: many_to_one
+  - id: rel_feature_stream
+    from_entity: feature
+    to_entity: stream
+    cardinality: many_to_many
+  - id: rel_service_answer
+    from_entity: service
+    to_entity: answer
+    cardinality: many_to_one
+  - id: rel_ticket_signer
+    from_entity: ticket
+    to_entity: signer
+    cardinality: many_to_many
+  - id: rel_response_transformer
+    from_entity: response
+    to_entity: transformer
+    cardinality: many_to_one
+  - id: rel_event_subscription
+    from_entity: event
+    to_entity: subscription
+    cardinality: one_to_many
+  - id: rel_asset_observer
+    from_entity: asset
+    to_entity: observer
+    cardinality: one_to_many
+  - id: rel_subscription_authorizer
+    from_entity: subscription
+    to_entity: authorizer
+    cardinality: many_to_one
+  - id: rel_transaction_pull_request
+    from_entity: transaction
+    to_entity: pull_request
+    cardinality: many_to_one
+  - id: rel_ledger_encoder
+    from_entity: ledger
+    to_entity: encoder
+    cardinality: one_to_many
+  - id: rel_policy_sanitizer
+    from_entity: policy
+    to_entity: sanitizer
+    cardinality: many_to_one
+  - id: rel_scraper_discount
+    from_entity: scraper
+    to_entity: discount
+    cardinality: one_to_many
+  - id: rel_discount_validator
+    from_entity: discount
+    to_entity: validator
+    cardinality: many_to_one
+  - id: rel_renderer_comment
+    from_entity: renderer
+    to_entity: comment
+    cardinality: many_to_many
+  - id: rel_environment_survey
+    from_entity: environment
+    to_entity: survey
+    cardinality: many_to_many
+  - id: rel_ranker_analyzer
+    from_entity: ranker
+    to_entity: analyzer
+    cardinality: many_to_one
+  - id: rel_permission_queue
+    from_entity: permission
+    to_entity: queue
+    cardinality: many_to_one
+  - id: rel_department_transfer
+    from_entity: department
+    to_entity: transfer
+    cardinality: one_to_many
+  - id: rel_snapshot_indexer
+    from_entity: snapshot
+    to_entity: indexer
+    cardinality: one_to_many
+  - id: rel_department_product
+    from_entity: department
+    to_entity: product
+    cardinality: one_to_many
+  - id: rel_deployment_proxy
+    from_entity: deployment
+    to_entity: proxy
+    cardinality: many_to_one
+  - id: rel_resource_coupon
+    from_entity: resource
+    to_entity: coupon
+    cardinality: one_to_many
+  - id: rel_enricher_diff
+    from_entity: enricher
+    to_entity: diff
+    cardinality: many_to_many
+  - id: rel_trigger_target
+    from_entity: trigger
+    to_entity: target
+    cardinality: many_to_many
+  - id: rel_invite_badge
+    from_entity: invite
+    to_entity: badge
+    cardinality: many_to_one
+  - id: rel_license_asset
+    from_entity: license
+    to_entity: asset
+    cardinality: many_to_one
+  - id: rel_predictor_team
+    from_entity: predictor
+    to_entity: team
+    cardinality: many_to_many
+  - id: rel_student_observer
+    from_entity: student
+    to_entity: observer
+    cardinality: many_to_one
+  - id: rel_customer_recommender
+    from_entity: customer
+    to_entity: recommender
+    cardinality: one_to_many
+  - id: rel_offer_deployment
+    from_entity: offer
+    to_entity: deployment
+    cardinality: many_to_many
+  - id: rel_scraper_backup
+    from_entity: scraper
+    to_entity: backup
+    cardinality: many_to_one
+  - id: rel_buffer_transformer
+    from_entity: buffer
+    to_entity: transformer
+    cardinality: one_to_many
+  - id: rel_result_catalog
+    from_entity: result
+    to_entity: catalog
+    cardinality: one_to_many
+  - id: rel_comment_reconciliation
+    from_entity: comment
+    to_entity: reconciliation
+    cardinality: many_to_many
+  - id: rel_rating_snapshot
+    from_entity: rating
+    to_entity: snapshot
+    cardinality: many_to_one
+  - id: rel_policy_deliverable
+    from_entity: policy
+    to_entity: deliverable
+    cardinality: many_to_one
+  - id: rel_transaction_instructor
+    from_entity: transaction
+    to_entity: instructor
+    cardinality: one_to_many
+  - id: rel_question_shard
+    from_entity: question
+    to_entity: shard
+    cardinality: one_to_many
+  - id: rel_asset_lead
+    from_entity: asset
+    to_entity: lead
+    cardinality: many_to_many
+  - id: rel_analyzer_environment
+    from_entity: analyzer
+    to_entity: environment
+    cardinality: many_to_one
+  - id: rel_instructor_encoder
+    from_entity: instructor
+    to_entity: encoder
+    cardinality: one_to_many
+  - id: rel_collector_question
+    from_entity: collector
+    to_entity: question
+    cardinality: many_to_one
+  - id: rel_encryptor_budget
+    from_entity: encryptor
+    to_entity: budget
+    cardinality: one_to_many
+  - id: rel_opportunity_message
+    from_entity: opportunity
+    to_entity: message
+    cardinality: one_to_many
+  - id: rel_scheduler_middleware
+    from_entity: scheduler
+    to_entity: middleware
+    cardinality: many_to_many
+  - id: rel_presenter_pipeline
+    from_entity: presenter
+    to_entity: pipeline
+    cardinality: many_to_many
+  - id: rel_budget_transformer
+    from_entity: budget
+    to_entity: transformer
+    cardinality: one_to_many
+  - id: rel_inventory_stream
+    from_entity: inventory
+    to_entity: stream
+    cardinality: many_to_one
+  - id: rel_request_target
+    from_entity: request
+    to_entity: target
+    cardinality: one_to_many
+  - id: rel_notification_org
+    from_entity: notification
+    to_entity: org
+    cardinality: many_to_many
+  - id: rel_cache_stock
+    from_entity: cache
+    to_entity: stock
+    cardinality: one_to_many
+  - id: rel_sampler_pull_request
+    from_entity: sampler
+    to_entity: pull_request
+    cardinality: one_to_many
+  - id: rel_scraper_branch
+    from_entity: scraper
+    to_entity: branch
+    cardinality: many_to_many
+  - id: rel_approval_formatter
+    from_entity: approval
+    to_entity: formatter
+    cardinality: many_to_one
+  - id: rel_authorizer_scraper
+    from_entity: authorizer
+    to_entity: scraper
+    cardinality: many_to_many
+  - id: rel_category_version
+    from_entity: category
+    to_entity: version
+    cardinality: one_to_many
+  - id: rel_patch_profiler
+    from_entity: patch
+    to_entity: profiler
+    cardinality: one_to_many
+  - id: rel_supplier_rollback
+    from_entity: supplier
+    to_entity: rollback
+    cardinality: many_to_one
+  - id: rel_campaign_pull_request
+    from_entity: campaign
+    to_entity: pull_request
+    cardinality: many_to_many
+  - id: rel_setting_environment
+    from_entity: setting
+    to_entity: environment
+    cardinality: many_to_many
+  - id: rel_alert_group
+    from_entity: alert
+    to_entity: group
+    cardinality: one_to_many
+  - id: rel_release_replica
+    from_entity: release
+    to_entity: replica
+    cardinality: many_to_one
+  - id: rel_authorizer_preference
+    from_entity: authorizer
+    to_entity: preference
+    cardinality: many_to_many
+  - id: rel_pod_action
+    from_entity: pod
+    to_entity: action
+    cardinality: many_to_one
+  - id: rel_registry_shard
+    from_entity: registry
+    to_entity: shard
+    cardinality: many_to_one
+  - id: rel_org_forecast
+    from_entity: org
+    to_entity: forecast
+    cardinality: many_to_many
+  - id: rel_queue_org
+    from_entity: queue
+    to_entity: org
+    cardinality: many_to_many
+  - id: rel_session_resolution
+    from_entity: session
+    to_entity: resolution
+    cardinality: one_to_many
+  - id: rel_verifier_opportunity
+    from_entity: verifier
+    to_entity: opportunity
+    cardinality: many_to_many
+  - id: rel_payment_transfer
+    from_entity: payment
+    to_entity: transfer
+    cardinality: one_to_many
+  - id: rel_account_scorer
+    from_entity: account
+    to_entity: scorer
+    cardinality: many_to_one
+  - id: rel_node_store
+    from_entity: node
+    to_entity: store
+    cardinality: many_to_one
+  - id: rel_job_calendar
+    from_entity: job
+    to_entity: calendar
+    cardinality: many_to_many
+  - id: rel_channel_commit
+    from_entity: channel
+    to_entity: commit
+    cardinality: many_to_one
+  - id: rel_region_token
+    from_entity: region
+    to_entity: token
+    cardinality: many_to_one
+  - id: rel_discount_ledger
+    from_entity: discount
+    to_entity: ledger
+    cardinality: many_to_one
+  - id: rel_renderer_target
+    from_entity: renderer
+    to_entity: target
+    cardinality: many_to_many
+  - id: rel_classifier_validator
+    from_entity: classifier
+    to_entity: validator
+    cardinality: one_to_many
+  - id: rel_stock_return_item
+    from_entity: stock
+    to_entity: return_item
+    cardinality: one_to_many
+  - id: rel_category_authorizer
+    from_entity: category
+    to_entity: authorizer
+    cardinality: many_to_many
+  - id: rel_commit_target
+    from_entity: commit
+    to_entity: target
+    cardinality: many_to_many
+  - id: rel_booking_budget
+    from_entity: booking
+    to_entity: budget
+    cardinality: many_to_one
+  - id: rel_branch_debit
+    from_entity: branch
+    to_entity: debit
+    cardinality: many_to_many
+  - id: rel_revenue_classifier
+    from_entity: revenue
+    to_entity: classifier
+    cardinality: many_to_one
+  - id: rel_account_scraper
+    from_entity: account
+    to_entity: scraper
+    cardinality: many_to_one
+  - id: rel_deal_member
+    from_entity: deal
+    to_entity: member
+    cardinality: many_to_many
+  - id: rel_inspector_diff
+    from_entity: inspector
+    to_entity: diff
+    cardinality: one_to_many
+  - id: rel_hotfix_return_item
+    from_entity: hotfix
+    to_entity: return_item
+    cardinality: many_to_one
+  - id: rel_course_team
+    from_entity: course
+    to_entity: team
+    cardinality: one_to_many
+  - id: rel_notification_achievement
+    from_entity: notification
+    to_entity: achievement
+    cardinality: many_to_one
+  - id: rel_analyzer_formatter
+    from_entity: analyzer
+    to_entity: formatter
+    cardinality: many_to_one
+  - id: rel_employee_compressor
+    from_entity: employee
+    to_entity: compressor
+    cardinality: one_to_many
+  - id: rel_stream_renderer
+    from_entity: stream
+    to_entity: renderer
+    cardinality: many_to_one
+  - id: rel_answer_preference
+    from_entity: answer
+    to_entity: preference
+    cardinality: many_to_one
+  - id: rel_subscription_route
+    from_entity: subscription
+    to_entity: route
+    cardinality: many_to_one
+  - id: rel_shard_gateway
+    from_entity: shard
+    to_entity: gateway
+    cardinality: many_to_many
+  - id: rel_profiler_ticket
+    from_entity: profiler
+    to_entity: ticket
+    cardinality: many_to_one
+  - id: rel_ranker_task
+    from_entity: ranker
+    to_entity: task
+    cardinality: one_to_many
+  - id: rel_partition_survey
+    from_entity: partition
+    to_entity: survey
+    cardinality: many_to_many
+  - id: rel_exporter_session
+    from_entity: exporter
+    to_entity: session
+    cardinality: many_to_one
+  - id: rel_middleware_promotion
+    from_entity: middleware
+    to_entity: promotion
+    cardinality: many_to_one
+  - id: rel_predictor_cluster
+    from_entity: predictor
+    to_entity: cluster
+    cardinality: one_to_many
+  - id: rel_cluster_gateway
+    from_entity: cluster
+    to_entity: gateway
+    cardinality: many_to_many
+  - id: rel_deliverable_question
+    from_entity: deliverable
+    to_entity: question
+    cardinality: one_to_many
+  - id: rel_report_compressor
+    from_entity: report
+    to_entity: compressor
+    cardinality: many_to_many
+  - id: rel_request_batch
+    from_entity: request
+    to_entity: batch
+    cardinality: one_to_many
+  - id: rel_achievement_campaign
+    from_entity: achievement
+    to_entity: campaign
+    cardinality: many_to_many
+  - id: rel_endpoint_recommender
+    from_entity: endpoint
+    to_entity: recommender
+    cardinality: many_to_one
+  - id: rel_connector_authenticator
+    from_entity: connector
+    to_entity: authenticator
+    cardinality: one_to_many
+  - id: rel_conflict_trigger
+    from_entity: conflict
+    to_entity: trigger
+    cardinality: many_to_one
+  - id: rel_calendar_enricher
+    from_entity: calendar
+    to_entity: enricher
+    cardinality: many_to_many
+  - id: rel_return_item_version
+    from_entity: return_item
+    to_entity: version
+    cardinality: one_to_many
+  - id: rel_aggregator_queue
+    from_entity: aggregator
+    to_entity: queue
+    cardinality: one_to_many
+  - id: rel_alert_deal
+    from_entity: alert
+    to_entity: deal
+    cardinality: one_to_many
+  - id: rel_snapshot_scraper
+    from_entity: snapshot
+    to_entity: scraper
+    cardinality: many_to_many
+  - id: rel_scope_answer
+    from_entity: scope
+    to_entity: answer
+    cardinality: many_to_one
+  - id: rel_deal_tracer
+    from_entity: deal
+    to_entity: tracer
+    cardinality: many_to_one
+  - id: rel_member_session
+    from_entity: member
+    to_entity: session
+    cardinality: many_to_many
+  - id: rel_batch_queue
+    from_entity: batch
+    to_entity: queue
+    cardinality: many_to_many
+  - id: rel_patch_target
+    from_entity: patch
+    to_entity: target
+    cardinality: one_to_many
+  - id: rel_quiz_student
+    from_entity: quiz
+    to_entity: student
+    cardinality: many_to_one
+  - id: rel_asset_validator
+    from_entity: asset
+    to_entity: validator
+    cardinality: many_to_one
+  - id: rel_tenant_inventory
+    from_entity: tenant
+    to_entity: inventory
+    cardinality: many_to_one
+  - id: rel_branch_analyzer
+    from_entity: branch
+    to_entity: analyzer
+    cardinality: many_to_one
+  - id: rel_event_certificate
+    from_entity: event
+    to_entity: certificate
+    cardinality: one_to_many
+  - id: rel_verifier_proxy
+    from_entity: verifier
+    to_entity: proxy
+    cardinality: many_to_many
+  - id: rel_project_store
+    from_entity: project
+    to_entity: store
+    cardinality: many_to_one
+  - id: rel_parser_service
+    from_entity: parser
+    to_entity: service
+    cardinality: many_to_many
+  - id: rel_signer_resolution
+    from_entity: signer
+    to_entity: resolution
+    cardinality: many_to_one
+  - id: rel_policy_template
+    from_entity: policy
+    to_entity: template
+    cardinality: one_to_many
+  - id: rel_lead_customer
+    from_entity: lead
+    to_entity: customer
+    cardinality: many_to_one
+  - id: rel_archive_ranker
+    from_entity: archive
+    to_entity: ranker
+    cardinality: many_to_one
+  - id: rel_indexer_scraper
+    from_entity: indexer
+    to_entity: scraper
+    cardinality: one_to_many
+  - id: rel_quiz_aggregator
+    from_entity: quiz
+    to_entity: aggregator
+    cardinality: many_to_many
+  - id: rel_profiler_preference
+    from_entity: profiler
+    to_entity: preference
+    cardinality: one_to_many
+  - id: rel_answer_merge
+    from_entity: answer
+    to_entity: merge
+    cardinality: one_to_many
+  - id: rel_exporter_coupon
+    from_entity: exporter
+    to_entity: coupon
+    cardinality: one_to_many
+  - id: rel_invite_hotfix
+    from_entity: invite
+    to_entity: hotfix
+    cardinality: many_to_many
+  - id: rel_venue_opportunity
+    from_entity: venue
+    to_entity: opportunity
+    cardinality: one_to_many
+  - id: rel_room_catalog
+    from_entity: room
+    to_entity: catalog
+    cardinality: one_to_many
+  - id: rel_invite_subscription
+    from_entity: invite
+    to_entity: subscription
+    cardinality: many_to_many
+  - id: rel_token_parser
+    from_entity: token
+    to_entity: parser
+    cardinality: one_to_many
+  - id: rel_preference_inventory
+    from_entity: preference
+    to_entity: inventory
+    cardinality: one_to_many
+  - id: rel_batch_task
+    from_entity: batch
+    to_entity: task
+    cardinality: many_to_many
+  - id: rel_request_ranker
+    from_entity: request
+    to_entity: ranker
+    cardinality: many_to_one
+  - id: rel_invoice_instructor
+    from_entity: invoice
+    to_entity: instructor
+    cardinality: many_to_many
+  - id: rel_pod_node
+    from_entity: pod
+    to_entity: node
+    cardinality: many_to_many
+  - id: rel_queue_offer
+    from_entity: queue
+    to_entity: offer
+    cardinality: many_to_one
+  - id: rel_config_asset
+    from_entity: config
+    to_entity: asset
+    cardinality: many_to_one
+  - id: rel_return_item_deployment
+    from_entity: return_item
+    to_entity: deployment
+    cardinality: many_to_one
+  - id: rel_handler_pull_request
+    from_entity: handler
+    to_entity: pull_request
+    cardinality: many_to_many
+  - id: rel_scheduler_allocation
+    from_entity: scheduler
+    to_entity: allocation
+    cardinality: one_to_many
+  - id: rel_formatter_action
+    from_entity: formatter
+    to_entity: action
+    cardinality: many_to_many
+  - id: rel_enricher_ranker
+    from_entity: enricher
+    to_entity: ranker
+    cardinality: one_to_many
+  - id: rel_team_role
+    from_entity: team
+    to_entity: role
+    cardinality: many_to_many
+  - id: rel_reservation_role
+    from_entity: reservation
+    to_entity: role
+    cardinality: many_to_one
+  - id: rel_action_snapshot
+    from_entity: action
+    to_entity: snapshot
+    cardinality: many_to_many
+  - id: rel_enricher_campaign
+    from_entity: enricher
+    to_entity: campaign
+    cardinality: many_to_many
+  - id: rel_employee_supplier
+    from_entity: employee
+    to_entity: supplier
+    cardinality: many_to_many
+  - id: rel_ticket_formatter
+    from_entity: ticket
+    to_entity: formatter
+    cardinality: many_to_one
+  - id: rel_batch_metric
+    from_entity: batch
+    to_entity: metric
+    cardinality: many_to_many
+  - id: rel_survey_region
+    from_entity: survey
+    to_entity: region
+    cardinality: many_to_many
+  - id: rel_alert_product
+    from_entity: alert
+    to_entity: product
+    cardinality: many_to_one
+  - id: rel_plugin_org
+    from_entity: plugin
+    to_entity: org
+    cardinality: one_to_many
+  - id: rel_campaign_sink
+    from_entity: campaign
+    to_entity: sink
+    cardinality: many_to_many
+  - id: rel_encryptor_stream
+    from_entity: encryptor
+    to_entity: stream
+    cardinality: one_to_many
+  - id: rel_decoder_condition
+    from_entity: decoder
+    to_entity: condition
+    cardinality: many_to_one
+  - id: rel_transaction_hotfix
+    from_entity: transaction
+    to_entity: hotfix
+    cardinality: many_to_many
+  - id: rel_batch_customer
+    from_entity: batch
+    to_entity: customer
+    cardinality: many_to_one
+  - id: rel_patch_inspector
+    from_entity: patch
+    to_entity: inspector
+    cardinality: one_to_many
+  - id: rel_branch_discount
+    from_entity: branch
+    to_entity: discount
+    cardinality: many_to_one
+  - id: rel_middleware_aggregator
+    from_entity: middleware
+    to_entity: aggregator
+    cardinality: many_to_many
+  - id: rel_schema_audit_log
+    from_entity: schema
+    to_entity: audit_log
+    cardinality: many_to_one
+  - id: rel_rating_version
+    from_entity: rating
+    to_entity: version
+    cardinality: many_to_one
+  - id: rel_answer_backup
+    from_entity: answer
+    to_entity: backup
+    cardinality: many_to_many
+  - id: rel_version_lesson
+    from_entity: version
+    to_entity: lesson
+    cardinality: one_to_many
+  - id: rel_certificate_transfer
+    from_entity: certificate
+    to_entity: transfer
+    cardinality: many_to_one
+  - id: rel_stock_journal
+    from_entity: stock
+    to_entity: journal
+    cardinality: one_to_many
+  - id: rel_rollback_quiz
+    from_entity: rollback
+    to_entity: quiz
+    cardinality: many_to_many
+  - id: rel_response_deal
+    from_entity: response
+    to_entity: deal
+    cardinality: many_to_many
+  - id: rel_category_encoder
+    from_entity: category
+    to_entity: encoder
+    cardinality: many_to_many
+  - id: rel_parser_employee
+    from_entity: parser
+    to_entity: employee
+    cardinality: many_to_one
+  - id: rel_journal_return_item
+    from_entity: journal
+    to_entity: return_item
+    cardinality: one_to_many
+  - id: rel_merge_scope
+    from_entity: merge
+    to_entity: scope
+    cardinality: many_to_one
+  - id: rel_transformer_product
+    from_entity: transformer
+    to_entity: product
+    cardinality: many_to_many
+  - id: rel_role_tag
+    from_entity: role
+    to_entity: tag
+    cardinality: one_to_many
+  - id: rel_index_validator
+    from_entity: index
+    to_entity: validator
+    cardinality: one_to_many
+  - id: rel_rollback_rating
+    from_entity: rollback
+    to_entity: rating
+    cardinality: many_to_many
+  - id: rel_project_feedback
+    from_entity: project
+    to_entity: feedback
+    cardinality: many_to_one
+  - id: rel_collector_deployment
+    from_entity: collector
+    to_entity: deployment
+    cardinality: one_to_many
+  - id: rel_badge_task
+    from_entity: badge
+    to_entity: task
+    cardinality: many_to_one
+  - id: rel_scheduler_reward
+    from_entity: scheduler
+    to_entity: reward
+    cardinality: many_to_many
+  - id: rel_rollback_decoder
+    from_entity: rollback
+    to_entity: decoder
+    cardinality: many_to_one
+  - id: rel_audit_log_stage
+    from_entity: audit_log
+    to_entity: stage
+    cardinality: many_to_one
+  - id: rel_report_crawler
+    from_entity: report
+    to_entity: crawler
+    cardinality: many_to_many
+  - id: rel_transfer_supplier
+    from_entity: transfer
+    to_entity: supplier
+    cardinality: one_to_many
+  - id: rel_thread_rollback
+    from_entity: thread
+    to_entity: rollback
+    cardinality: many_to_one
+  - id: rel_deployment_credit
+    from_entity: deployment
+    to_entity: credit
+    cardinality: many_to_many
+  - id: rel_commit_asset
+    from_entity: commit
+    to_entity: asset
+    cardinality: one_to_many
+  - id: rel_scraper_ranker
+    from_entity: scraper
+    to_entity: ranker
+    cardinality: many_to_one
+  - id: rel_dispatcher_analyzer
+    from_entity: dispatcher
+    to_entity: analyzer
+    cardinality: many_to_one
+  - id: rel_middleware_scorer
+    from_entity: middleware
+    to_entity: scorer
+    cardinality: one_to_many
+  - id: rel_index_survey
+    from_entity: index
+    to_entity: survey
+    cardinality: many_to_one
+  - id: rel_schedule_proxy
+    from_entity: schedule
+    to_entity: proxy
+    cardinality: many_to_many
+  - id: rel_route_transfer
+    from_entity: route
+    to_entity: transfer
+    cardinality: one_to_many
+  - id: rel_warehouse_bridge
+    from_entity: warehouse
+    to_entity: bridge
+    cardinality: one_to_many
+  - id: rel_tenant_action
+    from_entity: tenant
+    to_entity: action
+    cardinality: many_to_one
+  - id: rel_venue_merge
+    from_entity: venue
+    to_entity: merge
+    cardinality: one_to_many
+  - id: rel_schema_snapshot
+    from_entity: schema
+    to_entity: snapshot
+    cardinality: many_to_many
+  - id: rel_pod_compressor
+    from_entity: pod
+    to_entity: compressor
+    cardinality: one_to_many
+  - id: rel_tag_presenter
+    from_entity: tag
+    to_entity: presenter
+    cardinality: many_to_many
+  - id: rel_offer_course
+    from_entity: offer
+    to_entity: course
+    cardinality: many_to_many
+  - id: rel_store_tag
+    from_entity: store
+    to_entity: tag
+    cardinality: one_to_many
+  - id: rel_notification_return_item
+    from_entity: notification
+    to_entity: return_item
+    cardinality: many_to_many
+  - id: rel_bridge_notification
+    from_entity: bridge
+    to_entity: notification
+    cardinality: many_to_many
+  - id: rel_credit_milestone
+    from_entity: credit
+    to_entity: milestone
+    cardinality: one_to_many
+  - id: rel_feature_review
+    from_entity: feature
+    to_entity: review
+    cardinality: many_to_one
+  - id: rel_opportunity_replica
+    from_entity: opportunity
+    to_entity: replica
+    cardinality: one_to_many
+  - id: rel_parser_badge
+    from_entity: parser
+    to_entity: badge
+    cardinality: many_to_one
+  - id: rel_forecast_comment
+    from_entity: forecast
+    to_entity: comment
+    cardinality: many_to_one
+  - id: rel_schema_shard
+    from_entity: schema
+    to_entity: shard
+    cardinality: many_to_many
+  - id: rel_conflict_catalog
+    from_entity: conflict
+    to_entity: catalog
+    cardinality: one_to_many
+  - id: rel_plan_shipment
+    from_entity: plan
+    to_entity: shipment
+    cardinality: many_to_one
+  - id: rel_reservation_merge
+    from_entity: reservation
+    to_entity: merge
+    cardinality: many_to_one
+  - id: rel_route_gateway
+    from_entity: route
+    to_entity: gateway
+    cardinality: one_to_many
+  - id: rel_refund_customer
+    from_entity: refund
+    to_entity: customer
+    cardinality: one_to_many
+  - id: rel_batch_credit
+    from_entity: batch
+    to_entity: credit
+    cardinality: many_to_one
+  - id: rel_analyzer_resolution
+    from_entity: analyzer
+    to_entity: resolution
+    cardinality: many_to_one
+  - id: rel_environment_release
+    from_entity: environment
+    to_entity: release
+    cardinality: many_to_one
+  - id: rel_scheduler_return_item
+    from_entity: scheduler
+    to_entity: return_item
+    cardinality: many_to_one
+  - id: rel_metric_certificate
+    from_entity: metric
+    to_entity: certificate
+    cardinality: one_to_many
+  - id: rel_certificate_trigger
+    from_entity: certificate
+    to_entity: trigger
+    cardinality: many_to_one
+  - id: rel_channel_group
+    from_entity: channel
+    to_entity: group
+    cardinality: one_to_many
+  - id: rel_achievement_worker
+    from_entity: achievement
+    to_entity: worker
+    cardinality: one_to_many
+  - id: rel_rule_supplier
+    from_entity: rule
+    to_entity: supplier
+    cardinality: one_to_many
+  - id: rel_lesson_course
+    from_entity: lesson
+    to_entity: course
+    cardinality: many_to_many
+  - id: rel_connector_trigger
+    from_entity: connector
+    to_entity: trigger
+    cardinality: many_to_many
+  - id: rel_stream_config
+    from_entity: stream
+    to_entity: config
+    cardinality: one_to_many
+  - id: rel_feature_target
+    from_entity: feature
+    to_entity: target
+    cardinality: one_to_many
+  - id: rel_transaction_transfer
+    from_entity: transaction
+    to_entity: transfer
+    cardinality: one_to_many
+  - id: rel_sink_return_item
+    from_entity: sink
+    to_entity: return_item
+    cardinality: one_to_many
+  - id: rel_partition_resource
+    from_entity: partition
+    to_entity: resource
+    cardinality: one_to_many
+  - id: rel_sanitizer_route
+    from_entity: sanitizer
+    to_entity: route
+    cardinality: many_to_one
+  - id: rel_deal_deliverable
+    from_entity: deal
+    to_entity: deliverable
+    cardinality: many_to_many
+  - id: rel_collector_setting
+    from_entity: collector
+    to_entity: setting
+    cardinality: one_to_many
+  - id: rel_stage_audit_log
+    from_entity: stage
+    to_entity: audit_log
+    cardinality: one_to_many
+  - id: rel_milestone_promotion
+    from_entity: milestone
+    to_entity: promotion
+    cardinality: many_to_many
+  - id: rel_collector_bridge
+    from_entity: collector
+    to_entity: bridge
+    cardinality: one_to_many
+  - id: rel_cluster_quiz
+    from_entity: cluster
+    to_entity: quiz
+    cardinality: one_to_many
+  - id: rel_order_line_reward
+    from_entity: order_line
+    to_entity: reward
+    cardinality: one_to_many
+  - id: rel_equipment_contract
+    from_entity: equipment
+    to_entity: contract
+    cardinality: many_to_many
+  - id: rel_setting_endpoint
+    from_entity: setting
+    to_entity: endpoint
+    cardinality: many_to_many
+  - id: rel_changelog_authorizer
+    from_entity: changelog
+    to_entity: authorizer
+    cardinality: many_to_many
+  - id: rel_shipment_classifier
+    from_entity: shipment
+    to_entity: classifier
+    cardinality: one_to_many
+  - id: rel_tracer_template
+    from_entity: tracer
+    to_entity: template
+    cardinality: one_to_many
+  - id: rel_promotion_collector
+    from_entity: promotion
+    to_entity: collector
+    cardinality: many_to_one
+  - id: rel_ledger_verifier
+    from_entity: ledger
+    to_entity: verifier
+    cardinality: one_to_many
+  - id: rel_metric_bridge
+    from_entity: metric
+    to_entity: bridge
+    cardinality: one_to_many
+  - id: rel_answer_lesson
+    from_entity: answer
+    to_entity: lesson
+    cardinality: many_to_many
+  - id: rel_notification_observer
+    from_entity: notification
+    to_entity: observer
+    cardinality: one_to_many
+  - id: rel_order_line_store
+    from_entity: order_line
+    to_entity: store
+    cardinality: one_to_many
+  - id: rel_gateway_policy
+    from_entity: gateway
+    to_entity: policy
+    cardinality: many_to_many
+  - id: rel_reconciliation_hotfix
+    from_entity: reconciliation
+    to_entity: hotfix
+    cardinality: many_to_many
+  - id: rel_collector_worker
+    from_entity: collector
+    to_entity: worker
+    cardinality: many_to_many
+  - id: rel_department_room
+    from_entity: department
+    to_entity: room
+    cardinality: many_to_many
+  - id: rel_branch_route
+    from_entity: branch
+    to_entity: route
+    cardinality: many_to_many
+  - id: rel_tag_feature
+    from_entity: tag
+    to_entity: feature
+    cardinality: many_to_one
+  - id: rel_decoder_encryptor
+    from_entity: decoder
+    to_entity: encryptor
+    cardinality: one_to_many
+  - id: rel_group_validator
+    from_entity: group
+    to_entity: validator
+    cardinality: many_to_many
+  - id: rel_task_rollback
+    from_entity: task
+    to_entity: rollback
+    cardinality: many_to_many
+  - id: rel_authenticator_validator
+    from_entity: authenticator
+    to_entity: validator
+    cardinality: one_to_many
+  - id: rel_crawler_asset
+    from_entity: crawler
+    to_entity: asset
+    cardinality: one_to_many
+  - id: rel_feature_product
+    from_entity: feature
+    to_entity: product
+    cardinality: many_to_one
+  - id: rel_instructor_request
+    from_entity: instructor
+    to_entity: request
+    cardinality: many_to_many
+  - id: rel_indexer_manifest
+    from_entity: indexer
+    to_entity: manifest
+    cardinality: many_to_many
+  - id: rel_node_dispatcher
+    from_entity: node
+    to_entity: dispatcher
+    cardinality: many_to_many
+  - id: rel_request_shard
+    from_entity: request
+    to_entity: shard
+    cardinality: one_to_many
+  - id: rel_debit_member
+    from_entity: debit
+    to_entity: member
+    cardinality: many_to_many
+  - id: rel_service_dispatcher
+    from_entity: service
+    to_entity: dispatcher
+    cardinality: many_to_many
+  - id: rel_alert_calendar
+    from_entity: alert
+    to_entity: calendar
+    cardinality: many_to_one
+  - id: rel_rule_plan
+    from_entity: rule
+    to_entity: plan
+    cardinality: one_to_many
+  - id: rel_queue_tag
+    from_entity: queue
+    to_entity: tag
+    cardinality: many_to_one
+  - id: rel_classifier_report
+    from_entity: classifier
+    to_entity: report
+    cardinality: one_to_many
+  - id: rel_pipeline_schedule
+    from_entity: pipeline
+    to_entity: schedule
+    cardinality: one_to_many
+  - id: rel_preference_release
+    from_entity: preference
+    to_entity: release
+    cardinality: one_to_many
+  - id: rel_booking_scope
+    from_entity: booking
+    to_entity: scope
+    cardinality: many_to_one
+  - id: rel_partition_inspector
+    from_entity: partition
+    to_entity: inspector
+    cardinality: many_to_many
+  - id: rel_tenant_milestone
+    from_entity: tenant
+    to_entity: milestone
+    cardinality: many_to_one
+  - id: rel_deal_task
+    from_entity: deal
+    to_entity: task
+    cardinality: many_to_many
+  - id: rel_contract_payment
+    from_entity: contract
+    to_entity: payment
+    cardinality: one_to_many
+  - id: rel_validator_feature
+    from_entity: validator
+    to_entity: feature
+    cardinality: many_to_many
+  - id: rel_group_ranker
+    from_entity: group
+    to_entity: ranker
+    cardinality: many_to_one
+  - id: rel_manifest_permission
+    from_entity: manifest
+    to_entity: permission
+    cardinality: many_to_many
+  - id: rel_message_asset
+    from_entity: message
+    to_entity: asset
+    cardinality: many_to_many
+  - id: rel_result_member
+    from_entity: result
+    to_entity: member
+    cardinality: many_to_one
+  - id: rel_journal_adapter
+    from_entity: journal
+    to_entity: adapter
+    cardinality: many_to_one
+  - id: rel_snapshot_transformer
+    from_entity: snapshot
+    to_entity: transformer
+    cardinality: many_to_many
+  - id: rel_schema_transfer
+    from_entity: schema
+    to_entity: transfer
+    cardinality: many_to_one
+  - id: rel_recommender_stream
+    from_entity: recommender
+    to_entity: stream
+    cardinality: many_to_one
+  - id: rel_tenant_endpoint
+    from_entity: tenant
+    to_entity: endpoint
+    cardinality: one_to_many
+  - id: rel_credit_transaction
+    from_entity: credit
+    to_entity: transaction
+    cardinality: many_to_many
+  - id: rel_workflow_preference
+    from_entity: workflow
+    to_entity: preference
+    cardinality: one_to_many
+  - id: rel_crawler_profiler
+    from_entity: crawler
+    to_entity: profiler
+    cardinality: many_to_one
+  - id: rel_cluster_plan
+    from_entity: cluster
+    to_entity: plan
+    cardinality: many_to_many
+  - id: rel_snapshot_equipment
+    from_entity: snapshot
+    to_entity: equipment
+    cardinality: one_to_many
+  - id: rel_config_team
+    from_entity: config
+    to_entity: team
+    cardinality: many_to_one
+  - id: rel_grade_signer
+    from_entity: grade
+    to_entity: signer
+    cardinality: one_to_many
+  - id: rel_patch_transformer
+    from_entity: patch
+    to_entity: transformer
+    cardinality: one_to_many
+  - id: rel_route_credit
+    from_entity: route
+    to_entity: credit
+    cardinality: many_to_many
+  - id: rel_debit_service
+    from_entity: debit
+    to_entity: service
+    cardinality: many_to_one
+  - id: rel_booking_reservation
+    from_entity: booking
+    to_entity: reservation
+    cardinality: one_to_many
+  - id: rel_sink_permission
+    from_entity: sink
+    to_entity: permission
+    cardinality: many_to_many
+  - id: rel_profiler_deal
+    from_entity: profiler
+    to_entity: deal
+    cardinality: many_to_many
+  - id: rel_endpoint_tag
+    from_entity: endpoint
+    to_entity: tag
+    cardinality: many_to_many
+  - id: rel_target_stage
+    from_entity: target
+    to_entity: stage
+    cardinality: many_to_one
+  - id: rel_answer_opportunity
+    from_entity: answer
+    to_entity: opportunity
+    cardinality: many_to_one
+  - id: rel_changelog_stock
+    from_entity: changelog
+    to_entity: stock
+    cardinality: many_to_many
+  - id: rel_report_registry
+    from_entity: report
+    to_entity: registry
+    cardinality: one_to_many
+  - id: rel_worker_route
+    from_entity: worker
+    to_entity: route
+    cardinality: many_to_one
+  - id: rel_cluster_refund
+    from_entity: cluster
+    to_entity: refund
+    cardinality: one_to_many
+  - id: rel_snapshot_condition
+    from_entity: snapshot
+    to_entity: condition
+    cardinality: many_to_many
+  - id: rel_branch_collector
+    from_entity: branch
+    to_entity: collector
+    cardinality: many_to_many
+  - id: rel_permission_conflict
+    from_entity: permission
+    to_entity: conflict
+    cardinality: many_to_one
+  - id: rel_action_discount
+    from_entity: action
+    to_entity: discount
+    cardinality: many_to_one
+  - id: rel_snapshot_stage
+    from_entity: snapshot
+    to_entity: stage
+    cardinality: one_to_many
+  - id: rel_sink_event
+    from_entity: sink
+    to_entity: event
+    cardinality: one_to_many
+  - id: rel_product_condition
+    from_entity: product
+    to_entity: condition
+    cardinality: many_to_one
+  - id: rel_backup_refund
+    from_entity: backup
+    to_entity: refund
+    cardinality: many_to_many
+  - id: rel_plugin_encoder
+    from_entity: plugin
+    to_entity: encoder
+    cardinality: one_to_many
+  - id: rel_ledger_scheduler
+    from_entity: ledger
+    to_entity: scheduler
+    cardinality: one_to_many
+  - id: rel_queue_tracer
+    from_entity: queue
+    to_entity: tracer
+    cardinality: one_to_many
+  - id: rel_action_group
+    from_entity: action
+    to_entity: group
+    cardinality: many_to_one
+  - id: rel_rollback_warehouse
+    from_entity: rollback
+    to_entity: warehouse
+    cardinality: many_to_one
+  - id: rel_promotion_employee
+    from_entity: promotion
+    to_entity: employee
+    cardinality: one_to_many
+  - id: rel_response_branch
+    from_entity: response
+    to_entity: branch
+    cardinality: one_to_many
+  - id: rel_role_importer
+    from_entity: role
+    to_entity: importer
+    cardinality: one_to_many
+  - id: rel_rollback_scorer
+    from_entity: rollback
+    to_entity: scorer
+    cardinality: one_to_many
+  - id: rel_pull_request_registry
+    from_entity: pull_request
+    to_entity: registry
+    cardinality: many_to_one
+  - id: rel_environment_contract
+    from_entity: environment
+    to_entity: contract
+    cardinality: one_to_many
+  - id: rel_exporter_diff
+    from_entity: exporter
+    to_entity: diff
+    cardinality: one_to_many
+  - id: rel_commit_scraper
+    from_entity: commit
+    to_entity: scraper
+    cardinality: many_to_one
+  - id: rel_parser_inspector
+    from_entity: parser
+    to_entity: inspector
+    cardinality: one_to_many
+  - id: rel_diff_approval
+    from_entity: diff
+    to_entity: approval
+    cardinality: one_to_many
+  - id: rel_plan_recommender
+    from_entity: plan
+    to_entity: recommender
+    cardinality: many_to_many
+  - id: rel_crawler_course
+    from_entity: crawler
+    to_entity: course
+    cardinality: one_to_many
+  - id: rel_employee_tenant
+    from_entity: employee
+    to_entity: tenant
+    cardinality: one_to_many
+  - id: rel_booking_comment
+    from_entity: booking
+    to_entity: comment
+    cardinality: one_to_many
+  - id: rel_budget_exporter
+    from_entity: budget
+    to_entity: exporter
+    cardinality: many_to_one
+  - id: rel_template_recommender
+    from_entity: template
+    to_entity: recommender
+    cardinality: many_to_many
+  - id: rel_dispatcher_booking
+    from_entity: dispatcher
+    to_entity: booking
+    cardinality: many_to_many
+  - id: rel_buffer_adapter
+    from_entity: buffer
+    to_entity: adapter
+    cardinality: one_to_many
+  - id: rel_group_stream
+    from_entity: group
+    to_entity: stream
+    cardinality: many_to_one
+  - id: rel_campaign_deployment
+    from_entity: campaign
+    to_entity: deployment
+    cardinality: one_to_many
+  - id: rel_hotfix_reward
+    from_entity: hotfix
+    to_entity: reward
+    cardinality: many_to_many
+  - id: rel_branch_role
+    from_entity: branch
+    to_entity: role
+    cardinality: one_to_many
+  - id: rel_profiler_promotion
+    from_entity: profiler
+    to_entity: promotion
+    cardinality: one_to_many
+  - id: rel_environment_certificate
+    from_entity: environment
+    to_entity: certificate
+    cardinality: many_to_many
+  - id: rel_authenticator_rating
+    from_entity: authenticator
+    to_entity: rating
+    cardinality: many_to_one
+  - id: rel_crawler_batch
+    from_entity: crawler
+    to_entity: batch
+    cardinality: many_to_one
+  - id: rel_achievement_encoder
+    from_entity: achievement
+    to_entity: encoder
+    cardinality: many_to_one
+  - id: rel_sampler_forecast
+    from_entity: sampler
+    to_entity: forecast
+    cardinality: many_to_one
+  - id: rel_dashboard_monitor
+    from_entity: dashboard
+    to_entity: monitor
+    cardinality: one_to_many
+  - id: rel_course_parser
+    from_entity: course
+    to_entity: parser
+    cardinality: many_to_many
+  - id: rel_debit_action
+    from_entity: debit
+    to_entity: action
+    cardinality: many_to_one
+  - id: rel_cluster_adapter
+    from_entity: cluster
+    to_entity: adapter
+    cardinality: one_to_many
+  - id: rel_connector_queue
+    from_entity: connector
+    to_entity: queue
+    cardinality: one_to_many
+  - id: rel_tenant_supplier
+    from_entity: tenant
+    to_entity: supplier
+    cardinality: many_to_many
+  - id: rel_renderer_review
+    from_entity: renderer
+    to_entity: review
+    cardinality: one_to_many
+  - id: rel_catalog_indexer
+    from_entity: catalog
+    to_entity: indexer
+    cardinality: one_to_many
+  - id: rel_collector_inventory
+    from_entity: collector
+    to_entity: inventory
+    cardinality: one_to_many
+  - id: rel_condition_artifact
+    from_entity: condition
+    to_entity: artifact
+    cardinality: many_to_many
+  - id: rel_account_exporter
+    from_entity: account
+    to_entity: exporter
+    cardinality: many_to_many
+  - id: rel_review_predictor
+    from_entity: review
+    to_entity: predictor
+    cardinality: one_to_many
+  - id: rel_bridge_encryptor
+    from_entity: bridge
+    to_entity: encryptor
+    cardinality: many_to_many
+  - id: rel_venue_channel
+    from_entity: venue
+    to_entity: channel
+    cardinality: many_to_many
+  - id: rel_transfer_approval
+    from_entity: transfer
+    to_entity: approval
+    cardinality: one_to_many
+  - id: rel_workflow_trigger
+    from_entity: workflow
+    to_entity: trigger
+    cardinality: one_to_many
+  - id: rel_deliverable_coupon
+    from_entity: deliverable
+    to_entity: coupon
+    cardinality: one_to_many
+  - id: rel_pull_request_cluster
+    from_entity: pull_request
+    to_entity: cluster
+    cardinality: many_to_one
+  - id: rel_rollback_condition
+    from_entity: rollback
+    to_entity: condition
+    cardinality: one_to_many
+  - id: rel_authorizer_formatter
+    from_entity: authorizer
+    to_entity: formatter
+    cardinality: many_to_one
+  - id: rel_task_subscription
+    from_entity: task
+    to_entity: subscription
+    cardinality: many_to_many
+  - id: rel_team_invoice
+    from_entity: team
+    to_entity: invoice
+    cardinality: many_to_one
+  - id: rel_message_partition
+    from_entity: message
+    to_entity: partition
+    cardinality: one_to_many
+  - id: rel_account_result
+    from_entity: account
+    to_entity: result
+    cardinality: many_to_one
+  - id: rel_dispatcher_forecast
+    from_entity: dispatcher
+    to_entity: forecast
+    cardinality: many_to_many
+  - id: rel_lead_message
+    from_entity: lead
+    to_entity: message
+    cardinality: one_to_many
+  - id: rel_review_encoder
+    from_entity: review
+    to_entity: encoder
+    cardinality: one_to_many
+  - id: rel_lesson_tag
+    from_entity: lesson
+    to_entity: tag
+    cardinality: one_to_many
+  - id: rel_encryptor_sanitizer
+    from_entity: encryptor
+    to_entity: sanitizer
+    cardinality: many_to_one
+  - id: rel_event_transfer
+    from_entity: event
+    to_entity: transfer
+    cardinality: many_to_many
+  - id: rel_sampler_scraper
+    from_entity: sampler
+    to_entity: scraper
+    cardinality: many_to_one
+  - id: rel_result_encoder
+    from_entity: result
+    to_entity: encoder
+    cardinality: many_to_one
+  - id: rel_profiler_rating
+    from_entity: profiler
+    to_entity: rating
+    cardinality: many_to_one
+  - id: rel_workflow_policy
+    from_entity: workflow
+    to_entity: policy
+    cardinality: many_to_one
+  - id: rel_forecast_endpoint
+    from_entity: forecast
+    to_entity: endpoint
+    cardinality: many_to_one
+  - id: rel_manifest_authorizer
+    from_entity: manifest
+    to_entity: authorizer
+    cardinality: one_to_many
+  - id: rel_aggregator_schedule
+    from_entity: aggregator
+    to_entity: schedule
+    cardinality: many_to_one
+  - id: rel_job_collector
+    from_entity: job
+    to_entity: collector
+    cardinality: many_to_one
+  - id: rel_policy_store
+    from_entity: policy
+    to_entity: store
+    cardinality: many_to_one
+  - id: rel_refund_comment
+    from_entity: refund
+    to_entity: comment
+    cardinality: many_to_many
+  - id: rel_stage_inventory
+    from_entity: stage
+    to_entity: inventory
+    cardinality: one_to_many
+  - id: rel_metric_return_item
+    from_entity: metric
+    to_entity: return_item
+    cardinality: many_to_one
+  - id: rel_enricher_authenticator
+    from_entity: enricher
+    to_entity: authenticator
+    cardinality: many_to_one
+  - id: rel_region_patch
+    from_entity: region
+    to_entity: patch
+    cardinality: many_to_many
+  - id: rel_product_buffer
+    from_entity: product
+    to_entity: buffer
+    cardinality: many_to_many
+  - id: rel_group_partition
+    from_entity: group
+    to_entity: partition
+    cardinality: one_to_many
+  - id: rel_inspector_workflow
+    from_entity: inspector
+    to_entity: workflow
+    cardinality: many_to_many
+  - id: rel_indexer_alert
+    from_entity: indexer
+    to_entity: alert
+    cardinality: one_to_many
+  - id: rel_stream_scheduler
+    from_entity: stream
+    to_entity: scheduler
+    cardinality: one_to_many
+  - id: rel_approval_comment
+    from_entity: approval
+    to_entity: comment
+    cardinality: many_to_one
+  - id: rel_metric_crawler
+    from_entity: metric
+    to_entity: crawler
+    cardinality: many_to_one
+  - id: rel_service_classifier
+    from_entity: service
+    to_entity: classifier
+    cardinality: one_to_many
+  - id: rel_booking_result
+    from_entity: booking
+    to_entity: result
+    cardinality: one_to_many
+  - id: rel_metric_course
+    from_entity: metric
+    to_entity: course
+    cardinality: one_to_many
+  - id: rel_validator_tag
+    from_entity: validator
+    to_entity: tag
+    cardinality: many_to_one
+  - id: rel_merge_gateway
+    from_entity: merge
+    to_entity: gateway
+    cardinality: many_to_many
+  - id: rel_inspector_cache
+    from_entity: inspector
+    to_entity: cache
+    cardinality: one_to_many
+  - id: rel_importer_dispatcher
+    from_entity: importer
+    to_entity: dispatcher
+    cardinality: many_to_one
+  - id: rel_decoder_lead
+    from_entity: decoder
+    to_entity: lead
+    cardinality: many_to_one
+  - id: rel_manifest_cache
+    from_entity: manifest
+    to_entity: cache
+    cardinality: many_to_many
+  - id: rel_archive_indexer
+    from_entity: archive
+    to_entity: indexer
+    cardinality: one_to_many
+  - id: rel_offer_validator
+    from_entity: offer
+    to_entity: validator
+    cardinality: many_to_one
+  - id: rel_answer_trigger
+    from_entity: answer
+    to_entity: trigger
+    cardinality: one_to_many
+  - id: rel_license_answer
+    from_entity: license
+    to_entity: answer
+    cardinality: one_to_many
+  - id: rel_transformer_route
+    from_entity: transformer
+    to_entity: route
+    cardinality: many_to_one
+  - id: rel_patch_customer
+    from_entity: patch
+    to_entity: customer
+    cardinality: one_to_many
+  - id: rel_milestone_forecast
+    from_entity: milestone
+    to_entity: forecast
+    cardinality: one_to_many
+  - id: rel_deployment_worker
+    from_entity: deployment
+    to_entity: worker
+    cardinality: one_to_many
+  - id: rel_diff_authorizer
+    from_entity: diff
+    to_entity: authorizer
+    cardinality: many_to_one
+  - id: rel_formatter_token
+    from_entity: formatter
+    to_entity: token
+    cardinality: many_to_one
+  - id: rel_invoice_service
+    from_entity: invoice
+    to_entity: service
+    cardinality: many_to_one
+  - id: rel_customer_grade
+    from_entity: customer
+    to_entity: grade
+    cardinality: many_to_one
+  - id: rel_project_campaign
+    from_entity: project
+    to_entity: campaign
+    cardinality: one_to_many
+  - id: rel_plugin_discount
+    from_entity: plugin
+    to_entity: discount
+    cardinality: many_to_many
+  - id: rel_monitor_middleware
+    from_entity: monitor
+    to_entity: middleware
+    cardinality: one_to_many
+  - id: rel_job_sampler
+    from_entity: job
+    to_entity: sampler
+    cardinality: one_to_many
+  - id: rel_tag_transformer
+    from_entity: tag
+    to_entity: transformer
+    cardinality: many_to_many
+  - id: rel_branch_stream
+    from_entity: branch
+    to_entity: stream
+    cardinality: many_to_one
+  - id: rel_reward_tag
+    from_entity: reward
+    to_entity: tag
+    cardinality: one_to_many
+  - id: rel_category_registry
+    from_entity: category
+    to_entity: registry
+    cardinality: many_to_one
+  - id: rel_notification_branch
+    from_entity: notification
+    to_entity: branch
+    cardinality: one_to_many
+  - id: rel_bridge_formatter
+    from_entity: bridge
+    to_entity: formatter
+    cardinality: many_to_many
+  - id: rel_authorizer_enricher
+    from_entity: authorizer
+    to_entity: enricher
+    cardinality: many_to_one
+  - id: rel_pipeline_aggregator
+    from_entity: pipeline
+    to_entity: aggregator
+    cardinality: one_to_many
+  - id: rel_classifier_answer
+    from_entity: classifier
+    to_entity: answer
+    cardinality: many_to_one
+  - id: rel_quiz_comment
+    from_entity: quiz
+    to_entity: comment
+    cardinality: one_to_many
+  - id: rel_contract_org
+    from_entity: contract
+    to_entity: org
+    cardinality: many_to_many
+  - id: rel_cache_session
+    from_entity: cache
+    to_entity: session
+    cardinality: one_to_many
+  - id: rel_encryptor_ranker
+    from_entity: encryptor
+    to_entity: ranker
+    cardinality: many_to_many
+  - id: rel_ranker_permission
+    from_entity: ranker
+    to_entity: permission
+    cardinality: many_to_one
+  - id: rel_customer_tracer
+    from_entity: customer
+    to_entity: tracer
+    cardinality: many_to_one
+  - id: rel_sampler_product
+    from_entity: sampler
+    to_entity: product
+    cardinality: many_to_one
+  - id: rel_handler_calendar
+    from_entity: handler
+    to_entity: calendar
+    cardinality: many_to_many
+  - id: rel_manifest_inspector
+    from_entity: manifest
+    to_entity: inspector
+    cardinality: one_to_many
+  - id: rel_group_stock
+    from_entity: group
+    to_entity: stock
+    cardinality: many_to_one
+  - id: rel_indexer_importer
+    from_entity: indexer
+    to_entity: importer
+    cardinality: one_to_many
+  - id: rel_predictor_budget
+    from_entity: predictor
+    to_entity: budget
+    cardinality: many_to_one
+  - id: rel_resource_result
+    from_entity: resource
+    to_entity: result
+    cardinality: one_to_many
+  - id: rel_version_channel
+    from_entity: version
+    to_entity: channel
+    cardinality: one_to_many
+  - id: rel_monitor_cluster
+    from_entity: monitor
+    to_entity: cluster
+    cardinality: many_to_many
+  - id: rel_supplier_handler
+    from_entity: supplier
+    to_entity: handler
+    cardinality: one_to_many
+  - id: rel_registry_room
+    from_entity: registry
+    to_entity: room
+    cardinality: many_to_one
+  - id: rel_handler_deployment
+    from_entity: handler
+    to_entity: deployment
+    cardinality: many_to_one
+  - id: rel_inventory_message
+    from_entity: inventory
+    to_entity: message
+    cardinality: one_to_many
+  - id: rel_presenter_plan
+    from_entity: presenter
+    to_entity: plan
+    cardinality: many_to_many
+  - id: rel_verifier_analyzer
+    from_entity: verifier
+    to_entity: analyzer
+    cardinality: many_to_one
+  - id: rel_feedback_ranker
+    from_entity: feedback
+    to_entity: ranker
+    cardinality: many_to_many
+  - id: rel_account_task
+    from_entity: account
+    to_entity: task
+    cardinality: many_to_one
+  - id: rel_quiz_task
+    from_entity: quiz
+    to_entity: task
+    cardinality: one_to_many
+  - id: rel_equipment_refund
+    from_entity: equipment
+    to_entity: refund
+    cardinality: many_to_one
+  - id: rel_audit_log_department
+    from_entity: audit_log
+    to_entity: department
+    cardinality: many_to_many
+  - id: rel_monitor_ranker
+    from_entity: monitor
+    to_entity: ranker
+    cardinality: many_to_many
+  - id: rel_worker_response
+    from_entity: worker
+    to_entity: response
+    cardinality: one_to_many
+  - id: rel_course_queue
+    from_entity: course
+    to_entity: queue
+    cardinality: many_to_many
+  - id: rel_milestone_badge
+    from_entity: milestone
+    to_entity: badge
+    cardinality: many_to_one
+  - id: rel_environment_stock
+    from_entity: environment
+    to_entity: stock
+    cardinality: many_to_one
+  - id: rel_middleware_verifier
+    from_entity: middleware
+    to_entity: verifier
+    cardinality: many_to_one
+  - id: rel_audit_log_response
+    from_entity: audit_log
+    to_entity: response
+    cardinality: many_to_many
+  - id: rel_task_reconciliation
+    from_entity: task
+    to_entity: reconciliation
+    cardinality: many_to_one
+  - id: rel_invite_coupon
+    from_entity: invite
+    to_entity: coupon
+    cardinality: one_to_many
+  - id: rel_artifact_comment
+    from_entity: artifact
+    to_entity: comment
+    cardinality: many_to_many
+  - id: rel_org_product
+    from_entity: org
+    to_entity: product
+    cardinality: one_to_many
+  - id: rel_setting_promotion
+    from_entity: setting
+    to_entity: promotion
+    cardinality: many_to_many
+  - id: rel_lead_ranker
+    from_entity: lead
+    to_entity: ranker
+    cardinality: many_to_many
+  - id: rel_quiz_member
+    from_entity: quiz
+    to_entity: member
+    cardinality: one_to_many
+  - id: rel_endpoint_trigger
+    from_entity: endpoint
+    to_entity: trigger
+    cardinality: many_to_one
+  - id: rel_predictor_diff
+    from_entity: predictor
+    to_entity: diff
+    cardinality: many_to_one
+  - id: rel_alert_transaction
+    from_entity: alert
+    to_entity: transaction
+    cardinality: one_to_many
+  - id: rel_shipment_survey
+    from_entity: shipment
+    to_entity: survey
+    cardinality: many_to_many
+  - id: rel_calendar_bridge
+    from_entity: calendar
+    to_entity: bridge
+    cardinality: many_to_many
+  - id: rel_product_resource
+    from_entity: product
+    to_entity: resource
+    cardinality: many_to_one
+  - id: rel_parser_decoder
+    from_entity: parser
+    to_entity: decoder
+    cardinality: one_to_many
+  - id: rel_opportunity_plan
+    from_entity: opportunity
+    to_entity: plan
+    cardinality: many_to_one
+  - id: rel_patch_question
+    from_entity: patch
+    to_entity: question
+    cardinality: one_to_many
+  - id: rel_action_campaign
+    from_entity: action
+    to_entity: campaign
+    cardinality: many_to_one
+  - id: rel_monitor_reward
+    from_entity: monitor
+    to_entity: reward
+    cardinality: many_to_one
+  - id: rel_task_survey
+    from_entity: task
+    to_entity: survey
+    cardinality: many_to_many
+  - id: rel_batch_sampler
+    from_entity: batch
+    to_entity: sampler
+    cardinality: one_to_many
+  - id: rel_team_indexer
+    from_entity: team
+    to_entity: indexer
+    cardinality: many_to_one
+  - id: rel_node_rating
+    from_entity: node
+    to_entity: rating
+    cardinality: many_to_many
+  - id: rel_target_transformer
+    from_entity: target
+    to_entity: transformer
+    cardinality: one_to_many
+  - id: rel_supplier_endpoint
+    from_entity: supplier
+    to_entity: endpoint
+    cardinality: many_to_many
+  - id: rel_campaign_index
+    from_entity: campaign
+    to_entity: index
+    cardinality: many_to_many
+  - id: rel_forecast_question
+    from_entity: forecast
+    to_entity: question
+    cardinality: one_to_many
+  - id: rel_instructor_stage
+    from_entity: instructor
+    to_entity: stage
+    cardinality: one_to_many
+  - id: rel_sampler_recommender
+    from_entity: sampler
+    to_entity: recommender
+    cardinality: one_to_many
+  - id: rel_milestone_tenant
+    from_entity: milestone
+    to_entity: tenant
+    cardinality: one_to_many
+  - id: rel_survey_supplier
+    from_entity: survey
+    to_entity: supplier
+    cardinality: many_to_one
+  - id: rel_target_importer
+    from_entity: target
+    to_entity: importer
+    cardinality: many_to_many
+  - id: rel_feature_notification
+    from_entity: feature
+    to_entity: notification
+    cardinality: many_to_one
+  - id: rel_group_tenant
+    from_entity: group
+    to_entity: tenant
+    cardinality: one_to_many
+  - id: rel_stage_ledger
+    from_entity: stage
+    to_entity: ledger
+    cardinality: many_to_one
+  - id: rel_branch_venue
+    from_entity: branch
+    to_entity: venue
+    cardinality: many_to_one
+  - id: rel_tenant_opportunity
+    from_entity: tenant
+    to_entity: opportunity
+    cardinality: one_to_many
+  - id: rel_grade_budget
+    from_entity: grade
+    to_entity: budget
+    cardinality: many_to_one
+  - id: rel_message_scheduler
+    from_entity: message
+    to_entity: scheduler
+    cardinality: one_to_many
+  - id: rel_profiler_aggregator
+    from_entity: profiler
+    to_entity: aggregator
+    cardinality: many_to_many
+  - id: rel_project_approval
+    from_entity: project
+    to_entity: approval
+    cardinality: one_to_many
+  - id: rel_dashboard_review
+    from_entity: dashboard
+    to_entity: review
+    cardinality: many_to_many
+  - id: rel_course_venue
+    from_entity: course
+    to_entity: venue
+    cardinality: one_to_many
+  - id: rel_catalog_ticket
+    from_entity: catalog
+    to_entity: ticket
+    cardinality: many_to_many
+  - id: rel_deal_instructor
+    from_entity: deal
+    to_entity: instructor
+    cardinality: many_to_one
+  - id: rel_warehouse_journal
+    from_entity: warehouse
+    to_entity: journal
+    cardinality: one_to_many
+  - id: rel_conflict_indexer
+    from_entity: conflict
+    to_entity: indexer
+    cardinality: many_to_many
+  - id: rel_course_rating
+    from_entity: course
+    to_entity: rating
+    cardinality: one_to_many
+  - id: rel_plan_metric
+    from_entity: plan
+    to_entity: metric
+    cardinality: many_to_one
+  - id: rel_customer_campaign
+    from_entity: customer
+    to_entity: campaign
+    cardinality: many_to_one
+  - id: rel_forecast_config
+    from_entity: forecast
+    to_entity: config
+    cardinality: one_to_many
+  - id: rel_stock_scheduler
+    from_entity: stock
+    to_entity: scheduler
+    cardinality: many_to_many
+  - id: rel_pod_service
+    from_entity: pod
+    to_entity: service
+    cardinality: one_to_many
