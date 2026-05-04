@@ -73,7 +73,6 @@ fn unknown_subcommand_exits_with_usage_error() {
 #[test]
 fn stub_commands_exit_with_validation_error() {
     let stubs = [
-        vec!["init"],
         vec!["generate"],
         vec!["examples", "list"],
         vec!["config", "inspect"],
@@ -1019,4 +1018,330 @@ fn check_help_shows_locked_flag() {
         stdout.contains("--locked"),
         "check --help should show --locked flag"
     );
+}
+
+// ── Init command tests ──────────────────────────────────────────────
+
+#[test]
+fn init_demo_creates_project_structure() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Created project"));
+    let proj = tmp.path().join("demo-project");
+    assert!(proj.join("metadata").is_dir());
+    assert!(proj.join("generated").is_dir());
+    assert!(proj.join("custom").is_dir());
+    assert!(proj.join(".knownow").is_dir());
+    assert!(proj.join("know-now.yml").is_file());
+    assert!(proj.join("README.md").is_file());
+    assert!(proj.join("generated/.gitkeep").is_file());
+    assert!(proj.join("custom/.gitkeep").is_file());
+}
+
+#[test]
+fn init_demo_creates_lockfile() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let lock_path = tmp.path().join("demo-project/know-now.lock");
+    assert!(lock_path.is_file(), "demo should create know-now.lock");
+    let content = std::fs::read_to_string(&lock_path).unwrap();
+    let lockfile: serde_json::Value = serde_json::from_str(&content).expect("valid JSON");
+    assert_eq!(lockfile["lockfile_schema_version"], "1.0");
+}
+
+#[test]
+fn init_demo_validates_successfully() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path().join("demo-project"))
+        .args(["validate"])
+        .assert()
+        .success();
+}
+
+#[test]
+fn init_demo_checks_successfully() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path().join("demo-project"))
+        .args(["check"])
+        .assert()
+        .success();
+}
+
+#[test]
+fn init_demo_check_locked_succeeds() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path().join("demo-project"))
+        .args(["check", "--locked"])
+        .assert()
+        .success();
+}
+
+#[test]
+fn init_demo_with_name() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "my-demo", "--profile", "demo"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("my-demo"));
+    assert!(tmp.path().join("my-demo/metadata").is_dir());
+}
+
+#[test]
+fn init_demo_json_output() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    let output = cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["--format", "json", "init", "--demo"])
+        .output()
+        .expect("should run");
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let envelope: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+    assert_eq!(envelope["result"], "success");
+    assert_eq!(envelope["command"], "init");
+    assert_eq!(envelope["payload"]["profile"], "demo");
+}
+
+#[test]
+fn init_demo_quiet_output() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["--format", "quiet", "init", "--demo"])
+        .assert()
+        .success()
+        .stdout(predicate::str::is_empty());
+    assert!(tmp.path().join("demo-project/metadata").is_dir());
+}
+
+#[test]
+fn init_minimal_creates_project() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "my-project", "--profile", "minimal"])
+        .assert()
+        .success();
+    let proj = tmp.path().join("my-project");
+    assert!(proj.join("metadata/project.yml").is_file());
+    assert!(proj.join("know-now.yml").is_file());
+    assert!(
+        !proj.join("know-now.lock").exists(),
+        "minimal should not create lockfile"
+    );
+}
+
+#[test]
+fn init_minimal_validates() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "my-project", "--profile", "minimal"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path().join("my-project"))
+        .args(["validate"])
+        .assert()
+        .success();
+}
+
+#[test]
+fn init_consultant_postgres_dbt_validates() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "my-project", "--profile", "consultant-postgres-dbt"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path().join("my-project"))
+        .args(["validate"])
+        .assert()
+        .success();
+}
+
+#[test]
+fn init_dbt_existing_stack_validates() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "my-project", "--profile", "dbt-existing-stack"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path().join("my-project"))
+        .args(["validate"])
+        .assert()
+        .success();
+}
+
+#[test]
+fn init_governed_team_validates() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "my-project", "--profile", "governed-team"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path().join("my-project"))
+        .args(["validate"])
+        .assert()
+        .success();
+}
+
+#[test]
+fn init_name_required_without_demo() {
+    cmd()
+        .args(["init"])
+        .assert()
+        .code(predicate::eq(1))
+        .stderr(predicate::str::contains("project name required"));
+}
+
+#[test]
+fn init_existing_dir_fails() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    std::fs::create_dir(tmp.path().join("exists")).unwrap();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "exists"])
+        .assert()
+        .code(predicate::eq(1))
+        .stderr(predicate::str::contains("already exists"));
+}
+
+#[test]
+fn init_help_shows_options() {
+    let output = cmd().args(["init", "--help"]).output().expect("should run");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout.contains("--profile"),
+        "init help should show --profile"
+    );
+    assert!(stdout.contains("--demo"), "init help should show --demo");
+    assert!(
+        stdout.contains("--guided"),
+        "init help should show --guided"
+    );
+    assert!(
+        stdout.contains("--generated-git-policy"),
+        "init help should show --generated-git-policy"
+    );
+}
+
+#[test]
+fn init_minimal_git_policy_ignore_creates_gitignore() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "my-project", "--profile", "minimal"])
+        .assert()
+        .success();
+    assert!(
+        tmp.path().join("my-project/generated/.gitignore").is_file(),
+        "minimal profile (git_policy=ignore) should create generated/.gitignore"
+    );
+}
+
+#[test]
+fn init_demo_no_generated_gitignore() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    assert!(
+        !tmp.path()
+            .join("demo-project/generated/.gitignore")
+            .exists(),
+        "demo profile (git_policy=commit) should not create generated/.gitignore"
+    );
+}
+
+#[test]
+fn init_guided_reads_stdin() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--guided"])
+        .write_stdin("guided-project\npostgres\n\nask\n")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("guided-project"));
+    let proj = tmp.path().join("guided-project");
+    assert!(proj.join("metadata").is_dir());
+    assert!(proj.join("know-now.yml").is_file());
+}
+
+#[test]
+fn init_guided_validates() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--guided"])
+        .write_stdin("guided-project\npostgres\n\nask\n")
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path().join("guided-project"))
+        .args(["validate"])
+        .assert()
+        .success();
 }
