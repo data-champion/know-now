@@ -1,0 +1,18 @@
+name: internal-api-docs
+version: "1.0"
+target: docs
+renderer:
+  kind: know-now-minijinja
+  profile: 1
+output_dir: generated/api-docs
+permissions:
+  filesystem: output_only
+  network: none
+limits:
+  max_templates: 50
+  max_template_bytes: 131072
+  max_output_files: 50
+  max_output_bytes: 5242880
+  max_fuel: 50000
+  max_include_depth: 4
+trust: experimental

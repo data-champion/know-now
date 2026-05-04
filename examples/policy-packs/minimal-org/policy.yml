@@ -1,0 +1,73 @@
+name: minimal-org
+version: "1.0"
+description: Minimal organization-wide metadata standards
+severity_profile: standard
+
+rules:
+  - id: ORG-001
+    severity: error
+    applies_to: entity
+    expression:
+      kind: attribute_presence
+      attribute: description
+    rationale: Every entity must have a description for stakeholder review.
+    remediation: Add a description field to the entity definition.
+
+  - id: ORG-002
+    severity: warning
+    applies_to: entity
+    expression:
+      kind: naming_convention
+      pattern: "^[a-z][a-z0-9_]*$"
+    rationale: Snake_case entity names produce clean DDL identifiers.
+    remediation: Rename the entity to use lowercase letters, digits, and underscores.
+
+  - id: ORG-003
+    severity: warning
+    applies_to: attribute
+    expression:
+      kind: naming_convention
+      pattern: "^[a-z][a-z0-9_]*$"
+    rationale: Snake_case attribute names produce clean column names.
+    remediation: Rename the attribute to use lowercase letters, digits, and underscores.
+
+  - id: ORG-004
+    severity: warning
+    applies_to: attribute
+    expression:
+      kind: enum_membership
+      field: logical_type
+      allowed:
+        - string
+        - integer
+        - boolean
+        - decimal
+        - date
+        - timestamp
+        - uuid
+        - text
+        - bigint
+        - float
+    rationale: Restrict logical types to the organization-approved set.
+    remediation: Use one of the allowed logical types.
+
+  - id: ORG-005
+    severity: warning
+    applies_to: entity
+    expression:
+      kind: tag_presence
+      tag: core
+    rationale: Core entities should be tagged for priority in reviews.
+    remediation: Add the 'core' tag if this entity is business-critical.
+
+  - id: ORG-006
+    severity: error
+    applies_to: relationship
+    expression:
+      kind: cardinality_check
+      allowed:
+        - many_to_one
+        - one_to_many
+        - many_to_many
+    rationale: Only standard cardinality types are allowed.
+    remediation: Use many_to_one, one_to_many, or many_to_many.

@@ -1,0 +1,23 @@
+{% include "partials/header.j2" %}
+
+# {{ entity.name | pascal_case }}
+
+{% if entity.description %}
+{{ entity.description }}
+{% endif %}
+
+{% if entity.domain %}
+**Domain:** {{ entity.domain }}
+{% endif %}
+
+## Attributes
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+{% for attr in entity.attributes %}
+| `{{ attr.name | snake_case }}` | {{ attr.logical_type }} | {% if attr.required %}yes{% else %}no{% endif %} | {{ attr.description | default("") | markdown_escape }} |
+{% endfor %}
+
+{% if entity.business_key %}
+**Business key:** {{ entity.business_key | join(", ") }}
+{% endif %}
