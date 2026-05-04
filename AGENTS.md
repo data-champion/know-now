@@ -18,7 +18,7 @@ For positioning, personas, scope by phase, and detailed architecture, read [`doc
 
 ## 2. Repository status
 
-The repository is **Phase 1 complete; Phase 2A active** (PRD §23.1 exit criteria met at `190fe48`). The Rust workspace builds, the metadata parser enforces the YAML subset with source-aware diagnostics, the canonical ProjectGraph is constructed, generators produce PostgreSQL DDL and Markdown docs, output is provably deterministic, and the writer provides atomic promotion with path safety. Volatile run state is separated from generated output. `cargo xtask e2e phase1` passes all 14 integration tests.
+The repository is **Phase 2A complete; Phase 2B active** (PRD §23.2 exit criteria met at `0046c43`). All Phase 1 capabilities remain intact. Phase 2A adds: full `generate` CLI command with target selection, dry-run, atomic staging, manual-edit detection, stale artifact tracking, and the manifest pipeline; `init --demo` produces a project that round-trips through validate → check → generate successfully; PostgreSQL DDL and Markdown docs generators are snapshot-tested; `know-now.lock` supports reproducible generation with `--locked`; policy-pack validation runs the `dc_standard` rules; JSON Schema export works in VS Code; the Phase 2A test suite covers snapshot, property-based (proptest), mutation, metadata-stability, and compatibility-fixture layers with an e2e shell driver (`tests/e2e/phase-2a.sh`). `cargo test --workspace` passes 200+ tests (excluding the pre-existing `inv02` architecture fitness issue).
 
 Treat any code you find as authoritative over any doc that disagrees with it.
 
