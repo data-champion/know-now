@@ -67,10 +67,7 @@ fn version_capabilities_lists_generators() {
 
 #[test]
 fn unknown_subcommand_exits_with_usage_error() {
-    cmd()
-        .arg("nonexistent")
-        .assert()
-        .code(predicate::eq(2));
+    cmd().arg("nonexistent").assert().code(predicate::eq(2));
 }
 
 #[test]
@@ -79,7 +76,6 @@ fn stub_commands_exit_with_validation_error() {
         vec!["init"],
         vec!["validate"],
         vec!["check"],
-        vec!["schema"],
         vec!["generate"],
         vec!["lock", "update"],
         vec!["lock", "check"],
@@ -131,7 +127,14 @@ fn global_flags_present_on_subcommands() {
         .output()
         .expect("should run");
     let stdout = String::from_utf8_lossy(&output.stdout);
-    for flag in &["--format", "--verbose", "--debug", "--config", "--project", "--no-color"] {
+    for flag in &[
+        "--format",
+        "--verbose",
+        "--debug",
+        "--config",
+        "--project",
+        "--no-color",
+    ] {
         assert!(
             stdout.contains(flag),
             "validate --help should show global flag '{flag}'"
@@ -167,4 +170,84 @@ fn version_quiet_produces_no_output() {
         .assert()
         .success()
         .stdout(predicate::str::is_empty());
+}
+
+#[test]
+fn schema_outputs_valid_json_schema() {
+    cmd()
+        .arg("schema")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            r#""$schema": "http://json-schema.org/draft-07/schema#""#,
+        ))
+        .stdout(predicate::str::contains(r#""title": "AuthoringMetadata""#));
+}
+
+#[test]
+fn schema_defines_entities_and_relationships() {
+    let output = cmd().arg("schema").output().expect("should run");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let schema: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+    let defs = schema.get("definitions").expect("has definitions");
+    assert!(defs.get("Entity").is_some(), "schema defines Entity");
+    assert!(
+        defs.get("Relationship").is_some(),
+        "schema defines Relationship"
+    );
+    assert!(defs.get("Domain").is_some(), "schema defines Domain");
+}
+
+#[test]
+fn schema_output_writes_file() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let schema_path = dir.path().join("schema.json");
+    cmd()
+        .args(["schema", "--output"])
+        .arg(&schema_path)
+        .assert()
+        .success()
+        .stderr(predicate::str::contains("Schema written to"));
+    let content = std::fs::read_to_string(&schema_path).expect("file written");
+    let schema: serde_json::Value = serde_json::from_str(&content).expect("valid JSON");
+    assert_eq!(schema["title"], "AuthoringMetadata");
+}
+
+#[test]
+fn schema_vscode_fragment() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let schema_path = dir.path().join("schema.json");
+    let vscode_path = dir.path().join("settings.json");
+    cmd()
+        .args(["schema", "--output"])
+        .arg(&schema_path)
+        .arg("--vscode")
+        .arg(&vscode_path)
+        .assert()
+        .success();
+    let content = std::fs::read_to_string(&vscode_path).expect("file written");
+    let fragment: serde_json::Value = serde_json::from_str(&content).expect("valid JSON");
+    assert!(
+        fragment.get("yaml.schemas").is_some(),
+        "fragment has yaml.schemas"
+    );
+}
+
+#[test]
+fn schema_quiet_produces_no_stdout() {
+    cmd()
+        .args(["schema", "--format", "quiet"])
+        .assert()
+        .success()
+        .stdout(predicate::str::is_empty());
+}
+
+#[test]
+fn schema_is_deterministic() {
+    let run1 = cmd().arg("schema").output().expect("run 1");
+    let run2 = cmd().arg("schema").output().expect("run 2");
+    assert_eq!(
+        run1.stdout, run2.stdout,
+        "schema output must be deterministic"
+    );
 }

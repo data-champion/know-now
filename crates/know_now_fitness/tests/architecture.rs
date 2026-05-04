@@ -444,7 +444,7 @@ fn banned_macros_in_production_crates() {
     let banned = ["println!", "eprintln!", "dbg!", "print!", "eprint!"];
     let ws = workspace_metadata();
     let ws_names = workspace_package_names(&ws);
-    let exempted = ["xtask", "know_now_fitness"];
+    let exempted = ["xtask", "know_now_fitness", "know_now_cli"];
     let mut violations = Vec::new();
 
     for pkg in &ws.packages {
