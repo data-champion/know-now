@@ -8,6 +8,7 @@ use know_now_codegen::generator::Generator;
 use know_now_contract::contract::GeneratorContract;
 use know_now_diagnostics::diagnostic::{Diagnostic, Severity};
 use know_now_gen_docs::DocsGenerator;
+use know_now_gen_er::ErDiagramGenerator;
 use know_now_gen_postgres::PostgresGenerator;
 use know_now_lock::check::{self, LOCK_CORRUPT_005, LOCK_MISSING_004, LOCK_STALE_003};
 use know_now_lock::lockfile::Lockfile;
@@ -306,7 +307,7 @@ fn resolve_targets(args: &GenerateArgs) -> Vec<GenerateTarget> {
                     }
                 }
             }
-            GenerateTarget::Ddl | GenerateTarget::Docs => {
+            GenerateTarget::Ddl | GenerateTarget::Docs | GenerateTarget::Diagrams => {
                 if seen.insert(target) {
                     selected.push(target);
                 }
@@ -321,7 +322,6 @@ fn resolve_targets(args: &GenerateArgs) -> Vec<GenerateTarget> {
             }
             GenerateTarget::Dbt
             | GenerateTarget::Quality
-            | GenerateTarget::Diagrams
             | GenerateTarget::Review => {
                 usage_error(
                     "Phase 2B feature: requested --target value is not available in this Phase 2A build",
@@ -334,7 +334,7 @@ fn resolve_targets(args: &GenerateArgs) -> Vec<GenerateTarget> {
 }
 
 fn supported_targets() -> Vec<GenerateTarget> {
-    vec![GenerateTarget::Ddl, GenerateTarget::Docs]
+    vec![GenerateTarget::Ddl, GenerateTarget::Docs, GenerateTarget::Diagrams]
 }
 
 fn ensure_locked_matches(ctx: &CommandContext) -> anyhow::Result<()> {
@@ -384,6 +384,13 @@ fn run_generators(
             }
             GenerateTarget::Docs => {
                 let generator = DocsGenerator::new();
+                let generated = generator
+                    .generate(contract)
+                    .map_err(|e| join_generation_errors(&e))?;
+                artifacts.extend(generated);
+            }
+            GenerateTarget::Diagrams => {
+                let generator = ErDiagramGenerator::new();
                 let generated = generator
                     .generate(contract)
                     .map_err(|e| join_generation_errors(&e))?;

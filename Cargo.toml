@@ -16,6 +16,7 @@ members = [
   "crates/know_now_gen_dbt",
   "crates/know_now_gen_quality",
   "crates/know_now_gen_docs",
+  "crates/know_now_gen_er",
   "crates/know_now_diff",
   "crates/know_now_server",
   "crates/know_now_policy",

@@ -1,0 +1,11 @@
+---
+source: crates/know_now_gen_er/tests/snapshots.rs
+assertion_line: 210
+expression: mmd.content
+---
+erDiagram
+    customer {
+        integer id PK "Primary key."
+        string email "Contact email."
+        string name
+    }
