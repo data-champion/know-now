@@ -1,0 +1,130 @@
+sources:
+  - id: src_shopify
+    name: shopify
+    type: application_export
+    freshness:
+      expected_interval: 24h
+      warn_after: 36h
+      error_after: 72h
+    tables:
+      - id: src_tbl_shopify_customers
+        name: customers
+        target_entity: customer
+        grain: one_row_per_customer
+        load_pattern: incremental
+        incremental_key: updated_at
+        transformation_intent: staging_to_entity
+        columns:
+          - source: id
+            target: customer_id
+          - source: email
+            target: email
+          - source: phone
+            target: phone
+          - source: created_at
+            target: created_at
+          - source: updated_at
+            target: updated_at
+
+      - id: src_tbl_shopify_orders
+        name: orders
+        target_entity: order
+        grain: one_row_per_order
+        load_pattern: incremental
+        incremental_key: updated_at
+        transformation_intent: staging_to_entity
+        columns:
+          - source: id
+            target: order_id
+          - source: customer_id
+            target: customer_id
+          - source: total_price
+            target: total_amount
+          - source: financial_status
+            target: order_status
+          - source: created_at
+            target: created_at
+          - source: updated_at
+            target: updated_at
+
+      - id: src_tbl_shopify_returns
+        name: returns
+        target_entity: return
+        grain: one_row_per_return
+        load_pattern: incremental
+        incremental_key: processed_at
+        transformation_intent: staging_to_entity
+        columns:
+          - source: id
+            target: return_id
+          - source: order_id
+            target: order_id
+          - source: customer_id
+            target: customer_id
+          - source: status
+            target: return_status
+          - source: refund_amount
+            target: refund_amount
+          - source: processed_at
+            target: processed_at
+
+  - id: src_erp
+    name: erp
+    type: warehouse_extract
+    freshness:
+      expected_interval: 12h
+      warn_after: 18h
+      error_after: 36h
+    tables:
+      - id: src_tbl_erp_products
+        name: products
+        target_entity: product
+        grain: one_row_per_product
+        load_pattern: full_refresh
+        transformation_intent: staging_to_entity
+        columns:
+          - source: product_uuid
+            target: product_id
+          - source: product_name
+            target: product_name
+          - source: supplier_uuid
+            target: supplier_id
+          - source: list_price
+            target: unit_price
+          - source: category
+            target: category_code
+
+      - id: src_tbl_erp_suppliers
+        name: suppliers
+        target_entity: supplier
+        grain: one_row_per_supplier
+        load_pattern: full_refresh
+        transformation_intent: staging_to_entity
+        columns:
+          - source: supplier_uuid
+            target: supplier_id
+          - source: supplier_name
+            target: supplier_name
+          - source: contact_email
+            target: contact_email
+          - source: contact_phone
+            target: contact_phone
+          - source: country_code
+            target: country_code
+
+      - id: src_tbl_erp_inventory
+        name: inventory_snapshot
+        target_entity: inventory
+        grain: one_row_per_product_per_day
+        load_pattern: incremental
+        incremental_key: snapshot_date
+        transformation_intent: staging_to_entity
+        columns:
+          - source: snapshot_uuid
+            target: inventory_id
+          - source: product_uuid
+            target: product_id
+          - source: quantity_available
+            target: quantity_on_hand
+          - source: snapshot_date
+            target: snapshot_date

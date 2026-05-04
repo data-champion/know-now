@@ -1,0 +1,63 @@
+relationships:
+  - id: rel_order_customer
+    name: order_customer
+    from_entity: order
+    to_entity: customer
+    cardinality: many_to_one
+    from_attributes: [customer_id]
+    to_attributes: [customer_id]
+    description: Each order belongs to one customer.
+
+  - id: rel_return_order
+    name: return_order
+    from_entity: return
+    to_entity: order
+    cardinality: many_to_one
+    from_attributes: [order_id]
+    to_attributes: [order_id]
+    description: Each return references one order.
+
+  - id: rel_product_supplier
+    name: product_supplier
+    from_entity: product
+    to_entity: supplier
+    cardinality: many_to_one
+    from_attributes: [supplier_id]
+    to_attributes: [supplier_id]
+    description: Products are sourced from suppliers.
+
+  - id: rel_inventory_product
+    name: inventory_product
+    from_entity: inventory
+    to_entity: product
+    cardinality: many_to_one
+    from_attributes: [product_id]
+    to_attributes: [product_id]
+    description: Inventory rows reference one product.
+
+  - id: rel_address_customer
+    name: address_customer
+    from_entity: address
+    to_entity: customer
+    cardinality: many_to_one
+    from_attributes: [customer_id]
+    to_attributes: [customer_id]
+    description: Addresses belong to one customer.
+
+  - id: rel_customer_parent
+    name: customer_parent
+    from_entity: customer
+    to_entity: customer
+    cardinality: many_to_one
+    from_attributes: [parent_customer_id]
+    to_attributes: [customer_id]
+    description: Optional self-referencing customer hierarchy.
+
+  - id: rel_customer_segment
+    name: customer_segment
+    from_entity: customer
+    to_entity: customer_segment
+    cardinality: many_to_many
+    from_attributes: [customer_id]
+    to_attributes: [segment_id]
+    description: Customers can belong to multiple segments.

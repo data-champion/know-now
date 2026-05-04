@@ -1,0 +1,543 @@
+entities:
+  - id: ent_customer
+    name: customer
+    display_name: Customer
+    domain: commercial
+    module: customers
+    owner: sales_ops
+    steward: data_governance
+    classification: internal
+    sensitivity: confidential
+    pii: true
+    retention_policy: standard_customer_retention
+    description: A person or organization that places orders.
+    type: dimension
+    tags: [core, commercial]
+    business_key: [customer_id]
+    attributes:
+      - id: attr_customer_id
+        name: customer_id
+        logical_type: uuid
+        semantic_type: identifier
+        required: true
+        unique: true
+        description: Stable customer identifier.
+      - id: attr_customer_parent_customer_id
+        name: parent_customer_id
+        logical_type: uuid
+        semantic_type: identifier
+        required: false
+        description: Optional reference to a parent customer account.
+      - id: attr_customer_email
+        name: email
+        logical_type: string
+        semantic_type: email
+        required: false
+        sensitivity: personal_data
+        pii: true
+        constraints:
+          max_length: 320
+        description: Primary customer email address.
+      - id: attr_customer_phone
+        name: phone
+        logical_type: string
+        semantic_type: phone
+        required: false
+        sensitivity: personal_data
+        pii: true
+        constraints:
+          max_length: 32
+        description: Customer phone number.
+      - id: attr_customer_name
+        name: full_name
+        logical_type: string
+        semantic_type: name
+        required: true
+        constraints:
+          max_length: 200
+        description: Full customer display name.
+      - id: attr_customer_status
+        name: status
+        logical_type: string
+        semantic_type: status
+        required: true
+        description: Customer lifecycle status.
+      - id: attr_customer_is_active
+        name: is_active
+        logical_type: boolean
+        semantic_type: status
+        required: true
+        description: Active record flag.
+      - id: attr_customer_country_code
+        name: country_code
+        logical_type: string
+        semantic_type: country_code
+        required: false
+        constraints:
+          max_length: 2
+        description: ISO country code.
+      - id: attr_customer_postal_code
+        name: postal_code
+        logical_type: string
+        semantic_type: postal_code
+        required: false
+        constraints:
+          max_length: 16
+        description: Customer postal code.
+      - id: attr_customer_created_at
+        name: created_at
+        logical_type: timestamp
+        semantic_type: created_timestamp
+        required: true
+        description: UTC timestamp when customer was created.
+      - id: attr_customer_updated_at
+        name: updated_at
+        logical_type: timestamp
+        semantic_type: updated_timestamp
+        required: true
+        description: UTC timestamp when customer was last updated.
+      - id: attr_customer_profile_json
+        name: profile_payload
+        logical_type: json
+        semantic_type: json_payload
+        required: false
+        description: Source profile payload for diagnostics.
+
+  - id: ent_order
+    name: order
+    display_name: Order
+    domain: commercial
+    module: orders
+    owner: sales_ops
+    steward: finance_data
+    classification: internal
+    sensitivity: confidential
+    pii: false
+    retention_policy: financial_records_7y
+    description: Commercial order transaction.
+    type: fact
+    tags: [core, finance]
+    business_key: [order_id]
+    attributes:
+      - id: attr_order_id
+        name: order_id
+        logical_type: uuid
+        semantic_type: identifier
+        required: true
+        unique: true
+        description: Stable order identifier.
+      - id: attr_order_customer_id
+        name: customer_id
+        logical_type: uuid
+        semantic_type: identifier
+        required: true
+        description: Owning customer identifier.
+      - id: attr_order_total_amount
+        name: total_amount
+        logical_type: decimal
+        semantic_type: currency_amount
+        required: true
+        constraints:
+          precision: 18
+          scale: 2
+        description: Total order amount in transaction currency.
+      - id: attr_order_status
+        name: order_status
+        logical_type: string
+        semantic_type: status
+        required: true
+        description: Order processing status.
+      - id: attr_order_submitted_date
+        name: submitted_date
+        logical_type: date
+        semantic_type: created_timestamp
+        required: true
+        description: Calendar date when order was submitted.
+      - id: attr_order_created_at
+        name: created_at
+        logical_type: timestamp
+        semantic_type: created_timestamp
+        required: true
+        description: UTC creation timestamp.
+      - id: attr_order_updated_at
+        name: updated_at
+        logical_type: timestamp
+        semantic_type: updated_timestamp
+        required: true
+        description: UTC update timestamp.
+      - id: attr_order_payload_json
+        name: source_payload
+        logical_type: json
+        semantic_type: json_payload
+        required: false
+        description: Raw source payload for reconciliation.
+
+  - id: ent_product
+    name: product
+    display_name: Product
+    domain: operations
+    module: catalog
+    owner: product_analytics
+    steward: catalog_governance
+    classification: internal
+    sensitivity: internal
+    pii: false
+    retention_policy: reference_data_standard
+    description: Sellable product definition.
+    type: dimension
+    tags: [catalog]
+    business_key: [product_id]
+    attributes:
+      - id: attr_product_id
+        name: product_id
+        logical_type: uuid
+        semantic_type: identifier
+        required: true
+        unique: true
+        description: Stable product identifier.
+      - id: attr_product_name
+        name: product_name
+        logical_type: string
+        semantic_type: name
+        required: true
+        description: Product display name.
+      - id: attr_product_supplier_id
+        name: supplier_id
+        logical_type: uuid
+        semantic_type: identifier
+        required: false
+        description: Default supplier identifier.
+      - id: attr_product_unit_price
+        name: unit_price
+        logical_type: decimal
+        semantic_type: currency_amount
+        required: true
+        constraints:
+          precision: 12
+          scale: 2
+        description: Standard catalog price.
+      - id: attr_product_category_code
+        name: category_code
+        logical_type: string
+        semantic_type: category
+        required: true
+        description: Product category code.
+      - id: attr_product_status
+        name: product_status
+        logical_type: string
+        semantic_type: status
+        required: true
+        description: Product lifecycle state.
+      - id: attr_product_created_at
+        name: created_at
+        logical_type: timestamp
+        semantic_type: created_timestamp
+        required: true
+        description: UTC creation timestamp.
+      - id: attr_product_updated_at
+        name: updated_at
+        logical_type: timestamp
+        semantic_type: updated_timestamp
+        required: true
+        description: UTC update timestamp.
+
+  - id: ent_inventory
+    name: inventory
+    display_name: Inventory Snapshot
+    domain: operations
+    module: supply
+    owner: supply_chain
+    steward: operations_analytics
+    classification: internal
+    sensitivity: internal
+    pii: false
+    retention_policy: inventory_snapshot_3y
+    description: Inventory position by product and location.
+    type: fact
+    tags: [operations]
+    business_key: [inventory_id]
+    attributes:
+      - id: attr_inventory_id
+        name: inventory_id
+        logical_type: uuid
+        semantic_type: identifier
+        required: true
+        unique: true
+        description: Inventory snapshot identifier.
+      - id: attr_inventory_product_id
+        name: product_id
+        logical_type: uuid
+        semantic_type: identifier
+        required: true
+        description: Related product identifier.
+      - id: attr_inventory_quantity_on_hand
+        name: quantity_on_hand
+        logical_type: integer
+        semantic_type: category
+        required: true
+        description: Quantity currently available.
+      - id: attr_inventory_snapshot_date
+        name: snapshot_date
+        logical_type: date
+        semantic_type: updated_timestamp
+        required: true
+        description: Snapshot business date.
+      - id: attr_inventory_created_at
+        name: created_at
+        logical_type: timestamp
+        semantic_type: created_timestamp
+        required: true
+        description: UTC creation timestamp.
+      - id: attr_inventory_updated_at
+        name: updated_at
+        logical_type: timestamp
+        semantic_type: updated_timestamp
+        required: true
+        description: UTC update timestamp.
+
+  - id: ent_supplier
+    name: supplier
+    display_name: Supplier
+    domain: operations
+    module: supply
+    description: Product supplier reference.
+    type: dimension
+    tags: [operations]
+    business_key: [supplier_id]
+    attributes:
+      - id: attr_supplier_id
+        name: supplier_id
+        logical_type: uuid
+        semantic_type: identifier
+        required: true
+        unique: true
+        description: Supplier identifier.
+      - id: attr_supplier_name
+        name: supplier_name
+        logical_type: string
+        semantic_type: name
+        required: true
+        description: Supplier legal or trade name.
+      - id: attr_supplier_email
+        name: contact_email
+        logical_type: string
+        semantic_type: email
+        required: false
+        description: Supplier contact email.
+      - id: attr_supplier_phone
+        name: contact_phone
+        logical_type: string
+        semantic_type: phone
+        required: false
+        description: Supplier contact phone.
+      - id: attr_supplier_country_code
+        name: country_code
+        logical_type: string
+        semantic_type: country_code
+        required: false
+        constraints:
+          max_length: 2
+        description: Supplier country code.
+      - id: attr_supplier_created_at
+        name: created_at
+        logical_type: timestamp
+        semantic_type: created_timestamp
+        required: true
+        description: UTC creation timestamp.
+      - id: attr_supplier_updated_at
+        name: updated_at
+        logical_type: timestamp
+        semantic_type: updated_timestamp
+        required: true
+        description: UTC update timestamp.
+
+  - id: ent_return
+    name: return
+    display_name: Return
+    domain: commercial
+    module: returns
+    owner: customer_support
+    steward: finance_data
+    classification: internal
+    sensitivity: confidential
+    pii: false
+    retention_policy: financial_records_7y
+    description: Return and refund record.
+    type: fact
+    tags: [commercial, finance]
+    business_key: [return_id]
+    attributes:
+      - id: attr_return_id
+        name: return_id
+        logical_type: uuid
+        semantic_type: identifier
+        required: true
+        unique: true
+        description: Return transaction identifier.
+      - id: attr_return_order_id
+        name: order_id
+        logical_type: uuid
+        semantic_type: identifier
+        required: true
+        description: Related order identifier.
+      - id: attr_return_customer_id
+        name: customer_id
+        logical_type: uuid
+        semantic_type: identifier
+        required: true
+        description: Related customer identifier.
+      - id: attr_return_status
+        name: return_status
+        logical_type: string
+        semantic_type: status
+        required: true
+        description: Return processing status.
+      - id: attr_return_refund_amount
+        name: refund_amount
+        logical_type: decimal
+        semantic_type: currency_amount
+        required: true
+        constraints:
+          precision: 18
+          scale: 2
+        description: Refunded amount.
+      - id: attr_return_reason
+        name: return_reason
+        logical_type: string
+        semantic_type: free_text
+        required: false
+        description: Free-text return rationale.
+      - id: attr_return_requested_at
+        name: requested_at
+        logical_type: timestamp
+        semantic_type: created_timestamp
+        required: true
+        description: UTC timestamp when return was requested.
+      - id: attr_return_processed_at
+        name: processed_at
+        logical_type: timestamp
+        semantic_type: updated_timestamp
+        required: false
+        description: UTC timestamp when return was processed.
+      - id: attr_return_source_payload
+        name: source_payload
+        logical_type: json
+        semantic_type: json_payload
+        required: false
+        description: Raw source return payload.
+
+  - id: ent_customer_segment
+    name: customer_segment
+    display_name: Customer Segment
+    domain: commercial
+    module: customers
+    description: Segment taxonomy for customer targeting.
+    type: dimension
+    tags: [commercial]
+    business_key: [segment_id]
+    attributes:
+      - id: attr_customer_segment_id
+        name: segment_id
+        logical_type: string
+        semantic_type: identifier
+        required: true
+        unique: true
+        description: Segment identifier.
+      - id: attr_customer_segment_name
+        name: segment_name
+        logical_type: string
+        semantic_type: name
+        required: true
+        description: Segment display name.
+      - id: attr_customer_segment_status
+        name: segment_status
+        logical_type: string
+        semantic_type: status
+        required: true
+        description: Segment lifecycle status.
+      - id: attr_customer_segment_created_at
+        name: created_at
+        logical_type: timestamp
+        semantic_type: created_timestamp
+        required: true
+        description: UTC creation timestamp.
+      - id: attr_customer_segment_updated_at
+        name: updated_at
+        logical_type: timestamp
+        semantic_type: updated_timestamp
+        required: true
+        description: UTC update timestamp.
+
+  - id: ent_address
+    name: address
+    display_name: Address
+    domain: commercial
+    module: customers
+    owner: sales_ops
+    steward: data_governance
+    classification: internal
+    sensitivity: confidential
+    pii: true
+    retention_policy: standard_customer_retention
+    description: Normalized customer address records.
+    type: dimension
+    tags: [commercial]
+    business_key: [address_id]
+    attributes:
+      - id: attr_address_id
+        name: address_id
+        logical_type: uuid
+        semantic_type: identifier
+        required: true
+        unique: true
+        description: Address identifier.
+      - id: attr_address_customer_id
+        name: customer_id
+        logical_type: uuid
+        semantic_type: identifier
+        required: true
+        description: Related customer identifier.
+      - id: attr_address_line_1
+        name: line_1
+        logical_type: string
+        semantic_type: free_text
+        required: true
+        description: Primary address line.
+      - id: attr_address_city
+        name: city
+        logical_type: string
+        semantic_type: name
+        required: true
+        description: City name.
+      - id: attr_address_country_code
+        name: country_code
+        logical_type: string
+        semantic_type: country_code
+        required: true
+        constraints:
+          max_length: 2
+        description: ISO country code.
+      - id: attr_address_postal_code
+        name: postal_code
+        logical_type: string
+        semantic_type: postal_code
+        required: true
+        description: Postal code.
+      - id: attr_address_status
+        name: address_status
+        logical_type: string
+        semantic_type: status
+        required: true
+        description: Address record status.
+      - id: attr_address_created_at
+        name: created_at
+        logical_type: timestamp
+        semantic_type: created_timestamp
+        required: true
+        description: UTC creation timestamp.
+      - id: attr_address_updated_at
+        name: updated_at
+        logical_type: timestamp
+        semantic_type: updated_timestamp
+        required: true
+        description: UTC update timestamp.
