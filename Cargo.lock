@@ -1317,6 +1317,7 @@ dependencies = [
  "hyper",
  "know_now_core",
  "know_now_metadata",
+ "know_now_writer",
  "reqwest",
  "serde",
  "serde_json",

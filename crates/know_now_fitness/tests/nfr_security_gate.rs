@@ -49,22 +49,24 @@ fn nfr_s1_no_raw_sql_interpolation_in_generators() {
     for crate_name in &generator_crates {
         let files = source_files_in(crate_name);
         for content in &files {
-            for (_line_num, line) in content.lines().enumerate() {
-                if line.contains("format!(") && line.contains("SELECT")
-                    || line.contains("format!(") && line.contains("INSERT")
-                    || line.contains("format!(") && line.contains("UPDATE")
-                    || line.contains("format!(") && line.contains("DELETE")
+            for line in content.lines() {
+                let has_sql_format = line.contains("format!(")
+                    && (line.contains("SELECT")
+                        || line.contains("INSERT")
+                        || line.contains("UPDATE")
+                        || line.contains("DELETE"));
+                if has_sql_format
+                    && !line.contains("//")
+                    && !line.trim().starts_with("//")
                 {
-                    if !line.contains("//") && !line.trim().starts_with("//") {
-                        let is_test_context = line.contains("test")
-                            || line.contains("Test")
-                            || line.contains("comment")
-                            || line.contains("--");
-                        assert!(
-                            is_test_context,
-                            "NFR-S1 VIOLATED — raw SQL format! in {crate_name}: {line}"
-                        );
-                    }
+                    let is_test_context = line.contains("test")
+                        || line.contains("Test")
+                        || line.contains("comment")
+                        || line.contains("--");
+                    assert!(
+                        is_test_context,
+                        "NFR-S1 VIOLATED — raw SQL format! in {crate_name}: {line}"
+                    );
                 }
             }
         }

@@ -150,6 +150,66 @@ paths:
                 $ref: "#/components/schemas/OpenQuestionsResponse"
         "401":
           description: Unauthorized
+  /api/v1/generation-status:
+    get:
+      operationId: getGenerationStatus
+      summary: Generation status summary
+      responses:
+        "200":
+          description: Generation status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerationStatusResponse"
+        "401":
+          description: Unauthorized
+  /api/v1/manifest:
+    get:
+      operationId: getManifest
+      summary: Generation manifest
+      responses:
+        "200":
+          description: Full manifest or null if no generation exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManifestResponse"
+        "401":
+          description: Unauthorized
+  /api/v1/docs:
+    get:
+      operationId: getDocsList
+      summary: List generated documentation files
+      responses:
+        "200":
+          description: Documentation file listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocsListResponse"
+        "401":
+          description: Unauthorized
+  /api/v1/docs/content:
+    get:
+      operationId: getDocsContent
+      summary: Get content of a generated documentation file
+      parameters:
+        - name: path
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: File content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocsContentResponse"
+        "401":
+          description: Unauthorized
+        "404":
+          description: File not found
 components:
   schemas:
     HealthResponse:
@@ -363,3 +423,124 @@ components:
         priority:
           type: string
           nullable: true
+    GenerationStatusResponse:
+      type: object
+      required: [has_generation, engine_version, artifact_count, warnings, generated_dir_exists]
+      properties:
+        has_generation:
+          type: boolean
+        engine_version:
+          type: string
+        artifact_count:
+          type: integer
+        warnings:
+          type: array
+          items:
+            type: string
+        last_generated_epoch:
+          type: integer
+          nullable: true
+        generated_dir_exists:
+          type: boolean
+    ManifestResponse:
+      type: object
+      properties:
+        manifest:
+          $ref: "#/components/schemas/Manifest"
+    Manifest:
+      type: object
+      nullable: true
+      properties:
+        engine_version:
+          type: string
+        metadata_schema_version:
+          type: string
+        generator_contract_version:
+          type: string
+        project_id:
+          type: string
+        input_hash:
+          type: string
+        lockfile_hash:
+          type: string
+        target_database:
+          type: object
+          properties:
+            kind:
+              type: string
+            version:
+              type: string
+            compatibility_floor:
+              type: string
+        policy:
+          type: object
+          properties:
+            pack:
+              type: string
+            version:
+              type: string
+            hash:
+              type: string
+        template_renderers:
+          type: array
+          items:
+            type: object
+            properties:
+              profile:
+                type: string
+              engine:
+                type: string
+              profile_version:
+                type: string
+        artifacts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ManifestArtifact"
+        warnings:
+          type: array
+          items:
+            type: string
+    ManifestArtifact:
+      type: object
+      required: [path, kind, artifact_id, generator, generator_version, hash]
+      properties:
+        path:
+          type: string
+        kind:
+          type: string
+        artifact_id:
+          type: string
+        generator:
+          type: string
+        generator_version:
+          type: string
+        hash:
+          type: string
+        metadata_object_ids:
+          type: array
+          items:
+            type: string
+    DocsListResponse:
+      type: object
+      required: [docs]
+      properties:
+        docs:
+          type: array
+          items:
+            $ref: "#/components/schemas/DocFile"
+    DocFile:
+      type: object
+      required: [path, kind]
+      properties:
+        path:
+          type: string
+        kind:
+          type: string
+    DocsContentResponse:
+      type: object
+      required: [path, content]
+      properties:
+        path:
+          type: string
+        content:
+          type: string

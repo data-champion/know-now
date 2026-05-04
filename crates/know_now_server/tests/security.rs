@@ -262,13 +262,6 @@ async fn e1_generate_endpoint_absent_without_feature() {
 
 #[test]
 fn f1_generate_route_absent_without_feature() {
-    // Compile-time verification: this test compiles without allow-generate
-    // feature. The route handler `handle_generate` is cfg-gated, proving
-    // the endpoint is unreachable at the type level.
-    #[cfg(not(feature = "allow-generate"))]
-    {
-        assert!(true, "compiled without allow-generate — route absent");
-    }
     #[cfg(feature = "allow-generate")]
     {
         panic!("this test should run without allow-generate feature");

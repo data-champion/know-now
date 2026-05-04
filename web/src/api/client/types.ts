@@ -107,3 +107,66 @@ export interface OpenQuestion {
 export interface OpenQuestionsResponse {
   open_questions: OpenQuestion[];
 }
+
+export interface GenerationStatusResponse {
+  has_generation: boolean;
+  engine_version: string;
+  artifact_count: number;
+  warnings: string[];
+  last_generated_epoch: number | null;
+  generated_dir_exists: boolean;
+}
+
+export interface ManifestArtifact {
+  path: string;
+  kind: string;
+  artifact_id: string;
+  generator: string;
+  generator_version: string;
+  hash: string;
+  metadata_object_ids: string[];
+}
+
+export interface Manifest {
+  engine_version: string;
+  metadata_schema_version: string;
+  generator_contract_version: string;
+  project_id: string;
+  input_hash: string;
+  lockfile_hash: string;
+  target_database: {
+    kind: string;
+    version: string;
+    compatibility_floor: string;
+  };
+  policy: {
+    pack: string;
+    version: string;
+    hash: string;
+  };
+  template_renderers: Array<{
+    profile: string;
+    engine: string;
+    profile_version: string;
+  }>;
+  artifacts: ManifestArtifact[];
+  warnings: string[];
+}
+
+export interface ManifestResponse {
+  manifest: Manifest | null;
+}
+
+export interface DocFile {
+  path: string;
+  kind: string;
+}
+
+export interface DocsListResponse {
+  docs: DocFile[];
+}
+
+export interface DocsContentResponse {
+  path: string;
+  content: string;
+}

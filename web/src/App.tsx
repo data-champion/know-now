@@ -2,12 +2,15 @@ import { useCallback, useState } from "react";
 import type { Entity, GraphResponse, RelationshipsResponse } from "./api/client";
 import { KnowNowClient } from "./api/client";
 import { useApi } from "./hooks/useApi";
+import { DocsViewer } from "./components/DocsViewer";
 import { EntityDetail } from "./components/EntityDetail";
 import { EntityList } from "./components/EntityList";
+import { GenerationStatus } from "./components/GenerationStatus";
+import { ManifestViewer } from "./components/ManifestViewer";
 import { RelationshipGraph } from "./components/RelationshipGraph";
 import { RelationshipTable } from "./components/RelationshipTable";
 
-type View = "entities" | "graph";
+type View = "entities" | "graph" | "generation" | "docs" | "manifest";
 type GraphMode = "visual" | "table";
 
 export function App() {
@@ -32,20 +35,11 @@ export function App() {
       <header className="kn-header">
         <h1 className="kn-header__title">know-now</h1>
         <nav className="kn-nav" aria-label="Main navigation">
-          <button
-            className={`kn-nav__tab${view === "entities" ? " kn-nav__tab--active" : ""}`}
-            onClick={() => { setView("entities"); }}
-            aria-current={view === "entities" ? "page" : undefined}
-          >
-            Entities
-          </button>
-          <button
-            className={`kn-nav__tab${view === "graph" ? " kn-nav__tab--active" : ""}`}
-            onClick={() => { setView("graph"); }}
-            aria-current={view === "graph" ? "page" : undefined}
-          >
-            Relationships
-          </button>
+          <NavTab view={view} target="entities" label="Entities" onClick={setView} />
+          <NavTab view={view} target="graph" label="Relationships" onClick={setView} />
+          <NavTab view={view} target="generation" label="Generation" onClick={setView} />
+          <NavTab view={view} target="docs" label="Docs" onClick={setView} />
+          <NavTab view={view} target="manifest" label="Manifest" onClick={setView} />
         </nav>
       </header>
 
@@ -105,7 +99,43 @@ export function App() {
             )}
           </div>
         )}
+
+        {view === "generation" && (
+          <div className="kn-page-content">
+            <GenerationStatus />
+          </div>
+        )}
+
+        {view === "docs" && <DocsViewer />}
+
+        {view === "manifest" && (
+          <div className="kn-page-content">
+            <ManifestViewer />
+          </div>
+        )}
       </main>
     </div>
+  );
+}
+
+function NavTab({
+  view,
+  target,
+  label,
+  onClick,
+}: {
+  view: View;
+  target: View;
+  label: string;
+  onClick: (v: View) => void;
+}) {
+  return (
+    <button
+      className={`kn-nav__tab${view === target ? " kn-nav__tab--active" : ""}`}
+      onClick={() => { onClick(target); }}
+      aria-current={view === target ? "page" : undefined}
+    >
+      {label}
+    </button>
   );
 }

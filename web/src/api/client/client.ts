@@ -1,10 +1,14 @@
 /** Generated from docs/dev/api/openapi.yaml — do not edit manually. */
 
 import type {
+  DocsContentResponse,
+  DocsListResponse,
   DomainsResponse,
   EntitiesResponse,
+  GenerationStatusResponse,
   GraphResponse,
   HealthResponse,
+  ManifestResponse,
   ModulesResponse,
   OpenQuestionsResponse,
   ProjectResponse,
@@ -70,6 +74,24 @@ export class KnowNowClient {
 
   async getOpenQuestions(): Promise<OpenQuestionsResponse> {
     return this.get<OpenQuestionsResponse>("/api/v1/open-questions");
+  }
+
+  async getGenerationStatus(): Promise<GenerationStatusResponse> {
+    return this.get<GenerationStatusResponse>("/api/v1/generation-status");
+  }
+
+  async getManifest(): Promise<ManifestResponse> {
+    return this.get<ManifestResponse>("/api/v1/manifest");
+  }
+
+  async getDocsList(): Promise<DocsListResponse> {
+    return this.get<DocsListResponse>("/api/v1/docs");
+  }
+
+  async getDocsContent(path: string): Promise<DocsContentResponse> {
+    return this.get<DocsContentResponse>(
+      `/api/v1/docs/content?path=${encodeURIComponent(path)}`,
+    );
   }
 
   private async get<T>(path: string): Promise<T> {
