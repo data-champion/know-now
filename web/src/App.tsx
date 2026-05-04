@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import type { Entity, GraphResponse, RelationshipsResponse } from "./api/client";
 import { KnowNowClient } from "./api/client";
 import { useApi } from "./hooks/useApi";
+import { ArtifactTraceability } from "./components/ArtifactTraceability";
 import { DocsViewer } from "./components/DocsViewer";
 import { EntityDetail } from "./components/EntityDetail";
 import { EntityList } from "./components/EntityList";
@@ -10,7 +11,7 @@ import { ManifestViewer } from "./components/ManifestViewer";
 import { RelationshipGraph } from "./components/RelationshipGraph";
 import { RelationshipTable } from "./components/RelationshipTable";
 
-type View = "entities" | "graph" | "generation" | "docs" | "manifest";
+type View = "entities" | "graph" | "generation" | "docs" | "manifest" | "traceability";
 type GraphMode = "visual" | "table";
 
 export function App() {
@@ -40,6 +41,7 @@ export function App() {
           <NavTab view={view} target="generation" label="Generation" onClick={setView} />
           <NavTab view={view} target="docs" label="Docs" onClick={setView} />
           <NavTab view={view} target="manifest" label="Manifest" onClick={setView} />
+          <NavTab view={view} target="traceability" label="Traceability" onClick={setView} />
         </nav>
       </header>
 
@@ -113,6 +115,8 @@ export function App() {
             <ManifestViewer />
           </div>
         )}
+
+        {view === "traceability" && <ArtifactTraceability />}
       </main>
     </div>
   );
