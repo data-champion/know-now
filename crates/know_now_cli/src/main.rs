@@ -6,8 +6,8 @@ use clap::{Parser, Subcommand};
 
 use know_now_cli::audit::{self, AuditEntry};
 use know_now_cli::commands::{
-    check, config, diff, doctor, examples, explain, generate, id, init, issues, lock, policy,
-    review, schema, support, validate, version,
+    admin, check, config, diff, doctor, examples, explain, generate, id, init, issues, lock,
+    policy, review, schema, support, validate, version,
 };
 use know_now_cli::context::CommandContext;
 use know_now_cli::exit_code;
@@ -99,6 +99,10 @@ enum Command {
     /// Create a sanitized support bundle for diagnostics
     Support(support::SupportBundleArgs),
 
+    /// Administrative fleet-wide operations
+    #[command(subcommand)]
+    Admin(admin::AdminCommand),
+
     /// Configuration operations
     #[command(subcommand)]
     Config(config::ConfigCommand),
@@ -156,6 +160,7 @@ fn main() {
         Command::Examples(cmd) => examples::run(&ctx, cmd),
         Command::Policy(cmd) => policy::run(&ctx, cmd),
         Command::Review(cmd) => review::run(&ctx, cmd),
+        Command::Admin(cmd) => admin::run(&ctx, cmd),
         Command::Support(args) => support::run(&ctx, args),
         Command::Config(cmd) => config::run(&ctx, cmd),
         Command::Version(args) => version::run(&ctx, args),
@@ -209,6 +214,7 @@ fn command_name(command: &Command) -> &'static str {
         Command::Examples(_) => "examples",
         Command::Policy(_) => "policy",
         Command::Review(_) => "review",
+        Command::Admin(_) => "admin",
         Command::Support(_) => "support",
         Command::Config(_) => "config",
         Command::Version(_) => "version",

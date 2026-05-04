@@ -1,3 +1,4 @@
+pub mod admin;
 pub mod check;
 pub mod config;
 pub mod diff;

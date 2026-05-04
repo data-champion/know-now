@@ -9,7 +9,7 @@ fn cmd() -> Command {
 fn help_shows_all_phase2a_subcommands() {
     let expected = [
         "init", "validate", "check", "schema", "generate", "diff", "doctor", "explain", "issues",
-        "lock", "id", "examples", "policy", "review", "support", "config", "version",
+        "lock", "id", "examples", "policy", "review", "admin", "support", "config", "version",
     ];
     let output = cmd().arg("--help").output().expect("should run");
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -3593,4 +3593,132 @@ fn diff_migrations_writes_file_on_changes() {
         let migrations_dir = project.join("generated").join("migrations");
         assert!(migrations_dir.exists());
     }
+}
+
+// ─── admin scan ───────────────────────────────────────────────────────────────
+
+#[test]
+fn admin_scan_errors_on_nonexistent_path() {
+    cmd()
+        .args(["admin", "scan", "/nonexistent/path/xyz"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("not a directory"));
+}
+
+#[test]
+fn admin_scan_finds_project_in_directory() {
+    let dir = valid_project();
+    std::fs::write(dir.path().join("know-now.yml"), "version: '1.0'\n").unwrap();
+    cmd()
+        .args(["admin", "scan"])
+        .arg(dir.path())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("1 project(s) found"));
+}
+
+#[test]
+fn admin_scan_json_has_envelope() {
+    let dir = valid_project();
+    cmd()
+        .args(["--format", "json", "admin", "scan"])
+        .arg(dir.path())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""result": "success""#))
+        .stdout(predicate::str::contains(r#""projects""#));
+}
+
+#[test]
+fn admin_scan_with_catalog_shows_drift() {
+    let dir = valid_project();
+    std::fs::write(dir.path().join("know-now.yml"), "version: '1.0'\n").unwrap();
+    let catalog_path = dir.path().join("catalog.json");
+    std::fs::write(
+        &catalog_path,
+        r#"{"approved":{"engines":{"know-now":["99.0.0"]},"metadata_schema_versions":["99.0"]}}"#,
+    )
+    .unwrap();
+
+    cmd()
+        .args(["admin", "scan", "--catalog"])
+        .arg(&catalog_path)
+        .arg(dir.path())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("drift"));
+}
+
+#[test]
+fn admin_scan_empty_directory_finds_zero_projects() {
+    let dir = tempfile::tempdir().unwrap();
+    cmd()
+        .args(["admin", "scan"])
+        .arg(dir.path())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("0 project(s) found"));
+}
+
+// ─── admin catalog-check ──────────────────────────────────────────────────────
+
+#[test]
+fn admin_catalog_check_valid_catalog() {
+    let dir = tempfile::tempdir().unwrap();
+    let catalog_path = dir.path().join("catalog.json");
+    std::fs::write(
+        &catalog_path,
+        r#"{"approved":{"engines":{"know-now":["1.0.0"]},"metadata_schema_versions":["1.0"]}}"#,
+    )
+    .unwrap();
+
+    cmd()
+        .args(["admin", "catalog-check"])
+        .arg(&catalog_path)
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Catalog valid"));
+}
+
+#[test]
+fn admin_catalog_check_invalid_json_errors() {
+    let dir = tempfile::tempdir().unwrap();
+    let catalog_path = dir.path().join("bad.json");
+    std::fs::write(&catalog_path, "not json at all").unwrap();
+
+    cmd()
+        .args(["admin", "catalog-check"])
+        .arg(&catalog_path)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("invalid catalog JSON"));
+}
+
+#[test]
+fn admin_catalog_check_missing_file_errors() {
+    cmd()
+        .args(["admin", "catalog-check", "/nonexistent/catalog.json"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("catalog file not found"));
+}
+
+#[test]
+fn admin_catalog_check_json_format_has_envelope() {
+    let dir = tempfile::tempdir().unwrap();
+    let catalog_path = dir.path().join("catalog.json");
+    std::fs::write(
+        &catalog_path,
+        r#"{"approved":{"engines":{"know-now":["1.0.0"]}}}"#,
+    )
+    .unwrap();
+
+    cmd()
+        .args(["--format", "json", "admin", "catalog-check"])
+        .arg(&catalog_path)
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""result": "success""#))
+        .stdout(predicate::str::contains(r#""valid": true"#));
 }
