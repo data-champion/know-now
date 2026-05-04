@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://know-now.dev/schemas/manifest/v0.1.0/manifest.json",
+  "title": "know-now Generation Manifest v0.1.0",
+  "description": "Deterministic manifest written after every successful generation. PRD §8.11.",
+  "type": "object",
+  "required": [
+    "engine_version",
+    "metadata_schema_version",
+    "generator_contract_version",
+    "project_id",
+    "input_hash",
+    "lockfile_hash",
+    "target_database",
+    "policy",
+    "template_renderers",
+    "artifacts",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "engine_version": {
+      "type": "string",
+      "description": "Semantic version of the know-now engine."
+    },
+    "metadata_schema_version": {
+      "type": "string",
+      "description": "Semantic version of the metadata schema."
+    },
+    "generator_contract_version": {
+      "type": "string",
+      "description": "Semantic version of the generator contract."
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Stable project identifier from know-now.yml."
+    },
+    "input_hash": {
+      "type": "string",
+      "pattern": "^sha256:.+$",
+      "description": "SHA-256 hash of the canonicalized input metadata."
+    },
+    "lockfile_hash": {
+      "type": "string",
+      "pattern": "^sha256:.+$",
+      "description": "SHA-256 hash of know-now.lock."
+    },
+    "target_database": {
+      "$ref": "#/$defs/target_database"
+    },
+    "policy": {
+      "$ref": "#/$defs/policy_ref"
+    },
+    "template_renderers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/template_renderer_ref"
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/artifact_entry"
+      },
+      "description": "Sorted lexicographically by path."
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "target_database": {
+      "type": "object",
+      "required": ["kind", "version", "compatibility_floor"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "type": "string" },
+        "version": { "type": "string" },
+        "compatibility_floor": { "type": "string" }
+      }
+    },
+    "policy_ref": {
+      "type": "object",
+      "required": ["pack", "version", "hash"],
+      "additionalProperties": false,
+      "properties": {
+        "pack": { "type": "string" },
+        "version": { "type": "string" },
+        "hash": { "type": "string", "pattern": "^sha256:.+$" }
+      }
+    },
+    "template_renderer_ref": {
+      "type": "object",
+      "required": ["profile", "engine", "profile_version", "limits"],
+      "additionalProperties": false,
+      "properties": {
+        "profile": { "type": "string" },
+        "engine": { "type": "string" },
+        "profile_version": { "type": "string" },
+        "limits": {
+          "type": "object",
+          "required": ["max_fuel", "max_output_bytes"],
+          "additionalProperties": false,
+          "properties": {
+            "max_fuel": { "type": "integer", "minimum": 0 },
+            "max_output_bytes": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "artifact_entry": {
+      "type": "object",
+      "required": [
+        "path", "kind", "artifact_id", "generator",
+        "generator_version", "hash", "metadata_object_ids", "trace"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "path": { "type": "string" },
+        "kind": { "type": "string" },
+        "artifact_id": { "type": "string" },
+        "generator": { "type": "string" },
+        "generator_version": { "type": "string" },
+        "hash": { "type": "string", "pattern": "^sha256:.+$" },
+        "metadata_object_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "trace": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/artifact_trace"
+          }
+        }
+      }
+    },
+    "artifact_trace": {
+      "type": "object",
+      "required": ["artifact_span", "metadata_object_ids", "policy_rule_ids"],
+      "additionalProperties": false,
+      "properties": {
+        "artifact_span": {
+          "type": "object",
+          "required": ["line_start", "line_end"],
+          "additionalProperties": false,
+          "properties": {
+            "line_start": { "type": "integer", "minimum": 0 },
+            "line_end": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "metadata_object_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "policy_rule_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}
