@@ -26,13 +26,55 @@ Pinned via `rust-toolchain.toml`. See `rust-toolchain.toml` for the current chan
 | pnpm | Pinned in `web/package.json` `packageManager` | ADR-0005 |
 | TypeScript | Strict mode | `tsconfig.json` |
 
-## Remaining sections
+## Metadata schema
 
-The following sections will be populated by bsf.9 (compatibility matrix maintenance bead):
+| Version | Status | Notes |
+|---------|--------|-------|
+| 1.0 | Current | Only supported version in Phase 3 |
 
-- Metadata schema version
-- Generator contract version
-- Renderer profile versions
-- PostgreSQL target versions
-- dbt adapter modes
-- Dashboard browser support
+## Generator contract
+
+| Version | Status | Notes |
+|---------|--------|-------|
+| 1.0 | Current | Stable since Phase 2a |
+
+## Renderer profiles
+
+| Profile | Version | Status | Notes |
+|---------|---------|--------|-------|
+| know-now-minijinja-v1 | 1 | Current | Strict mode, fuel-limited |
+
+## PostgreSQL targets
+
+| Version | Status | Notes |
+|---------|--------|-------|
+| 16 | Floor / tested | Minimum supported |
+| 17 | Tested | |
+| 18 | Tested | Latest supported |
+
+## dbt adapter modes
+
+| Adapter | Version | Status | Notes |
+|---------|---------|--------|-------|
+| dbt-postgres | 1.7+ | Tested | Primary adapter |
+
+## Dashboard browser support
+
+| Browser | Version | Status | Notes |
+|---------|---------|--------|-------|
+| Chrome | Latest 2 major | Supported | Primary target |
+| Firefox | Latest 2 major | Supported | |
+| Safari | Latest 2 major | Best-effort | |
+| Edge | Latest 2 major | Supported | Chromium-based |
+
+## Release classification
+
+When a release changes generated output, the commit body must include a
+classification per PRD §20.2:
+
+- **expected-formatting**: whitespace, indentation, comment placement
+- **metadata-schema**: changes to metadata YAML structure
+- **generator-behavior**: different SQL/dbt/docs output for same input
+- **policy-default**: new or changed default policy rules
+- **bug-fix**: corrects previously incorrect output
+- **breaking**: incompatible change requiring user action

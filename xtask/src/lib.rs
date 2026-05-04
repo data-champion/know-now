@@ -3,16 +3,19 @@
 //! Responsibility is defined in PRD section 8.2 (workspace layout).
 
 use std::{
-    fmt, fs,
+    collections::BTreeMap,
+    fmt::{self, Write as _},
+    fs,
     io::{self, Write},
-    path::Path,
+    path::{Path, PathBuf},
     process::{Command, ExitCode, Stdio},
+    time::{Instant, SystemTime, UNIX_EPOCH},
 };
 
 use anyhow::Context;
-use clap::{Parser, Subcommand, ValueEnum};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 use know_now_audit::redaction;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 #[derive(Debug, Parser)]
@@ -32,7 +35,7 @@ enum Commands {
         command: FixtureCommands,
     },
     /// Run benchmark suite.
-    Bench,
+    Bench(BenchArgs),
     /// Release preparation utilities.
     Release {
         #[command(subcommand)]
@@ -70,6 +73,37 @@ enum Commands {
     },
 }
 
+#[derive(Debug, Clone, Args)]
+struct BenchArgs {
+    /// Number of timing samples per benchmark case.
+    #[arg(long, default_value_t = 3, value_parser = clap::value_parser!(u32).range(1..=20))]
+    runs: u32,
+
+    /// Allowed regression percentage versus baseline before failing.
+    #[arg(long, default_value_t = 20.0)]
+    max_regression_pct: f64,
+
+    /// Path to the benchmark baseline JSON.
+    #[arg(long, default_value = "benchmarks/baseline.json")]
+    baseline: String,
+
+    /// Update baseline file from current measurements.
+    #[arg(long, default_value_t = false)]
+    update_baseline: bool,
+
+    /// Allow baseline regressions above threshold.
+    #[arg(long, default_value_t = false)]
+    allow_regression: bool,
+
+    /// Run optional peak-memory check for 100-entity generation (NFR-P11).
+    #[arg(long, default_value_t = false)]
+    memory_check: bool,
+
+    /// Peak-memory budget in MiB for NFR-P11.
+    #[arg(long, default_value_t = 512)]
+    memory_budget_mib: u64,
+}
+
 #[derive(Debug, Subcommand)]
 enum FixtureCommands {
     /// Regenerate fixtures (requires --confirm).
@@ -89,6 +123,18 @@ enum FixtureCommands {
 enum ReleaseCommands {
     /// Prepare release metadata for a version.
     Prepare { version: String },
+    /// Generate release notes from classified commits.
+    Notes {
+        /// Git ref range (e.g., v0.1.0..HEAD).
+        #[arg(long, default_value = "HEAD~20..HEAD")]
+        range: String,
+    },
+    /// Check commit messages for convention compliance.
+    CheckCommits {
+        /// Git ref range to check.
+        #[arg(long, default_value = "HEAD~10..HEAD")]
+        range: String,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -176,6 +222,62 @@ struct FixtureDiffEntry {
     path: String,
 }
 
+#[derive(Debug, Serialize)]
+struct BenchReport {
+    version: u32,
+    runs: u32,
+    max_regression_pct: f64,
+    baseline_path: String,
+    allow_regression: bool,
+    memory_check: bool,
+    memory_budget_mib: u64,
+    cases: Vec<BenchCaseResult>,
+    deferred_cases: Vec<BenchDeferredCase>,
+    memory_case: Option<BenchMemoryCaseResult>,
+    passed: bool,
+}
+
+#[derive(Debug, Serialize)]
+struct BenchCaseResult {
+    id: &'static str,
+    requirement: &'static str,
+    budget_ms: f64,
+    samples_ms: Vec<f64>,
+    mean_ms: f64,
+    min_ms: f64,
+    max_ms: f64,
+    baseline_ms: Option<f64>,
+    regression_pct: Option<f64>,
+    within_budget: bool,
+    regression_within_limit: Option<bool>,
+    status: &'static str,
+    detail: String,
+}
+
+#[derive(Debug, Serialize)]
+struct BenchDeferredCase {
+    id: &'static str,
+    requirement: &'static str,
+    reason: &'static str,
+}
+
+#[derive(Debug, Serialize)]
+struct BenchMemoryCaseResult {
+    id: &'static str,
+    requirement: &'static str,
+    budget_mib: u64,
+    observed_mib: Option<f64>,
+    within_budget: Option<bool>,
+    status: &'static str,
+    detail: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct BenchBaseline {
+    version: u32,
+    cases: BTreeMap<String, f64>,
+}
+
 pub fn entry() -> ExitCode {
     match run() {
         Ok(()) => ExitCode::SUCCESS,
@@ -194,9 +296,11 @@ fn run() -> anyhow::Result<()> {
             FixtureCommands::Regen { confirm } => cmd_fixtures_regen(confirm),
             FixtureCommands::Diff { json } => cmd_fixtures_diff(json),
         },
-        Commands::Bench => cmd_bench(),
+        Commands::Bench(args) => cmd_bench(&args),
         Commands::Release { command } => match command {
             ReleaseCommands::Prepare { version } => cmd_release_prepare(&version),
+            ReleaseCommands::Notes { range } => cmd_release_notes(&range),
+            ReleaseCommands::CheckCommits { range } => cmd_check_commits(&range),
         },
         Commands::Docs { command } => match command {
             DocsCommands::Build => cmd_docs_build(),
@@ -362,8 +466,782 @@ fn cmd_release_prepare(version: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn cmd_bench() -> anyhow::Result<()> {
-    run_external_command("cargo", ["bench", "--workspace"])
+fn cmd_release_notes(range: &str) -> anyhow::Result<()> {
+    let commits = git_log_oneline(range)?;
+    if commits.is_empty() {
+        anyhow::bail!("no commits found in range {range}")
+    }
+
+    let classified = classify_commits(&commits);
+    let mut stdout = io::stdout();
+
+    writeln!(stdout, "# Release Notes\n")?;
+
+    let sections: &[(&str, &str)] = &[
+        ("breaking", "Breaking Changes"),
+        ("feat", "Features"),
+        ("fix", "Bug Fixes"),
+        ("refactor", "Refactoring"),
+        ("perf", "Performance"),
+        ("docs", "Documentation"),
+        ("test", "Tests"),
+        ("build", "Build"),
+        ("chore", "Chores"),
+        ("other", "Other"),
+    ];
+
+    for (key, heading) in sections {
+        let items: Vec<_> = classified.iter().filter(|c| c.category == *key).collect();
+        if items.is_empty() {
+            continue;
+        }
+        writeln!(stdout, "## {heading}\n")?;
+        for item in &items {
+            writeln!(stdout, "- {}", item.summary)?;
+            if let Some(classification) = &item.output_classification {
+                writeln!(stdout, "  Output classification: {classification}")?;
+            }
+        }
+        writeln!(stdout)?;
+    }
+
+    Ok(())
+}
+
+fn cmd_check_commits(range: &str) -> anyhow::Result<()> {
+    let raw = run_command_capture("git", ["log", "--format=%H %s%n%b%n---END---", range])?;
+    let commit_blocks: Vec<&str> = raw.split("---END---").collect();
+    let mut violations = Vec::new();
+
+    for block in &commit_blocks {
+        let block = block.trim();
+        if block.is_empty() {
+            continue;
+        }
+
+        let lines: Vec<&str> = block.lines().collect();
+        let Some(first_line) = lines.first() else {
+            continue;
+        };
+
+        let subject = first_line.split_once(' ').map_or("", |x| x.1);
+        let body = lines[1..].join("\n");
+
+        if subject.contains('!') && subject.contains(':') && !body.contains("BREAKING CHANGE:") {
+            violations.push(format!(
+                "breaking commit missing BREAKING CHANGE footer: {subject}"
+            ));
+        }
+    }
+
+    let mut stdout = io::stdout();
+    if violations.is_empty() {
+        writeln!(stdout, "All commits pass convention checks.")?;
+        return Ok(());
+    }
+
+    for v in &violations {
+        writeln!(stdout, "  VIOLATION: {v}")?;
+    }
+    anyhow::bail!("{} commit convention violation(s)", violations.len())
+}
+
+struct ClassifiedCommit {
+    category: String,
+    summary: String,
+    output_classification: Option<String>,
+}
+
+fn classify_commits(oneline_commits: &[String]) -> Vec<ClassifiedCommit> {
+    oneline_commits
+        .iter()
+        .map(|line| {
+            let subject = line.split_once(' ').map_or(line.as_str(), |x| x.1);
+            let (category, summary) = parse_conventional_subject(subject);
+            ClassifiedCommit {
+                category,
+                summary: summary.to_owned(),
+                output_classification: None,
+            }
+        })
+        .collect()
+}
+
+fn parse_conventional_subject(subject: &str) -> (String, &str) {
+    let Some(colon_pos) = subject.find(':') else {
+        return ("other".into(), subject);
+    };
+
+    let prefix = &subject[..colon_pos];
+    let message = subject[colon_pos + 1..].trim_start();
+
+    let type_part = prefix
+        .split('(')
+        .next()
+        .unwrap_or(prefix)
+        .trim_end_matches('!');
+
+    let category = match type_part {
+        "feat" => "feat",
+        "fix" => "fix",
+        "refactor" => "refactor",
+        "perf" => "perf",
+        "docs" | "doc" => "docs",
+        "test" | "tests" => "test",
+        "build" | "ci" => "build",
+        "chore" => "chore",
+        _ => "other",
+    };
+
+    if prefix.contains('!') {
+        return ("breaking".into(), message);
+    }
+
+    (category.into(), message)
+}
+
+fn git_log_oneline(range: &str) -> anyhow::Result<Vec<String>> {
+    let raw = run_command_capture("git", ["log", "--oneline", range])?;
+    Ok(raw.lines().map(String::from).collect())
+}
+
+fn cmd_bench(args: &BenchArgs) -> anyhow::Result<()> {
+    let know_now = ensure_know_now_binary()?;
+    let baseline_path = Path::new(&args.baseline);
+    let baseline = load_benchmark_baseline(baseline_path)?;
+
+    let run_root = benchmark_run_root()?;
+    let cases = run_primary_bench_cases(args, &know_now, baseline.as_ref(), &run_root)?;
+    let deferred_cases = deferred_bench_cases();
+    let memory_case = maybe_run_memory_benchmark(args, &know_now, &run_root)?;
+
+    let all_case_passed = cases.iter().all(|case| case.status == "pass");
+    let memory_passed = memory_case
+        .as_ref()
+        .is_none_or(|case| case.status == "pass" || case.status == "skip");
+
+    if args.update_baseline {
+        let baseline_payload = baseline_from_cases(&cases);
+        write_benchmark_baseline(baseline_path, &baseline_payload)?;
+    }
+
+    let report = BenchReport {
+        version: 1,
+        runs: args.runs,
+        max_regression_pct: args.max_regression_pct,
+        baseline_path: args.baseline.clone(),
+        allow_regression: args.allow_regression,
+        memory_check: args.memory_check,
+        memory_budget_mib: args.memory_budget_mib,
+        cases,
+        deferred_cases,
+        memory_case,
+        passed: all_case_passed && memory_passed,
+    };
+
+    write_benchmark_report(&report)?;
+    print_benchmark_summary(&report)?;
+
+    if report.passed {
+        return Ok(());
+    }
+
+    anyhow::bail!("benchmark gate failed")
+}
+
+fn run_primary_bench_cases(
+    args: &BenchArgs,
+    know_now: &Path,
+    baseline: Option<&BenchBaseline>,
+    run_root: &Path,
+) -> anyhow::Result<Vec<BenchCaseResult>> {
+    let p3_projects = prepare_synthetic_projects(run_root, "p3_validate_100", 100, args.runs)?;
+    let p4_projects = prepare_synthetic_projects(run_root, "p4_generate_10", 10, args.runs)?;
+    let p5_projects = prepare_synthetic_projects(run_root, "p5_generate_100", 100, args.runs)?;
+
+    Ok(vec![
+        run_benchmark_case(
+            "p1_cli_startup",
+            "NFR-P1",
+            500.0,
+            args,
+            baseline.and_then(|b| b.cases.get("p1_cli_startup").copied()),
+            |_run_index| run_know_now_command(know_now, None, &["version"]),
+        ),
+        run_benchmark_case(
+            "p2_help_output",
+            "NFR-P2",
+            200.0,
+            args,
+            baseline.and_then(|b| b.cases.get("p2_help_output").copied()),
+            |_run_index| run_know_now_command(know_now, None, &["--help"]),
+        ),
+        run_benchmark_case(
+            "p3_validate_100_entities",
+            "NFR-P3",
+            2_000.0,
+            args,
+            baseline.and_then(|b| b.cases.get("p3_validate_100_entities").copied()),
+            |run_index| {
+                run_know_now_command(know_now, Some(&p3_projects[run_index]), &["validate"])
+            },
+        ),
+        run_benchmark_case(
+            "p4_generate_10_entities",
+            "NFR-P4",
+            5_000.0,
+            args,
+            baseline.and_then(|b| b.cases.get("p4_generate_10_entities").copied()),
+            |run_index| {
+                run_know_now_command(know_now, Some(&p4_projects[run_index]), &["generate"])
+            },
+        ),
+        run_benchmark_case(
+            "p5_generate_100_entities",
+            "NFR-P5",
+            60_000.0,
+            args,
+            baseline.and_then(|b| b.cases.get("p5_generate_100_entities").copied()),
+            |run_index| {
+                run_know_now_command(know_now, Some(&p5_projects[run_index]), &["generate"])
+            },
+        ),
+    ])
+}
+
+fn deferred_bench_cases() -> Vec<BenchDeferredCase> {
+    vec![
+        BenchDeferredCase {
+            id: "p6_incremental_regeneration",
+            requirement: "NFR-P6",
+            reason: "Phase-3 incremental target (`--changed`) is not implemented yet.",
+        },
+        BenchDeferredCase {
+            id: "p7_custom_reference_scan",
+            requirement: "NFR-P7",
+            reason: "Custom-reference scan harness is pending extension-model implementation.",
+        },
+        BenchDeferredCase {
+            id: "p8_dashboard_fcp",
+            requirement: "NFR-P8",
+            reason: "Dashboard web-vitals perf harness is tracked under Playwright/web profiling work.",
+        },
+        BenchDeferredCase {
+            id: "p9_entity_list_api",
+            requirement: "NFR-P9",
+            reason: "API p95 latency gate needs a load-harness in phase-3 server testing.",
+        },
+        BenchDeferredCase {
+            id: "p12_timing_breakdown",
+            requirement: "NFR-P12",
+            reason: "Per-stage timing JSON is not emitted by the pipeline yet.",
+        },
+        BenchDeferredCase {
+            id: "p13_parallel_generation",
+            requirement: "NFR-P13",
+            reason: "Parallel generation safety is covered by determinism/fitness tests, not microbench timings.",
+        },
+    ]
+}
+
+fn maybe_run_memory_benchmark(
+    args: &BenchArgs,
+    know_now: &Path,
+    run_root: &Path,
+) -> anyhow::Result<Option<BenchMemoryCaseResult>> {
+    if !args.memory_check {
+        return Ok(None);
+    }
+    let memory_project = prepare_synthetic_project(&run_root.join("p11_memory"), 100)?;
+    Ok(Some(run_memory_benchmark(
+        know_now,
+        &memory_project,
+        args.memory_budget_mib,
+    )))
+}
+
+fn baseline_from_cases(cases: &[BenchCaseResult]) -> BenchBaseline {
+    BenchBaseline {
+        version: 1,
+        cases: cases
+            .iter()
+            .map(|case| (case.id.to_string(), case.mean_ms))
+            .collect(),
+    }
+}
+
+fn ensure_know_now_binary() -> anyhow::Result<PathBuf> {
+    let binary_name = if cfg!(windows) {
+        "know-now.exe"
+    } else {
+        "know-now"
+    };
+    let path = Path::new("target").join("debug").join(binary_name);
+    if path.exists() {
+        return Ok(path);
+    }
+
+    run_external_command("cargo", ["build", "-p", "know_now_cli"])?;
+    if path.exists() {
+        return Ok(path);
+    }
+
+    anyhow::bail!("expected know-now binary at {} after build", path.display())
+}
+
+fn load_benchmark_baseline(path: &Path) -> anyhow::Result<Option<BenchBaseline>> {
+    if !path.exists() {
+        return Ok(None);
+    }
+    let payload = fs::read_to_string(path)
+        .with_context(|| format!("failed to read baseline file {}", path.display()))?;
+    let baseline: BenchBaseline = serde_json::from_str(&payload)
+        .with_context(|| format!("failed to parse benchmark baseline {}", path.display()))?;
+    Ok(Some(baseline))
+}
+
+fn write_benchmark_baseline(path: &Path, baseline: &BenchBaseline) -> anyhow::Result<()> {
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent).with_context(|| {
+            format!(
+                "failed to create baseline parent directory {}",
+                parent.display()
+            )
+        })?;
+    }
+    let encoded = serde_json::to_vec_pretty(baseline)?;
+    fs::write(path, encoded)
+        .with_context(|| format!("failed to write benchmark baseline {}", path.display()))
+}
+
+fn benchmark_run_root() -> anyhow::Result<PathBuf> {
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .context("system clock appears to be before UNIX_EPOCH")?;
+    let root = std::env::temp_dir().join(format!(
+        "know-now-bench-{}-{}",
+        std::process::id(),
+        now.as_nanos()
+    ));
+    fs::create_dir_all(&root)
+        .with_context(|| format!("failed to create benchmark run root {}", root.display()))?;
+    Ok(root)
+}
+
+fn prepare_synthetic_projects(
+    root: &Path,
+    case_key: &str,
+    entity_count: usize,
+    runs: u32,
+) -> anyhow::Result<Vec<PathBuf>> {
+    let mut projects = Vec::new();
+    for run_index in 0..runs {
+        let project_path = root.join(case_key).join(format!("run-{run_index}"));
+        let project = prepare_synthetic_project(&project_path, entity_count)?;
+        projects.push(project);
+    }
+    Ok(projects)
+}
+
+fn prepare_synthetic_project(project_root: &Path, entity_count: usize) -> anyhow::Result<PathBuf> {
+    let metadata_dir = project_root.join("metadata");
+    fs::create_dir_all(&metadata_dir).with_context(|| {
+        format!(
+            "failed to create synthetic metadata directory {}",
+            metadata_dir.display()
+        )
+    })?;
+    let project_yml = metadata_dir.join("project.yml");
+    let contents = synthetic_project_yaml(entity_count);
+    fs::write(&project_yml, contents).with_context(|| {
+        format!(
+            "failed to write synthetic metadata {}",
+            project_yml.display()
+        )
+    })?;
+    Ok(project_root.to_path_buf())
+}
+
+fn synthetic_project_yaml(entity_count: usize) -> String {
+    let mut out = String::from("version: \"1.0\"\nentities:\n");
+    for idx in 0..entity_count {
+        let ordinal = idx + 1;
+        let entity_slug = format!("entity_{ordinal:03}");
+        let entity_id = format!("ent_{ordinal:03}");
+        let attr_id = format!("attr_{ordinal:03}_id");
+        let attr_name = format!("attr_{ordinal:03}_name");
+        let attr_status = format!("attr_{ordinal:03}_status");
+        let attr_created_at = format!("attr_{ordinal:03}_created_at");
+
+        let _ = writeln!(out, "  - id: {entity_id}");
+        let _ = writeln!(out, "    name: {entity_slug}");
+        let _ = writeln!(out, "    attributes:");
+        let _ = writeln!(out, "      - id: {attr_id}");
+        let _ = writeln!(out, "        name: id");
+        let _ = writeln!(out, "        logical_type: integer");
+        let _ = writeln!(out, "        required: true");
+        let _ = writeln!(out, "      - id: {attr_name}");
+        let _ = writeln!(out, "        name: {entity_slug}_name");
+        let _ = writeln!(out, "        logical_type: string");
+        let _ = writeln!(out, "        required: true");
+        let _ = writeln!(out, "      - id: {attr_status}");
+        let _ = writeln!(out, "        name: {entity_slug}_status");
+        let _ = writeln!(out, "        logical_type: string");
+        let _ = writeln!(out, "      - id: {attr_created_at}");
+        let _ = writeln!(out, "        name: {entity_slug}_created_at");
+        let _ = writeln!(out, "        logical_type: timestamp");
+    }
+    out
+}
+
+fn run_know_now_command(
+    know_now: &Path,
+    project: Option<&Path>,
+    args: &[&str],
+) -> anyhow::Result<()> {
+    let mut command = Command::new(know_now);
+    if let Some(project_root) = project {
+        command.arg("--project").arg(project_root);
+    }
+    command
+        .args(args)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
+    let status = command.status().with_context(|| {
+        format!(
+            "failed to execute {} {}",
+            know_now.display(),
+            args.join(" ")
+        )
+    })?;
+    if status.success() {
+        return Ok(());
+    }
+    anyhow::bail!(
+        "`{}` {} exited with status {}",
+        know_now.display(),
+        args.join(" "),
+        status
+    )
+}
+
+fn run_benchmark_case<F>(
+    case_id: &'static str,
+    requirement: &'static str,
+    budget_ms: f64,
+    args: &BenchArgs,
+    baseline_ms: Option<f64>,
+    mut run_once: F,
+) -> BenchCaseResult
+where
+    F: FnMut(usize) -> anyhow::Result<()>,
+{
+    let mut samples_ms = Vec::new();
+    let mut command_failure = None;
+
+    for run_index in 0..args.runs {
+        let run_index = usize::try_from(run_index).unwrap_or(usize::MAX);
+        let started = Instant::now();
+        match run_once(run_index) {
+            Ok(()) => {
+                let elapsed_ms = started.elapsed().as_secs_f64() * 1_000.0;
+                samples_ms.push(elapsed_ms);
+            }
+            Err(err) => {
+                command_failure = Some(err.to_string());
+                break;
+            }
+        }
+    }
+
+    if let Some(err) = command_failure {
+        return BenchCaseResult {
+            id: case_id,
+            requirement,
+            budget_ms,
+            samples_ms,
+            mean_ms: 0.0,
+            min_ms: 0.0,
+            max_ms: 0.0,
+            baseline_ms,
+            regression_pct: None,
+            within_budget: false,
+            regression_within_limit: None,
+            status: "fail",
+            detail: format!("command failed: {err}"),
+        };
+    }
+
+    if samples_ms.is_empty() {
+        return BenchCaseResult {
+            id: case_id,
+            requirement,
+            budget_ms,
+            samples_ms,
+            mean_ms: 0.0,
+            min_ms: 0.0,
+            max_ms: 0.0,
+            baseline_ms,
+            regression_pct: None,
+            within_budget: false,
+            regression_within_limit: None,
+            status: "fail",
+            detail: "no successful samples captured".to_string(),
+        };
+    }
+
+    let (mean_ms, min_ms, max_ms) = benchmark_sample_stats(&samples_ms);
+    let within_budget = mean_ms <= budget_ms;
+    let regression_pct = baseline_ms.and_then(|baseline| {
+        if baseline <= f64::EPSILON {
+            None
+        } else {
+            Some(((mean_ms - baseline) / baseline) * 100.0)
+        }
+    });
+
+    let regression_within_limit = regression_pct.map(|pct| {
+        if pct <= args.max_regression_pct {
+            true
+        } else {
+            args.allow_regression
+        }
+    });
+
+    let regression_text = match (regression_pct, regression_within_limit) {
+        (Some(pct), Some(true)) if pct > args.max_regression_pct => {
+            format!("regression {pct:.2}% (allowed)")
+        }
+        (Some(pct), Some(true)) => format!("regression {pct:.2}%"),
+        (Some(pct), Some(false)) => format!(
+            "regression {pct:.2}% exceeds {:.2}%",
+            args.max_regression_pct
+        ),
+        _ => "no baseline".to_string(),
+    };
+
+    let status = if within_budget && regression_within_limit.unwrap_or(true) {
+        "pass"
+    } else {
+        "fail"
+    };
+
+    BenchCaseResult {
+        id: case_id,
+        requirement,
+        budget_ms,
+        samples_ms,
+        mean_ms,
+        min_ms,
+        max_ms,
+        baseline_ms,
+        regression_pct,
+        within_budget,
+        regression_within_limit,
+        status,
+        detail: format!("mean {mean_ms:.2}ms vs budget {budget_ms:.2}ms; {regression_text}"),
+    }
+}
+
+fn benchmark_sample_stats(samples_ms: &[f64]) -> (f64, f64, f64) {
+    let sum: f64 = samples_ms.iter().sum();
+    let count_u32 = u32::try_from(samples_ms.len()).unwrap_or(u32::MAX);
+    let mean = sum / f64::from(count_u32);
+    let min = samples_ms.iter().copied().fold(f64::INFINITY, f64::min);
+    let max = samples_ms.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+    (mean, min, max)
+}
+
+fn run_memory_benchmark(know_now: &Path, project: &Path, budget_mib: u64) -> BenchMemoryCaseResult {
+    if !Path::new("/usr/bin/time").exists() {
+        return bench_memory_skip(budget_mib, "/usr/bin/time not available on this host");
+    }
+
+    let temp_file = std::env::temp_dir().join(format!(
+        "know-now-memory-{}-{}.txt",
+        std::process::id(),
+        rand_suffix()
+    ));
+
+    let status = Command::new("/usr/bin/time")
+        .arg("-f")
+        .arg("%M")
+        .arg("-o")
+        .arg(&temp_file)
+        .arg(know_now)
+        .arg("--project")
+        .arg(project)
+        .arg("generate")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status();
+
+    let status = match status {
+        Ok(status) => status,
+        Err(err) => {
+            return bench_memory_fail(
+                budget_mib,
+                None,
+                format!("failed to run memory check: {err}"),
+            )
+        }
+    };
+
+    if !status.success() {
+        return bench_memory_fail(
+            budget_mib,
+            None,
+            format!("memory-check command exited with status {status}"),
+        );
+    }
+
+    let raw = match fs::read_to_string(&temp_file) {
+        Ok(raw) => raw,
+        Err(err) => {
+            return bench_memory_fail(
+                budget_mib,
+                None,
+                format!("failed to read memory sample: {err}"),
+            )
+        }
+    };
+
+    let kib = match raw.trim().parse::<f64>() {
+        Ok(kib) => kib,
+        Err(err) => {
+            return bench_memory_fail(
+                budget_mib,
+                None,
+                format!("failed to parse memory sample `{}`: {err}", raw.trim()),
+            );
+        }
+    };
+
+    let observed_mib = kib / 1024.0;
+    let Ok(budget_mib_u32) = u32::try_from(budget_mib) else {
+        return bench_memory_fail(
+            budget_mib,
+            Some(observed_mib),
+            format!("memory budget exceeds supported range: {budget_mib} MiB"),
+        );
+    };
+    let within_budget = observed_mib <= f64::from(budget_mib_u32);
+    if within_budget {
+        return BenchMemoryCaseResult {
+            id: "p11_peak_memory_100_entities",
+            requirement: "NFR-P11",
+            budget_mib,
+            observed_mib: Some(observed_mib),
+            within_budget: Some(true),
+            status: "pass",
+            detail: format!(
+                "observed peak memory {observed_mib:.2} MiB vs budget {budget_mib} MiB"
+            ),
+        };
+    }
+    bench_memory_fail(
+        budget_mib,
+        Some(observed_mib),
+        format!("observed peak memory {observed_mib:.2} MiB vs budget {budget_mib} MiB"),
+    )
+}
+
+fn bench_memory_skip(budget_mib: u64, detail: &str) -> BenchMemoryCaseResult {
+    BenchMemoryCaseResult {
+        id: "p11_peak_memory_100_entities",
+        requirement: "NFR-P11",
+        budget_mib,
+        observed_mib: None,
+        within_budget: None,
+        status: "skip",
+        detail: detail.to_string(),
+    }
+}
+
+fn bench_memory_fail(
+    budget_mib: u64,
+    observed_mib: Option<f64>,
+    detail: String,
+) -> BenchMemoryCaseResult {
+    BenchMemoryCaseResult {
+        id: "p11_peak_memory_100_entities",
+        requirement: "NFR-P11",
+        budget_mib,
+        observed_mib,
+        within_budget: Some(false),
+        status: "fail",
+        detail,
+    }
+}
+
+fn rand_suffix() -> u128 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_nanos())
+        .unwrap_or(0)
+}
+
+fn write_benchmark_report(report: &BenchReport) -> anyhow::Result<()> {
+    let dir = Path::new("target").join("benchmarks");
+    fs::create_dir_all(&dir).with_context(|| {
+        format!(
+            "failed to create benchmark report directory {}",
+            dir.display()
+        )
+    })?;
+    let report_path = dir.join("latest.json");
+    let payload = serde_json::to_vec_pretty(report)?;
+    fs::write(&report_path, payload)
+        .with_context(|| format!("failed to write benchmark report {}", report_path.display()))
+}
+
+fn print_benchmark_summary(report: &BenchReport) -> anyhow::Result<()> {
+    let mut stdout = io::stdout();
+    writeln!(stdout, "Benchmark gate summary:")?;
+    writeln!(stdout, "  runs per case: {}", report.runs)?;
+    writeln!(
+        stdout,
+        "  max regression threshold: {:.2}%",
+        report.max_regression_pct
+    )?;
+    writeln!(stdout, "  baseline path: {}", report.baseline_path)?;
+
+    for case in &report.cases {
+        writeln!(
+            stdout,
+            "  [{:4}] {:<28} mean={:>9.2}ms budget={:>8.2}ms ({})",
+            case.status.to_ascii_uppercase(),
+            case.id,
+            case.mean_ms,
+            case.budget_ms,
+            case.detail
+        )?;
+    }
+
+    if let Some(memory_case) = &report.memory_case {
+        writeln!(
+            stdout,
+            "  [{:4}] {:<28} {}",
+            memory_case.status.to_ascii_uppercase(),
+            memory_case.id,
+            memory_case.detail
+        )?;
+    }
+
+    if !report.deferred_cases.is_empty() {
+        writeln!(stdout, "  deferred cases:")?;
+        for deferred in &report.deferred_cases {
+            writeln!(
+                stdout,
+                "    - {} ({}) {}",
+                deferred.id, deferred.requirement, deferred.reason
+            )?;
+        }
+    }
+
+    let report_path = Path::new("target/benchmarks/latest.json");
+    writeln!(stdout, "  report: {}", report_path.display())?;
+    Ok(())
 }
 
 fn cmd_docs_build() -> anyhow::Result<()> {
