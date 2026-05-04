@@ -2,6 +2,7 @@
 //!
 //! Responsibility is defined in PRD section 8.2 (workspace layout).
 
+pub mod authoring;
 pub mod budgets;
 pub mod fixtures;
 pub mod parser;
