@@ -4,5 +4,6 @@
 
 pub mod generation;
 pub mod manifest;
+pub mod manifest_builder;
 pub mod path_safety;
 pub mod staging;
