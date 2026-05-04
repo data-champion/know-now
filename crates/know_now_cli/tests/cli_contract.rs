@@ -1574,6 +1574,24 @@ fn generate_phase3_changed_flag_rejected() {
 }
 
 #[test]
+fn generate_phase3_target_changed_rejected() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path().join("demo-project"))
+        .args(["generate", "--target", "changed"])
+        .assert()
+        .code(predicate::eq(2))
+        .stderr(predicate::str::contains("Phase 3 feature"));
+}
+
+#[test]
 fn generate_phase3_migration_safe_flag_rejected() {
     let tmp = tempfile::tempdir().expect("tempdir");
     cmd()
@@ -1737,6 +1755,43 @@ fn generate_manifest_is_valid_json() {
 }
 
 #[test]
+fn generate_locked_fails_without_lockfile() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "no-lock", "--profile", "minimal"])
+        .assert()
+        .success();
+    let project = tmp.path().join("no-lock");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate", "--locked"])
+        .assert()
+        .code(predicate::eq(1))
+        .stderr(predicate::str::contains("LOCK-MISSING-004"));
+}
+
+#[test]
+fn generate_locked_succeeds_with_lockfile() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate", "--locked"])
+        .assert()
+        .success();
+}
+
+#[test]
 fn generate_ddl_contains_sql() {
     let tmp = tempfile::tempdir().expect("tempdir");
     cmd()
@@ -1858,6 +1913,27 @@ fn generate_target_comma_separated() {
         .args(["--project"])
         .arg(&project)
         .args(["generate", "--target", "ddl,docs"])
+        .assert()
+        .success();
+    let generated = project.join("generated");
+    assert!(generated.join("ddl/postgres/schema.sql").exists());
+    assert!(generated.join("docs/README.md").exists());
+}
+
+#[test]
+fn generate_target_all_alias_produces_supported_union() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate", "--target", "all"])
         .assert()
         .success();
     let generated = project.join("generated");
