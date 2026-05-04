@@ -259,4 +259,52 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn manifest_json_uses_lf_line_endings() {
+        let manifest = sample_manifest();
+        let json = manifest.to_json_pretty();
+        assert!(
+            !json.contains('\r'),
+            "manifest JSON must use LF line endings, not CRLF (NFR-PO3)"
+        );
+    }
+
+    #[test]
+    fn manifest_json_is_valid_utf8_without_bom() {
+        let manifest = sample_manifest();
+        let json = manifest.to_json_pretty();
+        let bytes = json.as_bytes();
+        assert!(
+            !bytes.starts_with(&[0xEF, 0xBB, 0xBF]),
+            "manifest JSON must not contain a UTF-8 BOM (NFR-PO3)"
+        );
+    }
+
+    #[test]
+    fn artifact_paths_use_forward_slashes() {
+        let manifest = sample_manifest();
+        for artifact in &manifest.artifacts {
+            let path_str = artifact.path.to_string_lossy();
+            assert!(
+                !path_str.contains('\\'),
+                "artifact path must use forward slashes for cross-platform determinism: {path_str}"
+            );
+        }
+    }
+
+    #[test]
+    fn non_ascii_identifiers_roundtrip() {
+        let mut manifest = sample_manifest();
+        manifest.project_id = "café_données".into();
+        manifest.artifacts[0].metadata_object_ids = vec!["ent_données".into(), "attr_名前".into()];
+
+        let json = manifest.to_json_pretty();
+        let parsed = ManifestV1::from_json(&json).unwrap();
+        assert_eq!(manifest, parsed);
+
+        assert!(json.contains("café_données"));
+        assert!(json.contains("ent_données"));
+        assert!(json.contains("attr_名前"));
+    }
 }
