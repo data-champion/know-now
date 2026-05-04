@@ -1,4 +1,6 @@
-use crate::ddl::{CreateTableStatement, OwnershipHeader};
+use std::fmt::Write;
+
+use crate::ddl::{OwnershipHeader, TableDef};
 use crate::identifier::Identifier;
 
 #[derive(Debug, Clone)]
@@ -15,21 +17,24 @@ pub struct EmittedDdl {
 }
 
 pub fn emit_document(
-    statements: &mut [CreateTableStatement],
+    tables: &mut [TableDef],
+    schema: Option<&Identifier>,
     header: &OwnershipHeader,
 ) -> EmittedDdl {
-    statements.sort_by(|a, b| a.name.as_str().cmp(b.name.as_str()));
+    tables.sort_by(|a, b| a.name.as_str().cmp(b.name.as_str()));
 
     let mut lines: Vec<String> = Vec::new();
     let mut traces: Vec<LineTrace> = Vec::new();
 
     emit_header(header, &mut lines);
 
-    for (i, stmt) in statements.iter().enumerate() {
+    for (i, table) in tables.iter().enumerate() {
         if i > 0 || !lines.is_empty() {
             lines.push(String::new());
         }
-        emit_create_table(stmt, &mut lines, &mut traces);
+        emit_create_table(table, schema, &mut lines, &mut traces);
+        emit_indexes(table, schema, &mut lines, &mut traces);
+        emit_comments(table, schema, &mut lines);
     }
 
     lines.push(String::new());
@@ -53,35 +58,29 @@ fn emit_header(header: &OwnershipHeader, lines: &mut Vec<String>) {
     lines.push("-- Do not edit directly unless you intend to fork this artifact.".to_owned());
 }
 
+fn qualified_name(schema: Option<&Identifier>, name: &Identifier) -> String {
+    schema.map_or_else(
+        || name.quoted(),
+        |s| format!("{}.{}", s.quoted(), name.quoted()),
+    )
+}
+
 fn emit_create_table(
-    stmt: &CreateTableStatement,
+    table: &TableDef,
+    schema: Option<&Identifier>,
     lines: &mut Vec<String>,
     traces: &mut Vec<LineTrace>,
 ) {
     let table_start = lines.len() as u32 + 1;
+    let qname = qualified_name(schema, &table.name);
 
-    lines.push(format!("CREATE TABLE {} (", stmt.qualified_name()));
+    lines.push(format!("CREATE TABLE {qname} ("));
 
     let mut parts: Vec<String> = Vec::new();
     let mut column_traces: Vec<(u32, Vec<String>)> = Vec::new();
 
-    for col in &stmt.columns {
-        let col_line = (lines.len() + parts.len() + 1) as u32;
-        let mut def = format!("    {} {}", col.name.quoted(), col.sql_type.sql_keyword());
-        if !col.nullable {
-            def.push_str(" NOT NULL");
-        }
-        parts.push(def);
-        column_traces.push((
-            col_line,
-            vec![stmt.entity_id.clone(), col.metadata_object_id.clone()],
-        ));
-    }
-
-    if let Some(pk) = &stmt.primary_key {
-        let cols: Vec<String> = pk.columns.iter().map(Identifier::quoted).collect();
-        parts.push(format!("    PRIMARY KEY ({})", cols.join(", ")));
-    }
+    emit_columns(table, lines.len(), &mut parts, &mut column_traces);
+    emit_inline_constraints(table, &mut parts);
 
     for (i, part) in parts.iter().enumerate() {
         if i < parts.len() - 1 {
@@ -97,7 +96,7 @@ fn emit_create_table(
     traces.push(LineTrace {
         line_start: table_start,
         line_end: table_end,
-        metadata_object_ids: vec![stmt.entity_id.clone()],
+        metadata_object_ids: vec![table.metadata_entity_id.clone()],
     });
 
     for (col_line, ids) in column_traces {
@@ -109,10 +108,144 @@ fn emit_create_table(
     }
 }
 
+fn emit_columns(
+    table: &TableDef,
+    base_line: usize,
+    parts: &mut Vec<String>,
+    column_traces: &mut Vec<(u32, Vec<String>)>,
+) {
+    for col in &table.columns {
+        let col_line = (base_line + parts.len() + 1) as u32;
+        let mut def = format!("    {} {}", col.name.quoted(), col.sql_type.sql_fragment());
+        if !col.nullable {
+            def.push_str(" NOT NULL");
+        }
+        if let Some(lit) = &col.default {
+            let _ = write!(def, " DEFAULT {}", lit.sql_fragment());
+        }
+        parts.push(def);
+        column_traces.push((
+            col_line,
+            vec![
+                table.metadata_entity_id.clone(),
+                col.metadata_object_id.clone(),
+            ],
+        ));
+    }
+}
+
+fn emit_inline_constraints(table: &TableDef, parts: &mut Vec<String>) {
+    if let Some(pk) = &table.primary_key {
+        let cols = join_quoted(&pk.columns);
+        parts.push(named_constraint(pk.name.as_ref(), &format!("PRIMARY KEY ({cols})")));
+    }
+
+    for uq in &table.unique_constraints {
+        let cols = join_quoted(&uq.columns);
+        parts.push(named_constraint(uq.name.as_ref(), &format!("UNIQUE ({cols})")));
+    }
+
+    for fk in &table.foreign_keys {
+        let cols = join_quoted(&fk.columns);
+        let ref_cols = join_quoted(&fk.referenced_columns);
+        let ref_table = qualified_name(fk.referenced_schema.as_ref(), &fk.referenced_table);
+
+        let mut constraint = String::from("    ");
+        if let Some(name) = &fk.name {
+            let _ = write!(constraint, "CONSTRAINT {} ", name.quoted());
+        }
+        let _ = write!(
+            constraint,
+            "FOREIGN KEY ({cols}) REFERENCES {ref_table} ({ref_cols})"
+        );
+        if let Some(action) = &fk.on_delete {
+            let _ = write!(constraint, " ON DELETE {}", action.sql_fragment());
+        }
+        if let Some(action) = &fk.on_update {
+            let _ = write!(constraint, " ON UPDATE {}", action.sql_fragment());
+        }
+        parts.push(constraint);
+    }
+
+    for ck in &table.check_constraints {
+        let mut constraint = String::from("    ");
+        if let Some(name) = &ck.name {
+            let _ = write!(constraint, "CONSTRAINT {} ", name.quoted());
+        }
+        let _ = write!(constraint, "CHECK ({})", ck.expression);
+        parts.push(constraint);
+    }
+}
+
+fn join_quoted(ids: &[Identifier]) -> String {
+    ids.iter()
+        .map(Identifier::quoted)
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+fn named_constraint(name: Option<&Identifier>, body: &str) -> String {
+    name.map_or_else(
+        || format!("    {body}"),
+        |n| format!("    CONSTRAINT {} {body}", n.quoted()),
+    )
+}
+
+fn emit_indexes(
+    table: &TableDef,
+    schema: Option<&Identifier>,
+    lines: &mut Vec<String>,
+    traces: &mut Vec<LineTrace>,
+) {
+    for idx in &table.indexes {
+        lines.push(String::new());
+        let idx_start = lines.len() as u32 + 1;
+        let cols = join_quoted(&idx.columns);
+        let unique_kw = if idx.unique { "UNIQUE " } else { "" };
+        let on_table = qualified_name(schema, &table.name);
+        lines.push(format!(
+            "CREATE {unique_kw}INDEX {} ON {on_table} ({cols});",
+            idx.name.quoted(),
+        ));
+        let idx_end = lines.len() as u32;
+        traces.push(LineTrace {
+            line_start: idx_start,
+            line_end: idx_end,
+            metadata_object_ids: vec![table.metadata_entity_id.clone()],
+        });
+    }
+}
+
+fn emit_comments(table: &TableDef, schema: Option<&Identifier>, lines: &mut Vec<String>) {
+    let qname = qualified_name(schema, &table.name);
+    if let Some(doc) = &table.comment {
+        lines.push(String::new());
+        lines.push(format!(
+            "COMMENT ON TABLE {} IS '{}';",
+            qname,
+            doc.as_str().replace('\'', "''")
+        ));
+    }
+    for col in &table.columns {
+        if let Some(doc) = &col.comment {
+            lines.push(format!(
+                "COMMENT ON COLUMN {}.{} IS '{}';",
+                qname,
+                col.name.quoted(),
+                doc.as_str().replace('\'', "''")
+            ));
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ddl::{ColumnDef, PrimaryKeyConstraint, SqlType};
+    use crate::ddl::{
+        CheckConstraint, ColumnDef, ForeignKeyConstraint, IndexDef, PrimaryKeyConstraint,
+        ReferentialAction, SqlType, UniqueConstraint,
+    };
+    use crate::doc::Doc;
     use crate::identifier::Identifier;
 
     fn sample_header() -> OwnershipHeader {
@@ -124,35 +257,44 @@ mod tests {
         }
     }
 
-    fn sample_table() -> CreateTableStatement {
-        CreateTableStatement {
-            schema: None,
+    fn sample_table() -> TableDef {
+        TableDef {
             name: Identifier::new("customer").unwrap(),
             columns: vec![
                 ColumnDef {
                     name: Identifier::new("id").unwrap(),
                     sql_type: SqlType::Integer,
                     nullable: false,
+                    default: None,
+                    comment: None,
                     metadata_object_id: "attr_customer_id".into(),
                 },
                 ColumnDef {
                     name: Identifier::new("email").unwrap(),
                     sql_type: SqlType::Text,
                     nullable: true,
+                    default: None,
+                    comment: None,
                     metadata_object_id: "attr_customer_email".into(),
                 },
             ],
             primary_key: Some(PrimaryKeyConstraint {
+                name: None,
                 columns: vec![Identifier::new("id").unwrap()],
             }),
-            entity_id: "ent_customer".into(),
+            unique_constraints: vec![],
+            foreign_keys: vec![],
+            check_constraints: vec![],
+            indexes: vec![],
+            comment: None,
+            metadata_entity_id: "ent_customer".into(),
         }
     }
 
     #[test]
     fn emits_ownership_header() {
         let mut stmts = vec![sample_table()];
-        let result = emit_document(&mut stmts, &sample_header());
+        let result = emit_document(&mut stmts, None, &sample_header());
         assert!(result.sql.starts_with("-- Generated by know-now.\n"));
         assert!(result.sql.contains("-- Artifact ID: art_pg_schema"));
         assert!(result.sql.contains("-- Generator: know_now_gen_postgres"));
@@ -168,7 +310,7 @@ mod tests {
     #[test]
     fn emits_create_table() {
         let mut stmts = vec![sample_table()];
-        let result = emit_document(&mut stmts, &sample_header());
+        let result = emit_document(&mut stmts, None, &sample_header());
         assert!(result.sql.contains("CREATE TABLE \"customer\" ("));
         assert!(result.sql.contains("    \"id\" INTEGER NOT NULL,"));
         assert!(result.sql.contains("    \"email\" TEXT,"));
@@ -179,22 +321,30 @@ mod tests {
     #[test]
     fn tables_sorted_alphabetically() {
         let mut stmts = vec![
-            CreateTableStatement {
-                schema: None,
+            TableDef {
                 name: Identifier::new("zebra").unwrap(),
                 columns: vec![],
                 primary_key: None,
-                entity_id: "ent_zebra".into(),
+                unique_constraints: vec![],
+                foreign_keys: vec![],
+                check_constraints: vec![],
+                indexes: vec![],
+                comment: None,
+                metadata_entity_id: "ent_zebra".into(),
             },
-            CreateTableStatement {
-                schema: None,
+            TableDef {
                 name: Identifier::new("alpha").unwrap(),
                 columns: vec![],
                 primary_key: None,
-                entity_id: "ent_alpha".into(),
+                unique_constraints: vec![],
+                foreign_keys: vec![],
+                check_constraints: vec![],
+                indexes: vec![],
+                comment: None,
+                metadata_entity_id: "ent_alpha".into(),
             },
         ];
-        let result = emit_document(&mut stmts, &sample_header());
+        let result = emit_document(&mut stmts, None, &sample_header());
         let alpha_pos = result.sql.find("\"alpha\"").unwrap();
         let zebra_pos = result.sql.find("\"zebra\"").unwrap();
         assert!(alpha_pos < zebra_pos);
@@ -203,22 +353,22 @@ mod tests {
     #[test]
     fn deterministic_across_runs() {
         let header = sample_header();
-        let sql1 = emit_document(&mut [sample_table()], &header).sql;
-        let sql2 = emit_document(&mut [sample_table()], &header).sql;
+        let sql1 = emit_document(&mut [sample_table()], None, &header).sql;
+        let sql2 = emit_document(&mut [sample_table()], None, &header).sql;
         assert_eq!(sql1, sql2);
     }
 
     #[test]
     fn no_crlf_line_endings() {
         let mut stmts = vec![sample_table()];
-        let result = emit_document(&mut stmts, &sample_header());
+        let result = emit_document(&mut stmts, None, &sample_header());
         assert!(!result.sql.contains('\r'), "must use LF, not CRLF");
     }
 
     #[test]
     fn traces_cover_table() {
         let mut stmts = vec![sample_table()];
-        let result = emit_document(&mut stmts, &sample_header());
+        let result = emit_document(&mut stmts, None, &sample_header());
         let table_trace = result
             .traces
             .iter()
@@ -231,7 +381,7 @@ mod tests {
     #[test]
     fn traces_cover_columns() {
         let mut stmts = vec![sample_table()];
-        let result = emit_document(&mut stmts, &sample_header());
+        let result = emit_document(&mut stmts, None, &sample_header());
         let col_traces: Vec<_> = result
             .traces
             .iter()
@@ -248,41 +398,298 @@ mod tests {
 
     #[test]
     fn empty_document() {
-        let mut stmts: Vec<CreateTableStatement> = vec![];
-        let result = emit_document(&mut stmts, &sample_header());
+        let mut stmts: Vec<TableDef> = vec![];
+        let result = emit_document(&mut stmts, None, &sample_header());
         assert!(result.sql.contains("-- Generated by know-now."));
         assert!(result.traces.is_empty());
     }
 
     #[test]
     fn table_without_primary_key() {
-        let mut stmts = vec![CreateTableStatement {
-            schema: None,
+        let mut stmts = vec![TableDef {
             name: Identifier::new("staging_raw").unwrap(),
             columns: vec![ColumnDef {
                 name: Identifier::new("payload").unwrap(),
                 sql_type: SqlType::Jsonb,
                 nullable: true,
+                default: None,
+                comment: None,
                 metadata_object_id: "attr_raw_payload".into(),
             }],
             primary_key: None,
-            entity_id: "ent_staging".into(),
+            unique_constraints: vec![],
+            foreign_keys: vec![],
+            check_constraints: vec![],
+            indexes: vec![],
+            comment: None,
+            metadata_entity_id: "ent_staging".into(),
         }];
-        let result = emit_document(&mut stmts, &sample_header());
+        let result = emit_document(&mut stmts, None, &sample_header());
         assert!(result.sql.contains("\"payload\" JSONB"));
         assert!(!result.sql.contains("PRIMARY KEY"));
     }
 
     #[test]
     fn schema_qualified_table() {
-        let mut stmts = vec![CreateTableStatement {
-            schema: Some(Identifier::new("analytics").unwrap()),
+        let schema = Identifier::new("analytics").unwrap();
+        let mut stmts = vec![TableDef {
             name: Identifier::new("events").unwrap(),
             columns: vec![],
             primary_key: None,
-            entity_id: "ent_events".into(),
+            unique_constraints: vec![],
+            foreign_keys: vec![],
+            check_constraints: vec![],
+            indexes: vec![],
+            comment: None,
+            metadata_entity_id: "ent_events".into(),
         }];
-        let result = emit_document(&mut stmts, &sample_header());
+        let result = emit_document(&mut stmts, Some(&schema), &sample_header());
         assert!(result.sql.contains("CREATE TABLE \"analytics\".\"events\""));
+    }
+
+    #[test]
+    fn emits_unique_constraint() {
+        let mut stmts = vec![TableDef {
+            name: Identifier::new("user_account").unwrap(),
+            columns: vec![ColumnDef {
+                name: Identifier::new("email").unwrap(),
+                sql_type: SqlType::Text,
+                nullable: false,
+                default: None,
+                comment: None,
+                metadata_object_id: "attr_email".into(),
+            }],
+            primary_key: None,
+            unique_constraints: vec![UniqueConstraint {
+                name: Some(Identifier::new("uq_email").unwrap()),
+                columns: vec![Identifier::new("email").unwrap()],
+            }],
+            foreign_keys: vec![],
+            check_constraints: vec![],
+            indexes: vec![],
+            comment: None,
+            metadata_entity_id: "ent_user".into(),
+        }];
+        let result = emit_document(&mut stmts, None, &sample_header());
+        assert!(result
+            .sql
+            .contains("CONSTRAINT \"uq_email\" UNIQUE (\"email\")"));
+    }
+
+    #[test]
+    fn emits_foreign_key_constraint() {
+        let mut stmts = vec![TableDef {
+            name: Identifier::new("order_item").unwrap(),
+            columns: vec![ColumnDef {
+                name: Identifier::new("order_id").unwrap(),
+                sql_type: SqlType::Integer,
+                nullable: false,
+                default: None,
+                comment: None,
+                metadata_object_id: "attr_order_id".into(),
+            }],
+            primary_key: None,
+            unique_constraints: vec![],
+            foreign_keys: vec![ForeignKeyConstraint {
+                name: Some(Identifier::new("fk_order").unwrap()),
+                columns: vec![Identifier::new("order_id").unwrap()],
+                referenced_schema: None,
+                referenced_table: Identifier::new("order_header").unwrap(),
+                referenced_columns: vec![Identifier::new("id").unwrap()],
+                on_delete: Some(ReferentialAction::Cascade),
+                on_update: None,
+            }],
+            check_constraints: vec![],
+            indexes: vec![],
+            comment: None,
+            metadata_entity_id: "ent_order_item".into(),
+        }];
+        let result = emit_document(&mut stmts, None, &sample_header());
+        assert!(result.sql.contains(
+            "CONSTRAINT \"fk_order\" FOREIGN KEY (\"order_id\") REFERENCES \"order_header\" (\"id\") ON DELETE CASCADE"
+        ));
+    }
+
+    #[test]
+    fn emits_check_constraint() {
+        let mut stmts = vec![TableDef {
+            name: Identifier::new("product").unwrap(),
+            columns: vec![ColumnDef {
+                name: Identifier::new("price").unwrap(),
+                sql_type: SqlType::Numeric {
+                    precision: Some(10),
+                    scale: Some(2),
+                },
+                nullable: false,
+                default: None,
+                comment: None,
+                metadata_object_id: "attr_price".into(),
+            }],
+            primary_key: None,
+            unique_constraints: vec![],
+            foreign_keys: vec![],
+            check_constraints: vec![CheckConstraint {
+                name: Some(Identifier::new("ck_positive_price").unwrap()),
+                expression: "price >= 0".into(),
+            }],
+            indexes: vec![],
+            comment: None,
+            metadata_entity_id: "ent_product".into(),
+        }];
+        let result = emit_document(&mut stmts, None, &sample_header());
+        assert!(result
+            .sql
+            .contains("CONSTRAINT \"ck_positive_price\" CHECK (price >= 0)"));
+    }
+
+    #[test]
+    fn emits_index() {
+        let mut stmts = vec![TableDef {
+            name: Identifier::new("event").unwrap(),
+            columns: vec![ColumnDef {
+                name: Identifier::new("created_at").unwrap(),
+                sql_type: SqlType::TimestampTz,
+                nullable: false,
+                default: None,
+                comment: None,
+                metadata_object_id: "attr_created_at".into(),
+            }],
+            primary_key: None,
+            unique_constraints: vec![],
+            foreign_keys: vec![],
+            check_constraints: vec![],
+            indexes: vec![IndexDef {
+                name: Identifier::new("idx_event_created_at").unwrap(),
+                columns: vec![Identifier::new("created_at").unwrap()],
+                unique: false,
+            }],
+            comment: None,
+            metadata_entity_id: "ent_event".into(),
+        }];
+        let result = emit_document(&mut stmts, None, &sample_header());
+        assert!(result
+            .sql
+            .contains("CREATE INDEX \"idx_event_created_at\" ON \"event\" (\"created_at\");"));
+    }
+
+    #[test]
+    fn emits_unique_index() {
+        let mut stmts = vec![TableDef {
+            name: Identifier::new("user_account").unwrap(),
+            columns: vec![],
+            primary_key: None,
+            unique_constraints: vec![],
+            foreign_keys: vec![],
+            check_constraints: vec![],
+            indexes: vec![IndexDef {
+                name: Identifier::new("uidx_email").unwrap(),
+                columns: vec![Identifier::new("email").unwrap()],
+                unique: true,
+            }],
+            comment: None,
+            metadata_entity_id: "ent_user".into(),
+        }];
+        let result = emit_document(&mut stmts, None, &sample_header());
+        assert!(result.sql.contains("CREATE UNIQUE INDEX"));
+    }
+
+    #[test]
+    fn emits_table_comment() {
+        let mut stmts = vec![TableDef {
+            name: Identifier::new("customer").unwrap(),
+            columns: vec![],
+            primary_key: None,
+            unique_constraints: vec![],
+            foreign_keys: vec![],
+            check_constraints: vec![],
+            indexes: vec![],
+            comment: Some(Doc::new("Customer master data")),
+            metadata_entity_id: "ent_customer".into(),
+        }];
+        let result = emit_document(&mut stmts, None, &sample_header());
+        assert!(result
+            .sql
+            .contains("COMMENT ON TABLE \"customer\" IS 'Customer master data';"));
+    }
+
+    #[test]
+    fn emits_column_comment() {
+        let mut stmts = vec![TableDef {
+            name: Identifier::new("customer").unwrap(),
+            columns: vec![ColumnDef {
+                name: Identifier::new("email").unwrap(),
+                sql_type: SqlType::Text,
+                nullable: true,
+                default: None,
+                comment: Some(Doc::new("Primary contact email")),
+                metadata_object_id: "attr_email".into(),
+            }],
+            primary_key: None,
+            unique_constraints: vec![],
+            foreign_keys: vec![],
+            check_constraints: vec![],
+            indexes: vec![],
+            comment: None,
+            metadata_entity_id: "ent_customer".into(),
+        }];
+        let result = emit_document(&mut stmts, None, &sample_header());
+        assert!(result
+            .sql
+            .contains("COMMENT ON COLUMN \"customer\".\"email\" IS 'Primary contact email';"));
+    }
+
+    #[test]
+    fn emits_column_default() {
+        let mut stmts = vec![TableDef {
+            name: Identifier::new("task").unwrap(),
+            columns: vec![ColumnDef {
+                name: Identifier::new("active").unwrap(),
+                sql_type: SqlType::Boolean,
+                nullable: false,
+                default: Some(crate::ddl::Literal::Bool(true)),
+                comment: None,
+                metadata_object_id: "attr_active".into(),
+            }],
+            primary_key: None,
+            unique_constraints: vec![],
+            foreign_keys: vec![],
+            check_constraints: vec![],
+            indexes: vec![],
+            comment: None,
+            metadata_entity_id: "ent_task".into(),
+        }];
+        let result = emit_document(&mut stmts, None, &sample_header());
+        assert!(result
+            .sql
+            .contains("\"active\" BOOLEAN NOT NULL DEFAULT TRUE"));
+    }
+
+    #[test]
+    fn named_primary_key() {
+        let mut stmts = vec![TableDef {
+            name: Identifier::new("customer").unwrap(),
+            columns: vec![ColumnDef {
+                name: Identifier::new("id").unwrap(),
+                sql_type: SqlType::Integer,
+                nullable: false,
+                default: None,
+                comment: None,
+                metadata_object_id: "attr_id".into(),
+            }],
+            primary_key: Some(PrimaryKeyConstraint {
+                name: Some(Identifier::new("pk_customer").unwrap()),
+                columns: vec![Identifier::new("id").unwrap()],
+            }),
+            unique_constraints: vec![],
+            foreign_keys: vec![],
+            check_constraints: vec![],
+            indexes: vec![],
+            comment: None,
+            metadata_entity_id: "ent_customer".into(),
+        }];
+        let result = emit_document(&mut stmts, None, &sample_header());
+        assert!(result
+            .sql
+            .contains("CONSTRAINT \"pk_customer\" PRIMARY KEY (\"id\")"));
     }
 }

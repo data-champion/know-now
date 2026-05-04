@@ -7,7 +7,7 @@ pub mod type_map;
 use know_now_codegen::artifact::{ArtifactDescriptor, ArtifactKind};
 use know_now_codegen::generator::{GenerationError, Generator};
 use know_now_contract::contract::GeneratorContract;
-use know_now_ir::ddl::{ColumnDef, CreateTableStatement, OwnershipHeader, PrimaryKeyConstraint};
+use know_now_ir::ddl::{ColumnDef, OwnershipHeader, PrimaryKeyConstraint, TableDef};
 use know_now_ir::emitter;
 use know_now_ir::identifier::Identifier;
 use sqlparser::dialect::PostgreSqlDialect;
@@ -72,7 +72,7 @@ impl Generator for PostgresGenerator {
             input_hash,
         };
 
-        let emitted = emitter::emit_document(&mut tables, &header);
+        let emitted = emitter::emit_document(&mut tables, None, &header);
 
         if let Err(e) = validate_sql(&emitted.sql) {
             return Err(vec![GenerationError {
@@ -105,7 +105,7 @@ impl Generator for PostgresGenerator {
 
 fn build_table(
     entity: &know_now_contract::contract::ContractEntity,
-) -> Result<CreateTableStatement, Vec<GenerationError>> {
+) -> Result<TableDef, Vec<GenerationError>> {
     let mut errors = Vec::new();
 
     let table_name = match Identifier::new(&entity.name) {
@@ -148,6 +148,8 @@ fn build_table(
             name: col_name,
             sql_type,
             nullable,
+            default: None,
+            comment: None,
             metadata_object_id: attr.id.clone(),
         });
     }
@@ -158,12 +160,16 @@ fn build_table(
 
     let primary_key = build_primary_key(&entity.business_key, &columns, &entity.name)?;
 
-    Ok(CreateTableStatement {
-        schema: None,
+    Ok(TableDef {
         name: table_name,
         columns,
         primary_key,
-        entity_id: entity.id.clone(),
+        unique_constraints: vec![],
+        foreign_keys: vec![],
+        check_constraints: vec![],
+        indexes: vec![],
+        comment: None,
+        metadata_entity_id: entity.id.clone(),
     })
 }
 
@@ -202,7 +208,10 @@ fn build_primary_key(
         return Err(errors);
     }
 
-    Ok(Some(PrimaryKeyConstraint { columns: pk_cols }))
+    Ok(Some(PrimaryKeyConstraint {
+        name: None,
+        columns: pk_cols,
+    }))
 }
 
 fn validate_sql(sql: &str) -> Result<(), String> {

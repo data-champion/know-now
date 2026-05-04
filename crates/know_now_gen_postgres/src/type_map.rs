@@ -9,7 +9,10 @@ pub fn map_logical_type(logical: Option<&str>) -> Result<SqlType, GenerationErro
         "integer" => Ok(SqlType::Integer),
         "bigint" => Ok(SqlType::BigInt),
         "smallint" => Ok(SqlType::SmallInt),
-        "decimal" | "numeric" => Ok(SqlType::Numeric),
+        "decimal" | "numeric" => Ok(SqlType::Numeric {
+            precision: None,
+            scale: None,
+        }),
         "boolean" => Ok(SqlType::Boolean),
         "date" => Ok(SqlType::Date),
         "timestamp" => Ok(SqlType::TimestampTz),
@@ -33,7 +36,13 @@ mod tests {
         let cases = [
             ("string", SqlType::Text),
             ("integer", SqlType::Integer),
-            ("decimal", SqlType::Numeric),
+            (
+                "decimal",
+                SqlType::Numeric {
+                    precision: None,
+                    scale: None,
+                },
+            ),
             ("boolean", SqlType::Boolean),
             ("date", SqlType::Date),
             ("timestamp", SqlType::TimestampTz),
@@ -65,7 +74,13 @@ mod tests {
 
     #[test]
     fn aliases_work() {
-        assert_eq!(map_logical_type(Some("numeric")).unwrap(), SqlType::Numeric);
+        assert_eq!(
+            map_logical_type(Some("numeric")).unwrap(),
+            SqlType::Numeric {
+                precision: None,
+                scale: None
+            }
+        );
         assert_eq!(map_logical_type(Some("jsonb")).unwrap(), SqlType::Jsonb);
         assert_eq!(map_logical_type(Some("bigint")).unwrap(), SqlType::BigInt);
         assert_eq!(
