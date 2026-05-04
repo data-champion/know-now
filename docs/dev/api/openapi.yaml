@@ -1,0 +1,365 @@
+openapi: "3.1.0"
+info:
+  title: know-now Local API
+  version: "1"
+  description: Local development server API for the know-now dashboard.
+servers:
+  - url: http://127.0.0.1:3827
+    description: Default local server
+paths:
+  /__health:
+    get:
+      operationId: getHealth
+      summary: Health check
+      responses:
+        "200":
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  /__open:
+    get:
+      operationId: openSession
+      summary: Exchange launch token for session cookie
+      parameters:
+        - name: launch_token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "303":
+          description: Session created, redirect to dashboard
+        "400":
+          description: Invalid or already-used launch token
+  /api/v1/version:
+    get:
+      operationId: getVersion
+      summary: Engine and API version information
+      responses:
+        "200":
+          description: Version info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VersionResponse"
+        "401":
+          description: Unauthorized
+  /api/v1/status:
+    get:
+      operationId: getStatus
+      summary: Server status
+      responses:
+        "200":
+          description: Server status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusResponse"
+        "401":
+          description: Unauthorized
+  /api/v1/project:
+    get:
+      operationId: getProject
+      summary: Project metadata summary
+      responses:
+        "200":
+          description: Project info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectResponse"
+        "401":
+          description: Unauthorized
+  /api/v1/domains:
+    get:
+      operationId: getDomains
+      summary: List all domains
+      responses:
+        "200":
+          description: Domain list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DomainsResponse"
+        "401":
+          description: Unauthorized
+  /api/v1/modules:
+    get:
+      operationId: getModules
+      summary: List all modules
+      responses:
+        "200":
+          description: Module list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModulesResponse"
+        "401":
+          description: Unauthorized
+  /api/v1/entities:
+    get:
+      operationId: getEntities
+      summary: List all entities
+      responses:
+        "200":
+          description: Entity list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntitiesResponse"
+        "401":
+          description: Unauthorized
+  /api/v1/relationships:
+    get:
+      operationId: getRelationships
+      summary: List all relationships
+      responses:
+        "200":
+          description: Relationship list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RelationshipsResponse"
+        "401":
+          description: Unauthorized
+  /api/v1/graph:
+    get:
+      operationId: getGraph
+      summary: Graph data for dashboard rendering
+      responses:
+        "200":
+          description: Graph nodes and edges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GraphResponse"
+        "401":
+          description: Unauthorized
+  /api/v1/open-questions:
+    get:
+      operationId: getOpenQuestions
+      summary: List open questions
+      responses:
+        "200":
+          description: Open questions list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenQuestionsResponse"
+        "401":
+          description: Unauthorized
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+    VersionResponse:
+      type: object
+      required: [engine_version, api_contract_version, compatibility]
+      properties:
+        engine_version:
+          type: string
+        api_contract_version:
+          type: string
+        compatibility:
+          type: string
+    StatusResponse:
+      type: object
+      required: [server, version, write_mode]
+      properties:
+        server:
+          type: string
+        version:
+          type: string
+        write_mode:
+          type: boolean
+    ProjectResponse:
+      type: object
+      properties:
+        project:
+          $ref: "#/components/schemas/Project"
+        version:
+          type: string
+          nullable: true
+    Project:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        owner:
+          type: string
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+    DomainsResponse:
+      type: object
+      required: [domains]
+      properties:
+        domains:
+          type: array
+          items:
+            $ref: "#/components/schemas/Domain"
+    Domain:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+    ModulesResponse:
+      type: object
+      required: [modules]
+      properties:
+        modules:
+          type: array
+          items:
+            $ref: "#/components/schemas/Module"
+    Module:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+    EntitiesResponse:
+      type: object
+      required: [entities]
+      properties:
+        entities:
+          type: array
+          items:
+            $ref: "#/components/schemas/Entity"
+    Entity:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        name:
+          type: string
+        domain:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        attributes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Attribute"
+    Attribute:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        name:
+          type: string
+        logical_type:
+          type: string
+        description:
+          type: string
+          nullable: true
+    RelationshipsResponse:
+      type: object
+      required: [relationships]
+      properties:
+        relationships:
+          type: array
+          items:
+            $ref: "#/components/schemas/Relationship"
+    Relationship:
+      type: object
+      required: [from_entity, to_entity]
+      properties:
+        id:
+          type: string
+          nullable: true
+        from_entity:
+          type: string
+        to_entity:
+          type: string
+        cardinality:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+    GraphResponse:
+      type: object
+      required: [nodes, edges]
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/GraphNode"
+        edges:
+          type: array
+          items:
+            $ref: "#/components/schemas/GraphEdge"
+    GraphNode:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        domain:
+          type: string
+          nullable: true
+    GraphEdge:
+      type: object
+      required: [id, from, to]
+      properties:
+        id:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+    OpenQuestionsResponse:
+      type: object
+      required: [open_questions]
+      properties:
+        open_questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/OpenQuestion"
+    OpenQuestion:
+      type: object
+      required: [question]
+      properties:
+        id:
+          type: string
+          nullable: true
+        question:
+          type: string
+        context:
+          type: string
+          nullable: true
+        entity:
+          type: string
+          nullable: true
+        priority:
+          type: string
+          nullable: true
