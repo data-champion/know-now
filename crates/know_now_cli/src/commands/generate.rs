@@ -9,6 +9,7 @@ use know_now_contract::contract::GeneratorContract;
 use know_now_diagnostics::diagnostic::{Diagnostic, Severity};
 use know_now_gen_docs::DocsGenerator;
 use know_now_gen_er::ErDiagramGenerator;
+use know_now_gen_fixtures::FixtureGenerator;
 use know_now_gen_postgres::PostgresGenerator;
 use know_now_lock::check::{self, LOCK_CORRUPT_005, LOCK_MISSING_004, LOCK_STALE_003};
 use know_now_lock::lockfile::Lockfile;
@@ -307,22 +308,20 @@ fn resolve_targets(args: &GenerateArgs) -> Vec<GenerateTarget> {
                     }
                 }
             }
-            GenerateTarget::Ddl | GenerateTarget::Docs | GenerateTarget::Diagrams => {
+            GenerateTarget::Ddl
+            | GenerateTarget::Docs
+            | GenerateTarget::Diagrams
+            | GenerateTarget::Fixtures => {
                 if seen.insert(target) {
                     selected.push(target);
                 }
-            }
-            GenerateTarget::Fixtures => {
-                usage_error("Phase 2B feature: --target fixtures is not available in Phase 2A");
             }
             GenerateTarget::Changed => {
                 usage_error(
                     "Phase 3 feature: --target changed is not available in Phase 2A (track via S_P3_DIFF / S_P3_MIGRATIONS)",
                 );
             }
-            GenerateTarget::Dbt
-            | GenerateTarget::Quality
-            | GenerateTarget::Review => {
+            GenerateTarget::Dbt | GenerateTarget::Quality | GenerateTarget::Review => {
                 usage_error(
                     "Phase 2B feature: requested --target value is not available in this Phase 2A build",
                 );
@@ -334,7 +333,11 @@ fn resolve_targets(args: &GenerateArgs) -> Vec<GenerateTarget> {
 }
 
 fn supported_targets() -> Vec<GenerateTarget> {
-    vec![GenerateTarget::Ddl, GenerateTarget::Docs, GenerateTarget::Diagrams]
+    vec![
+        GenerateTarget::Ddl,
+        GenerateTarget::Docs,
+        GenerateTarget::Diagrams,
+    ]
 }
 
 fn ensure_locked_matches(ctx: &CommandContext) -> anyhow::Result<()> {
@@ -391,6 +394,13 @@ fn run_generators(
             }
             GenerateTarget::Diagrams => {
                 let generator = ErDiagramGenerator::new();
+                let generated = generator
+                    .generate(contract)
+                    .map_err(|e| join_generation_errors(&e))?;
+                artifacts.extend(generated);
+            }
+            GenerateTarget::Fixtures => {
+                let generator = FixtureGenerator::new();
                 let generated = generator
                     .generate(contract)
                     .map_err(|e| join_generation_errors(&e))?;
