@@ -326,7 +326,9 @@ dependencies = [
  "know_now_gen_docs",
  "know_now_gen_postgres",
  "know_now_metadata",
+ "know_now_toolchain",
  "know_now_validate",
+ "know_now_writer",
 ]
 
 [[package]]
