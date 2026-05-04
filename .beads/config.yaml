@@ -1,4 +1,2 @@
-# Beads Project Configuration
-# issue_prefix: know-now
-# default_priority: 2
-# default_type: task
+sync:
+  branch: beads-sync
