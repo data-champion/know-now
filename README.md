@@ -10,16 +10,40 @@ know-now is a local-first, metadata-driven data platform generation engine. User
 
 ---
 
+## Quick start
+
+```bash
+# Install (see docs/user/install.md for all options)
+cargo binstall know-now
+
+# Create a demo project with sample metadata
+know-now init --demo
+cd demo-project
+
+# Validate metadata
+know-now validate
+
+# Run the recommended check suite
+know-now check
+
+# Check with lockfile verification (CI mode)
+know-now check --locked
+```
+
+See [`docs/user/demo.md`](docs/user/demo.md) for a guided five-minute walkthrough.
+
+---
+
 ## Repository status
 
-This repository is in the **architecture-contract spike** phase (PRD Phase 1). The product specification is complete; the implementation has not yet started.
+This repository is **Phase 1 complete; Phase 2A active**. The product specification is complete; the Rust workspace builds, metadata parsing, validation, deterministic generation pipeline, and CLI are functional.
 
-The canonical source of truth for product, architecture, and scope decisions is [`docs/PRD.md`](docs/PRD.md). All other documents reference, summarize, or instantiate the PRD — never override it.
+The canonical source of truth for product, architecture, and scope decisions is [`docs/PRD.md`](docs/PRD.md).
 
 | Phase | Status | Notes |
 | ----- | ------ | ----- |
-| 1 — architecture contract spike | not started | Workspace, parser spike, generator contract, writer PoC, deterministic manifest, one DDL + one Markdown artifact. |
-| 2A — Rust CLI MVP | not started | First publicly usable CLI. |
+| 1 — architecture contract spike | complete | Workspace, parser, generator contract, writer, deterministic manifest, DDL + Markdown artifacts. |
+| 2A — Rust CLI MVP | active | First publicly usable CLI. |
 | 2B — dbt, quality, diagrams, validation | not started | |
 | 3 — change safety, dashboard, admin | not started | |
 | 4+ — collaboration, intelligence | not started | |
@@ -31,13 +55,14 @@ See PRD §6 (Product phases) and §22 (Recommended build sequence).
 ## Quick links
 
 - **Product spec:** [`docs/PRD.md`](docs/PRD.md)
-- **Documentation index:** [`docs/README.md`](docs/README.md)
+- **Install guide:** [`docs/user/install.md`](docs/user/install.md)
+- **Demo walkthrough:** [`docs/user/demo.md`](docs/user/demo.md)
+- **Metadata reference:** [`docs/user/metadata-reference.md`](docs/user/metadata-reference.md)
 - **Agent / contributor guide:** [`AGENTS.md`](AGENTS.md)
 - **Human contributor guide:** [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - **Architecture decision records:** [`docs/adr/`](docs/adr/)
 - **Repo layout:** [`docs/dev/repo-layout.md`](docs/dev/repo-layout.md)
-- **Versioning policy:** [`docs/dev/versioning.md`](docs/dev/versioning.md)
-- **Commit conventions:** [`docs/dev/commit-conventions.md`](docs/dev/commit-conventions.md)
+- **CI integration examples:** [`examples/ci/`](examples/ci/)
 
 ---
 
@@ -55,12 +80,12 @@ See PRD §3 for the full personas.
 
 ---
 
-## Installation (placeholder)
+## Installation
 
-The CLI is not yet published. When releases land, the supported install paths will be:
+The CLI is distributed as prebuilt binaries and a Cargo source-build fallback.
 
 ```bash
-# Recommended (requires cargo-binstall and published binary metadata)
+# Recommended (requires cargo-binstall)
 cargo binstall know-now
 
 # Source-build fallback
@@ -69,13 +94,11 @@ cargo install --locked know-now
 # Direct binary download from GitHub releases (Linux, macOS, Windows)
 ```
 
-See PRD §18 for distribution requirements and §20.3 for release artifacts.
+See [`docs/user/install.md`](docs/user/install.md) for prerequisites, verification, and platform-specific details.
 
 ---
 
-## Local development (placeholder)
-
-Once the workspace exists, contributors will use:
+## Local development
 
 ```bash
 cargo build
@@ -89,7 +112,7 @@ pnpm test
 pnpm build
 ```
 
-Until the workspace is scaffolded, see [`CONTRIBUTING.md`](CONTRIBUTING.md) for what to expect, [`AGENTS.md`](AGENTS.md) for invariants that must hold from the first line of code, and [`docs/dev/repo-layout.md`](docs/dev/repo-layout.md) for the planned top-level layout.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for contributor setup and [`AGENTS.md`](AGENTS.md) for invariants.
 
 ---
 
