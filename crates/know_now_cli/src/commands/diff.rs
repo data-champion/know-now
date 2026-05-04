@@ -2,6 +2,9 @@ use std::fmt::Write as _;
 use std::path::PathBuf;
 
 use know_now_diff::{diff, format_json, format_text, DiffResult};
+use know_now_gen_postgres::migrations::{
+    format_migration_file, generate_migration_stubs, MigrationCategory,
+};
 use serde::Serialize;
 
 use crate::commands::load_project_metadata;
@@ -9,6 +12,7 @@ use crate::context::CommandContext;
 use crate::output::{JsonEnvelope, OutputFormat};
 
 #[derive(Debug, clap::Args)]
+#[allow(clippy::struct_excessive_bools)]
 pub struct DiffArgs {
     /// Baseline to compare against
     #[arg(long, default_value = "last-generation")]
@@ -25,6 +29,14 @@ pub struct DiffArgs {
     /// Scan custom/ directory for references to changed objects
     #[arg(long)]
     pub scan_custom: bool,
+
+    /// Generate migration SQL stubs for detected changes
+    #[arg(long)]
+    pub migrations: bool,
+
+    /// Accept destructive changes in migration stubs (DROP TABLE, DROP COLUMN)
+    #[arg(long)]
+    pub accept_destructive: bool,
 }
 
 pub fn run(ctx: &CommandContext, args: &DiffArgs) -> anyhow::Result<()> {
@@ -62,6 +74,10 @@ pub fn run(ctx: &CommandContext, args: &DiffArgs) -> anyhow::Result<()> {
                 print_custom_scan(ctx, &result);
             }
         }
+    }
+
+    if args.migrations {
+        write_migration_stubs(ctx, &result, &right_contract, args.accept_destructive)?;
     }
 
     if args.migration_safe && result.summary.has_breaking() {
@@ -359,4 +375,110 @@ fn print_custom_scan(ctx: &CommandContext, result: &DiffResult) {
             r.file, r.line, r.match_kind, r.matched_object, r.reference_text
         );
     }
+}
+
+fn write_migration_stubs(
+    ctx: &CommandContext,
+    result: &DiffResult,
+    contract: &know_now_contract::contract::GeneratorContract,
+    accept_destructive: bool,
+) -> anyhow::Result<()> {
+    let plan = generate_migration_stubs(result, contract);
+
+    if plan.stubs.is_empty() {
+        println!("No migration stubs needed — no schema-affecting changes detected.");
+        return Ok(());
+    }
+
+    let has_destructive = plan
+        .stubs
+        .iter()
+        .any(|s| s.category == MigrationCategory::Destructive);
+    if has_destructive && !accept_destructive {
+        println!(
+            "Warning: {} destructive change(s) detected. Use --accept-destructive to include them.",
+            plan.stubs
+                .iter()
+                .filter(|s| s.category == MigrationCategory::Destructive)
+                .count()
+        );
+    }
+
+    let migrations_dir = ctx.project_root.join("generated").join("migrations");
+    std::fs::create_dir_all(&migrations_dir)?;
+
+    let seq = next_sequence_number(&migrations_dir);
+    let filename = format!("{seq:04}__migration.sql");
+    let path = migrations_dir.join(&filename);
+
+    let content = format_migration_file(&plan.stubs, accept_destructive);
+    std::fs::write(&path, &content)?;
+
+    match ctx.format {
+        OutputFormat::Json | OutputFormat::Sarif => {
+            let report = MigrationReport {
+                path: path.display().to_string(),
+                stub_count: plan.stubs.len(),
+                categories: MigrationCategorySummary {
+                    additive: plan.stubs.iter().filter(|s| s.category == MigrationCategory::Additive).count(),
+                    rename: plan.stubs.iter().filter(|s| s.category == MigrationCategory::Rename).count(),
+                    ambiguous: plan.stubs.iter().filter(|s| s.category == MigrationCategory::Ambiguous).count(),
+                    destructive: plan.stubs.iter().filter(|s| s.category == MigrationCategory::Destructive).count(),
+                },
+                accept_destructive,
+            };
+            let envelope = JsonEnvelope::success("diff migrations", &report);
+            println!("{}", serde_json::to_string_pretty(&envelope)?);
+        }
+        OutputFormat::Text | OutputFormat::Quiet => {
+            println!(
+                "\nMigration stub written to: {}",
+                path.display()
+            );
+            println!(
+                "  {} statement(s): {} additive, {} rename, {} ambiguous, {} destructive",
+                plan.stubs.len(),
+                plan.stubs.iter().filter(|s| s.category == MigrationCategory::Additive).count(),
+                plan.stubs.iter().filter(|s| s.category == MigrationCategory::Rename).count(),
+                plan.stubs.iter().filter(|s| s.category == MigrationCategory::Ambiguous).count(),
+                plan.stubs.iter().filter(|s| s.category == MigrationCategory::Destructive).count(),
+            );
+        }
+    }
+
+    Ok(())
+}
+
+#[derive(Debug, Serialize)]
+struct MigrationReport {
+    path: String,
+    stub_count: usize,
+    categories: MigrationCategorySummary,
+    accept_destructive: bool,
+}
+
+#[derive(Debug, Serialize)]
+struct MigrationCategorySummary {
+    additive: usize,
+    rename: usize,
+    ambiguous: usize,
+    destructive: usize,
+}
+
+fn next_sequence_number(dir: &std::path::Path) -> u32 {
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return 1;
+    };
+
+    let max_seq = entries
+        .flatten()
+        .filter_map(|e| {
+            let name = e.file_name();
+            let s = name.to_string_lossy();
+            s.split("__").next()?.parse::<u32>().ok()
+        })
+        .max()
+        .unwrap_or(0);
+
+    max_seq + 1
 }

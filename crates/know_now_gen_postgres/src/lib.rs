@@ -2,6 +2,7 @@
 //!
 //! Responsibility is defined in PRD section 8.2 (workspace layout).
 
+pub mod migrations;
 pub mod type_map;
 
 use know_now_codegen::artifact::{ArtifactDescriptor, ArtifactKind};

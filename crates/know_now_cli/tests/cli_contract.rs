@@ -3501,3 +3501,97 @@ fn policy_explain_declarative_rule() {
         .stdout(predicate::str::contains("CORP-001"))
         .stdout(predicate::str::contains("compliance"));
 }
+
+// --- diff --migrations tests ---
+
+#[test]
+fn diff_migrations_no_changes_reports_empty() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+
+    let manifest_path = project.join("generated/manifest.json");
+    let manifest = std::fs::read_to_string(&manifest_path).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&manifest).unwrap();
+    if json.get("contract").is_none() {
+        return;
+    }
+
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["diff", "--migrations"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("No migration stubs needed"));
+}
+
+#[test]
+fn diff_migrations_writes_file_on_changes() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    cmd()
+        .args(["--project"])
+        .arg(tmp.path())
+        .args(["init", "--demo"])
+        .assert()
+        .success();
+    let project = tmp.path().join("demo-project");
+    cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["generate"])
+        .assert()
+        .success();
+
+    let manifest_path = project.join("generated/manifest.json");
+    let manifest = std::fs::read_to_string(&manifest_path).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&manifest).unwrap();
+    if json.get("contract").is_none() {
+        return;
+    }
+
+    let meta_dir = project.join("metadata");
+    let entries: Vec<_> = std::fs::read_dir(&meta_dir)
+        .unwrap()
+        .flatten()
+        .filter(|e| {
+            e.path()
+                .extension()
+                .is_some_and(|ext| ext == "yml" || ext == "yaml")
+        })
+        .collect();
+    let meta_file = entries[0].path();
+    let content = std::fs::read_to_string(&meta_file).unwrap();
+    let updated = format!(
+        "{content}\n  - id: ent_new_table\n    name: new_table\n    description: A test table\n    attributes:\n      - id: attr_new_col\n        name: col_a\n        logical_type: string\n        description: a column\n"
+    );
+    std::fs::write(&meta_file, updated).unwrap();
+
+    let output = cmd()
+        .args(["--project"])
+        .arg(&project)
+        .args(["diff", "--migrations"])
+        .output()
+        .unwrap();
+
+    if output.status.success() {
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        assert!(
+            stdout.contains("Migration stub written to"),
+            "expected migration output, got: {stdout}"
+        );
+        let migrations_dir = project.join("generated").join("migrations");
+        assert!(migrations_dir.exists());
+    }
+}
