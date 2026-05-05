@@ -28,7 +28,7 @@ If in doubt, write the ADR. They are cheap; archaeology is expensive.
 1. Copy [`0000-template.md`](0000-template.md) to `<NNNN>-<slug>.md` using the next available 4-digit number.
 2. Fill in **Context**, **Decision**, **Alternatives considered**, **Consequences**, and **References**.
 3. Set **Status** to `Proposed`. Open a beads issue (`br`) under the appropriate Epic and discuss in the bead's `[know-now-NN]` agent-mail thread (this repo is trunk-based — there are no PRs; see [`../../AGENTS.md`](../../AGENTS.md) §7.6).
-4. On agreement, set status to `Accepted`. Stage the ADR file and request reviewer-agent review per [`../../AGENTS.md`](../../AGENTS.md) §7.8. After `Approved`, commit and push directly to `main`.
+4. On agreement, set status to `Accepted`. Stage the ADR file, run a fresh-eyes self-review per [`../../AGENTS.md`](../../AGENTS.md) §7.3 step 5, then commit and push directly to `main`.
 5. If a later ADR replaces this one, set status to `Superseded by ADR-NNNN` (do not delete the original — it remains the historical record).
 6. Add an entry to the **Index** below in the same commit.
 7. Reference the ADR from the relevant PRD section, from related code (where applicable), and from the introducing commit body.
@@ -49,5 +49,5 @@ The PRD §24 decisions table summarizes high-level decisions and their status. A
 | [0004](0004-template-renderer-minijinja-restricted.md) | Restricted MiniJinja-based template renderer profile | Accepted |
 | [0005](0005-frontend-package-manager-pnpm.md) | Frontend package manager: pnpm | Accepted |
 | [0006](0006-trunk-based-development-main-no-prs.md) | Trunk-based development on `main` with no feature branches or PRs | Accepted |
-| [0007](0007-review-gate-different-agent-via-mcp-agent-mail.md) | Code-review gate by a different agent via mcp-agent-mail | Accepted |
+| [0007](0007-review-gate-different-agent-via-mcp-agent-mail.md) | Code-review gate by a different agent via mcp-agent-mail | Superseded |
 | [0008](0008-structured-logging-tracing.md) | Structured logging via `tracing` | Accepted |

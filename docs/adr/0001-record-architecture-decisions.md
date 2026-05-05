@@ -32,7 +32,7 @@ The PRD §24 decisions table remains the high-level summary. ADRs are the place 
 
 Positive:
 
-- Architectural choices are versioned with the codebase and reviewed through the trunk workflow's reviewer-agent gate.
+- Architectural choices are versioned with the codebase alongside the implementation that introduces them.
 - New contributors can read `docs/adr/` and understand the design without reverse-engineering.
 - Supersession history is explicit; we never lose the *why* behind a reversal.
 - AI assistants can be pointed at the ADR set as a curated, high-signal context window.

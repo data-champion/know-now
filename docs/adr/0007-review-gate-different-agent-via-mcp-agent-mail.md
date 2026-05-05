@@ -1,9 +1,9 @@
 # ADR-0007: Code-review gate by a different agent via mcp-agent-mail
 
-- **Status:** Accepted
+- **Status:** Superseded — policy reversed on 2026-05-05; the cross-agent review gate has been removed in favor of fresh-eyes self-review before commit. See AGENTS.md §7.3 step 5 and §7.6.
 - **Date:** 2026-05-02
 - **Deciders:** Maintainer
-- **Related:** AGENTS.md §7.8, AGENTS.md §7.4, PRD §17.6, PRD §20.1
+- **Related:** AGENTS.md §7.4, PRD §17.6, PRD §20.1
 
 ## Context
 
@@ -44,6 +44,6 @@ Negative / costs:
 
 ## References
 
-- AGENTS.md §7.4 (mcp-agent-mail usage), §7.8 (review gate protocol).
+- AGENTS.md §7.4 (mcp-agent-mail usage).
 - PRD §17.6 (architecture fitness and enforcement posture).
 - PRD §20.1 (CI/review quality expectations).

@@ -3541,7 +3541,7 @@ Generated docs include:
 Beyond the user-facing reference in §19.1, the repository maintains a small set of contributor and maintainer documents at well-known locations so that humans and AI assistants can orient quickly without re-reading the PRD.
 
 * `README.md` (repository root): project overview, status, and entry-point links.
-* `AGENTS.md` (repository root): invariants and conventions for humans and AI agents working in the repo. Lists architecture invariants derived from §4, §8, §9, and §17.6, banned dependencies, and the workflow rules used by maintainers (Beads issue tracking, BMAD Dev Story Workflow).
+* `AGENTS.md` (repository root): invariants and conventions for humans and AI agents working in the repo. Lists architecture invariants derived from §4, §8, §9, and §17.6, banned dependencies, and the workflow rules used by maintainers (Beads issue tracking, trunk-based development on `main`).
 * `CONTRIBUTING.md` (repository root): human contributor guide covering setup, build/test/lint commands, commit conventions, and PR expectations.
 * `docs/README.md`: documentation index.
 * `docs/adr/` — Architecture Decision Records. Significant architectural choices are recorded as ADRs with status, context, alternatives, and consequences. The ADR process is documented in `docs/adr/README.md`. The PRD §24 decisions table summarizes high-level decisions; ADRs explain them and record supersession.

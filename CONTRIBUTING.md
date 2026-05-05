@@ -1,6 +1,6 @@
 # Contributing to know-now
 
-Thanks for considering a contribution. This guide focuses on **how** to contribute. The **what** lives in [`docs/PRD.md`](docs/PRD.md), and the invariants and conventions every contributor (human or AI) must respect live in [`AGENTS.md`](AGENTS.md). Read both before opening a non-trivial PR.
+Thanks for considering a contribution. This guide focuses on **how** to contribute. The **what** lives in [`docs/PRD.md`](docs/PRD.md), and the invariants and conventions every contributor (human or AI) must respect live in [`AGENTS.md`](AGENTS.md). Read both before pushing a non-trivial change.
 
 ---
 
@@ -9,7 +9,7 @@ Thanks for considering a contribution. This guide focuses on **how** to contribu
 1. Read [`AGENTS.md`](AGENTS.md) §4 (architecture invariants) and §8 (hard "don'ts"). These are non-negotiable.
 2. Skim the PRD section relevant to your change. The PRD section index is in [`AGENTS.md`](AGENTS.md#3-where-to-find-canonical-information).
 3. Check open issues (`br q` / `br ready --json`) and the [decisions table](docs/PRD.md) (PRD §24) so you don't duplicate work or revisit a decided question.
-4. For anything beyond a typo or a docs fix, open a beads issue first describing scope, intent, and PRD section. Linking the issue from your PR makes review faster.
+4. For anything beyond a typo or a docs fix, open a beads issue first describing scope, intent, and PRD section. Linking the bead in your commit body makes archaeology faster.
 
 ---
 
@@ -66,7 +66,7 @@ This repo replaces standard branch + PR practice with three coordinated conventi
 - **Trunk-based on `main`** — no feature branches, no PRs. All work lands directly on `main`; mcp-agent-mail file reservations prevent collisions. See [`AGENTS.md`](AGENTS.md) §7.6.
 - **Core Flywheel** (`br` + `bv` + `mcp-agent-mail`) for routing, claiming, file reservations, and per-bead threads. See [`AGENTS.md`](AGENTS.md) §7.2–§7.4.
 - **Beads (`br`)** for issue tracking. When you claim a Story (`in_progress`), set its parent Epic to `in_progress` if it isn't already.
-- **BMAD Dev Story Workflow with cross-agent review.** After implementing a story, **stage only the paths you reserved** (`git add <reserved-paths>`), set the bead status to `review`, post a Review-request in the bead's `[know-now-NN]` thread to a *different* agent (default identity `know-now-reviewer`), and **stop**. The reviewer agent runs `bmad-bmm-code-review` against `git diff --cached` and posts `Approved` / `Changes requested` / `Blocked`. **Do not** `git commit` until the reviewer posts `Approved`. Implementers never review their own code. See [`AGENTS.md`](AGENTS.md) §7.8 for the full protocol.
+- **Fresh-eyes self-review before commit.** After implementing a story, re-read all the code you wrote with fresh eyes (see [`AGENTS.md`](AGENTS.md) §7.3 step 5). Then **stage only the paths you reserved** (`git add <reserved-paths>`), verify with `git diff --cached`, and commit directly to `main`.
 
 If those tools aren't available in your environment, ask the maintainer rather than skipping the workflow.
 
@@ -138,27 +138,24 @@ Notes:
 - Do **not** amend or rebase commits that have already been pushed to `main`.
 - Do **not** force-push `main`. There is no upstream branch to recover from.
 - Stage only the paths you reserved. Avoid `git add -A` / `git add .` / `git commit -a` — they pull in other agents' unstaged work-in-progress.
-- The maintainer's BMAD workflow blocks committing before reviewer-agent approval — respect it.
 
 ---
 
 ## 5. Landing your change
 
-There are no pull requests in this repo. The reviewer-agent verdict in the bead's `[know-now-NN]` thread is the review of record (see [`AGENTS.md`](AGENTS.md) §7.6, §7.8). After `Approved`, you push directly to `main`.
+There are no pull requests in this repo. After your fresh-eyes self-review (see [`AGENTS.md`](AGENTS.md) §7.3 step 5), you push directly to `main` (see [`AGENTS.md`](AGENTS.md) §7.6).
 
 The end-to-end sequence is:
 
 1. **Stage** exactly the paths you reserved: `git add <reserved-paths>`. Verify with `git diff --cached`.
-2. **Request review.** Set the bead to `review` and post a Review-request in the bead thread (template in [`AGENTS.md`](AGENTS.md) §7.8). Stop. Do not commit.
-3. **Address feedback.** On `Changes requested`, fix, restage, re-request review in the same thread.
-4. **Commit and push** after `Approved`:
+2. **Commit and push:**
    ```bash
    git commit            # Conventional Commits — see docs/dev/commit-conventions.md
    git pull --rebase     # absorb anything that landed on main in the meantime
    git push origin main  # never --force
    ```
-5. **Close the bead** (`br close know-now-NN`), release file reservations, and post a Completion message including the resulting commit SHA.
-6. **Pick the next bead** with `br ready --json`. Use `bv --robot-plan` for graph context while `bv --robot-next` treats `parent-child` rollup edges as blockers.
+3. **Close the bead** (`br close know-now-NN`), release file reservations, and post a Completion message including the resulting commit SHA.
+4. **Pick the next bead** with `br ready --json`. Use `bv --robot-plan` for graph context while `bv --robot-next` treats `parent-child` rollup edges as blockers.
 
 Each commit must include in its body or footer:
 
@@ -182,7 +179,7 @@ CI runs on every push to `main` and must remain green:
 
 If CI breaks `main`, the implementer who pushed is responsible for the fix-forward (or revert) commit, coordinated in the relevant bead thread.
 
-The reviewer agent (and the maintainer) pay particular attention to:
+When self-reviewing (and during maintainer review of architectural changes), pay particular attention to:
 
 - Architecture invariants ([`AGENTS.md`](AGENTS.md) §4).
 - Determinism and ownership-boundary rules.
@@ -193,7 +190,7 @@ The reviewer agent (and the maintainer) pay particular attention to:
 
 ## 6. Architecture decisions
 
-Significant architectural choices are recorded as ADRs under [`docs/adr/`](docs/adr/). The process is in [`docs/adr/README.md`](docs/adr/README.md). If your change introduces or revisits an architectural decision, include the ADR in the same PR (or a preceding one).
+Significant architectural choices are recorded as ADRs under [`docs/adr/`](docs/adr/). The process is in [`docs/adr/README.md`](docs/adr/README.md). If your change introduces or revisits an architectural decision, include the ADR in the same commit (or a preceding one).
 
 ---
 

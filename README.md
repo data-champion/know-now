@@ -124,7 +124,7 @@ This repository uses [beads](https://github.com/) (CLI: `br`) for project-local 
 
 ## Reporting issues and contributing
 
-- Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before pushing changes. (Note: this repo is trunk-based — work lands directly on `main` after cross-agent review; there are no feature branches and no pull requests. See [`AGENTS.md`](AGENTS.md) §7.6 / §7.8.)
+- Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before pushing changes. (Note: this repo is trunk-based — work lands directly on `main`; there are no feature branches and no pull requests. See [`AGENTS.md`](AGENTS.md) §7.6.)
 - Significant architectural choices are recorded as ADRs under [`docs/adr/`](docs/adr/).
 - Product/scope questions belong against the PRD. Open an issue or proposal that cites the PRD section.
 

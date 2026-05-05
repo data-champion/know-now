@@ -109,13 +109,13 @@ The `!` after the type/scope, **and** a `BREAKING CHANGE:` footer, are both requ
 ## Pre-commit / pre-merge expectations
 
 - Do **not** skip git hooks (`--no-verify`, `--no-gpg-sign`) unless the maintainer has explicitly approved it for this commit.
-- The maintainer's BMAD Dev Story Workflow blocks committing before `bmad-bmm-code-review` has been run. Respect it. (See [`AGENTS.md`](../../AGENTS.md) §7.4.)
+- Run a fresh-eyes self-review before committing (see [`AGENTS.md`](../../AGENTS.md) §7.3 step 5).
 - Generated-output changes that affect compatibility fixtures need the fixture diff classification in the **commit body** (PRD §20.2 — there is no PR description in this repo; see [`../../AGENTS.md`](../../AGENTS.md) §7.6). The commit message itself should still be a single, focused, conventional commit.
 
 ## Why these conventions
 
 - A predictable header format lets us auto-generate changelogs and release notes (PRD §19.1, §20.3).
-- A short, well-named type makes reviewer-agent triage and `git log` archaeology faster.
+- A short, well-named type makes `git log` archaeology faster.
 - Explicit `BREAKING CHANGE` markers reduce the risk of shipping a contract bump as a routine release.
 
 ## Anti-patterns

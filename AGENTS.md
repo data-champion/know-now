@@ -257,37 +257,22 @@ Post brief Progress messages in the thread at meaningful checkpoints (e.g., "lis
 
 Before any other review, re-read **all the code you wrote** with fresh eyes, looking for obvious bugs, off-by-ones, missed edge cases, leaks of internal types across crate boundaries, or violations of the architecture invariants. Fix anything you find. Repeat until you find nothing new.
 
-**6. Stage your changes and hand off to the reviewer agent — gate before commit**
+**6. Stage your changes and commit**
 
-There are no feature branches in this repo (§7.6). All work lands directly on `main`, so the **review payload is the implementer's staged changes**, not a branch. After your fresh-eyes self-review:
+There are no feature branches in this repo (§7.6). All work lands directly on `main`. After your fresh-eyes self-review:
 
 ```bash
 # Stage exactly the paths you reserved — and nothing else.
 git add <reserved-paths-only>
-git diff --cached    # sanity-check what the reviewer will see
-```
-
-Then transition the bead and request review:
-
-```bash
-br update know-now-42 --status review
-```
-
-Post a Review-request in the bead's thread addressed to the reviewer agent (default identity `know-now-reviewer`), referencing the staged diff. **Stop.** Do not `git commit`. The implementer never runs `bmad-bmm-code-review` on their own code. Resume only after the reviewer has posted `Approved` (or after you've addressed their feedback, restaged, and they re-approve). See §7.8 for the full protocol, including the reviewer's own checklist.
-
-**7. Commit directly to `main` and push**
-
-After `Approved`:
-
-```bash
+git diff --cached    # sanity-check what's about to land
 git commit            # Conventional Commits — see §7.7 and docs/dev/commit-conventions.md
 git pull --rebase     # keep main linear; replay your commit if others landed in the meantime
 git push origin main
 ```
 
-No branch, no PR. The reviewer-agent verdict in the thread *is* the review. Cite `Closes know-now-NN` and the relevant PRD section(s) in the commit body.
+No branch, no PR. Cite `Closes know-now-NN` and the relevant PRD section(s) in the commit body.
 
-**8. Close the bead and release reservations**
+**7. Close the bead and release reservations**
 
 ```bash
 br close know-now-42       # or `br update --status closed` per project policy
@@ -306,7 +291,7 @@ Post the completion message:
 Commit <sha> pushed to main. Reservations released. Next: br ready --json.
 ```
 
-**9. Ask `br` what's ready**
+**8. Ask `br` what's ready**
 
 ```bash
 br ready --json
@@ -365,55 +350,22 @@ The repo can install `mcp-agent-mail`'s pre-commit guard (`install_precommit_gua
 
 ### 7.5 Standard marching orders for new agent sessions
 
-There are two roles: **implementer** and **reviewer**. Each has its own marching orders. A given session is exactly one role — never both — because the BMAD code-review gate (§7.8) requires a *different agent* to review the implementer's code.
-
-**Implementer marching orders** — use this prompt verbatim when launching an implementer agent.
+Use this prompt verbatim when launching a fresh agent session.
 
 ```
-You are an IMPLEMENTER agent on the know-now repository. First read
-ALL of AGENTS.md and README.md carefully. Use code investigation mode
-to understand the architecture and the architecture invariants in
-AGENTS.md §4. Register with mcp-agent-mail (macro_start_session) under
-an implementer identity and introduce yourself. Check the agent-mail
-inbox promptly. Proceed meticulously with assigned beads systematically
-— claim via br, reserve files via mcp-agent-mail, implement, do a
-fresh-eyes review on your own code, then STOP and post a Review-request
-message in the bead's thread addressed to the reviewer agent
-(default identity: `know-now-reviewer`). DO NOT run
-`bmad-bmm-code-review` on your own code. DO NOT git commit until the
-reviewer has posted `Approved` in the thread. Track progress via beads
-(br update) and per-bead agent-mail threads ([know-now-NN]). Don't get
-stuck in communication purgatory. When unsure what to work on next,
-run `bv --robot-triage`, then use `br ready --json` as the authoritative
-ready set. Use `bv --robot-plan` for graph context. Use ultrathink.
-```
-
-**Reviewer marching orders** — use this prompt verbatim when launching a reviewer agent.
-
-```
-You are the REVIEWER agent on the know-now repository. Your sole job
-is to perform `bmad-bmm-code-review` on changes produced by IMPLEMENTER
-agents and to act as the BMAD commit gate (AGENTS.md §7.8). First read
-ALL of AGENTS.md, README.md, and docs/PRD.md §4 / §8 / §9 / §17.6 so
-the architecture invariants are fresh. Register with mcp-agent-mail
-(macro_start_session) under the reviewer identity (default:
-`know-now-reviewer`). Subscribe to / poll the inbox for Review-request
-messages on `[know-now-NN]` threads. For each request:
-  1. Acknowledge in the thread.
-  2. Run `bmad-bmm-code-review` against the implementer's STAGED changes
-     (`git diff --cached`). There are no feature branches in this repo;
-     the staged set is the review payload (AGENTS.md §7.6, §7.8).
-  3. Cross-check the change against AGENTS.md §4 invariants and §8
-     hard "don'ts", and against the PRD section(s) the implementer
-     cited.
-  4. Post findings as a Review-feedback message — concrete file:line
-     references, severity-tagged, with a clear final verdict:
-     `Approved`, `Changes requested`, or `Blocked`.
-  5. On `Changes requested`, wait for the implementer to address and
-     re-request review. Loop until `Approved` or `Blocked`.
-You do NOT implement, commit, or claim implementation beads. You do NOT
-review your own work. If asked to implement, decline and refer to the
-implementer-agent marching orders. Use ultrathink.
+You are an agent on the know-now repository. First read ALL of AGENTS.md
+and README.md carefully. Use code investigation mode to understand the
+architecture and the architecture invariants in AGENTS.md §4. Register
+with mcp-agent-mail (macro_start_session) under your identity and
+introduce yourself. Check the agent-mail inbox promptly. Proceed
+meticulously with assigned beads systematically — claim via br, reserve
+files via mcp-agent-mail, implement, do a fresh-eyes review on your own
+code, then commit directly to `main` per AGENTS.md §7.3 / §7.6. Track
+progress via beads (br update) and per-bead agent-mail threads
+([know-now-NN]). Don't get stuck in communication purgatory. When unsure
+what to work on next, run `bv --robot-triage`, then use `br ready --json`
+as the authoritative ready set. Use `bv --robot-plan` for graph context.
+Use ultrathink.
 ```
 
 If you launch multiple agents, **stagger starts by 30+ seconds** to avoid the thundering-herd problem on the agent-mail registration / `bv` triage.
@@ -423,96 +375,26 @@ If you launch multiple agents, **stagger starts by 30+ seconds** to avoid the th
 **All work happens directly on `main`. There are no feature branches and no pull requests.**
 
 - Conflict prevention is the job of mcp-agent-mail file reservations (§7.4), not of branch isolation. Reserve before you edit; release at bead close.
-- The "review payload" is the implementer's **staged changes** in the working tree (`git diff --cached`), reviewed by a different agent via mcp-agent-mail (§7.8). The reviewer-agent verdict replaces traditional PR review.
-- After `Approved`, the implementer commits directly on `main`, runs `git pull --rebase` to absorb anything that landed in the meantime, and pushes.
+- After implementing and self-reviewing your work (§7.3 step 5), commit directly on `main`, run `git pull --rebase` to absorb anything that landed in the meantime, and push.
 - Keep history linear: rebase, never merge. Conventional Commits (§7.7) carry the metadata that PR descriptions usually carry.
 - Force-pushing `main` is **forbidden** without explicit maintainer approval — there is no upstream to recover from. Ordinary `git push origin main` only.
-- Each implementer agent stages **only the paths it reserved**. This keeps the review payload to one bead's worth of change even when other implementers have unstaged work-in-progress in the same working tree.
+- Each agent stages **only the paths it reserved**. This keeps each commit scoped to one bead's worth of change even when other agents have unstaged work-in-progress in the same working tree.
 - A short-lived branch is permissible **only** for genuine maintainer operations that cannot be performed on `main` directly (e.g., bisecting an incident). Do not use branches as a workflow shortcut.
 
 ### 7.7 Commits
 
 - Commit messages follow **Conventional Commits**. See [`docs/dev/commit-conventions.md`](docs/dev/commit-conventions.md).
-- **Do not commit before the BMAD code-review gate (§7.8) has produced an `Approved` verdict from the reviewer agent.**
 - Each commit cites the relevant PRD section(s) and the beads issue ID (`Closes know-now-NN`) in the body or footer.
 - Generated-output changes that affect compatibility fixtures must include the fixture diff classification in the **commit body** (since there is no PR description): `expected formatting change`, `metadata schema change`, `generator behavior change`, `policy default change`, `bug fix`, or `breaking change` (PRD §20.2).
 - Commits that touch parser, writer, generator contract, lockfile schema, renderer profile, or local API contract require an ADR or PRD update if behavior changes. Land the ADR/PRD update **before** or **in the same commit** as the surface change — not after.
 - Stage only the paths you reserved (§7.6). One bead per commit. Do not bundle unrelated changes from other agents' in-progress work that happen to be present in the working tree.
 - `git pull --rebase` before pushing. `git push origin main` only — never `--force` (§7.6).
 
-### 7.8 Code-review gate (BMAD) — performed by a different agent via mcp-agent-mail
+### 7.8 Reviews
 
-This repo follows the maintainer's **BMAD Dev Story Workflow** as the gate before any commit. The non-negotiable rule:
-
-> **The implementer never reviews their own code.** `bmad-bmm-code-review` is run by a *separate* agent identity (the reviewer agent), and the handoff happens through mcp-agent-mail.
-
-#### Roles
-
-| Role | Identity (default) | Permitted actions |
-| ---- | ------------------ | ----------------- |
-| Implementer | one identity per implementer session (e.g. `know-now-impl-<n>`) | Claim beads, reserve files, implement, fresh-eyes self-review, request review, address feedback, commit **only after `Approved`**. |
-| Reviewer | `know-now-reviewer` (singleton, but the maintainer may run multiple) | Run `bmad-bmm-code-review`, cross-check against AGENTS.md §4 / §8 and the cited PRD sections, post findings, issue verdicts. **Does not implement.** |
-
-The reviewer must not be the same agent process as the implementer. The reviewer should be a freshly-launched session whose context is uncontaminated by the implementation. If you are unsure whether you qualify as "different enough," you don't — request a separate reviewer agent.
-
-#### Protocol (one round)
-
-1. **Implementer** finishes implementation, runs the fresh-eyes self-review (§7.3 step 5), then sets the bead status to `review`:
-   ```bash
-   br update know-now-NN --status review
-   ```
-2. **Implementer** stages exactly the paths they reserved (`git add <reserved-paths>`), verifies with `git diff --cached`, and posts a Review-request in the bead's thread:
-   ```
-   [know-now-NN] Review request
-   To: know-now-reviewer
-   Base: main @ <HEAD-sha>
-   Staged paths:
-     - crates/know_now_gen_postgres/src/...
-     - fixtures/snapshots/postgres/...
-   PRD refs: §<X.Y>, <NFR / GEN / META id>
-   Notes: <anything the reviewer should pay particular attention to>
-   ```
-   Use `mcp__mcp-agent-mail__send_message` (or `reply_message` if continuing the thread). File reservations stay in place — do **not** release them until after `Approved` and commit. There is no branch to point at; the staged diff is the review payload.
-3. **Implementer** stops. No `git commit`. No further edits to staged paths until the reviewer responds. Other agents' unstaged work-in-progress in the same working tree is irrelevant to this review — the reviewer reads `git diff --cached` only.
-4. **Reviewer** acknowledges (`acknowledge_message`) and runs `bmad-bmm-code-review` against the implementer's staged changes (`git diff --cached`). The reviewer may also inspect the working tree for context, but the review is scoped to the staged set.
-5. **Reviewer** cross-checks: architecture invariants (§4), hard "don'ts" (§8), the PRD section(s) the implementer cited, fixture diffs, lockfile / contract / API / renderer-profile compatibility, dependency policy.
-6. **Reviewer** posts a Review-feedback message in the same thread with concrete `file:line` references, severity-tagged findings, and **exactly one** of these final verdicts:
-   - `Approved` — implementer may commit.
-   - `Changes requested` — implementer addresses feedback, re-requests review, loop.
-   - `Blocked` — work cannot proceed without intervention from the maintainer (e.g., requires an ADR, a PRD update, or scope change). Implementer escalates to the maintainer in the thread.
-
-#### Loop
-
-`Changes requested` cycles back to step 1, scoped to the requested changes. Each round is a new Review-request message in the same thread. Reviewer acknowledges, re-checks the diff, and re-issues a verdict. There is no implicit cap, but if a bead requires more than three review rounds, that is a signal the bead is underspecified — escalate to the maintainer (Core Flywheel "step back into bead space").
-
-#### After `Approved`
-
-1. **Implementer** commits the staged changes per §7.7 (Conventional Commits, no `--no-verify`, no `--force`).
-2. **Implementer** runs `git pull --rebase` to absorb anything that landed on `main` in the meantime, then `git push origin main`. There is no PR — the reviewer-agent verdict in the thread is the review of record.
-3. **Implementer** closes the bead (`br close know-now-NN`) and releases file reservations (`release_file_reservations`).
-4. **Implementer** posts a Completion message in the thread (`[know-now-NN] Completed`) including the resulting commit SHA.
-5. **Implementer** asks `br ready --json` for the next ready bead.
-
-#### Recovery
-
-- **Reviewer unavailable:** if no reviewer agent is registered or the inbox is unattended, the implementer asks the maintainer in the thread before doing anything else. **Do not** self-approve.
-- **Reviewer disappears mid-review:** the maintainer launches a fresh reviewer agent, who reads the thread (`summarize_thread` if long), runs the review, and issues a verdict.
-- **Implementer disappears mid-revision:** another implementer agent picks up the bead per §7.4 recovery, and the existing thread continues.
-
-#### Hard rules (also see §8)
-
-- The implementer MUST NOT run `bmad-bmm-code-review` on their own code.
-- The implementer MUST NOT commit before an `Approved` verdict from a different agent.
-- The reviewer MUST NOT review code they wrote (across any role).
-- Bypassing the gate (including via `--no-verify` or by misrepresenting agent identity) is a hard "don't."
-
-If `bmad-bmm-code-review` or mcp-agent-mail isn't available in your environment, **ask the maintainer** rather than skipping the gate.
-
-### 7.9 Reviews
-
-- Architectural changes (parser, writer, generator contract, lockfile schema, renderer profile, local API) require explicit review by a **maintainer agent or human** in addition to the reviewer-agent gate (§7.8). Address them in the bead's thread before staging the change.
+- Architectural changes (parser, writer, generator contract, lockfile schema, renderer profile, local API) require explicit review by a **maintainer agent or human**. Address them in the bead's thread before committing.
 - Generator output changes require the fixture-diff classification in the **commit body** (PRD §20.2 — see §7.7).
-- Dependency additions/upgrades require `cargo deny check` to remain green; run it locally before requesting review.
+- Dependency additions/upgrades require `cargo deny check` to remain green; run it locally before committing.
 
 ---
 
@@ -536,15 +418,12 @@ If your change requires any of these, stop and find a different approach.
 - ❌ Skipping `cargo deny check`, license checks, or architecture fitness tests in CI.
 - ❌ Committing generated dashboard build artifacts under `web/dist/` to the repo (they are release assets, not source).
 - ❌ Skipping git hooks (`--no-verify`, `--no-gpg-sign`) without an explicit, recorded reason.
-- ❌ Committing before the reviewer agent has posted `Approved` in the bead thread (§7.8).
-- ❌ Reviewing your own code with `bmad-bmm-code-review`. The reviewer must be a *different agent identity* (§7.8).
-- ❌ Self-approving (issuing your own `Approved` verdict on your own implementation), or impersonating the reviewer identity.
 - ❌ Editing files without a current reservation through mcp-agent-mail (§7.3 step 3, §7.4).
 - ❌ Using `force_release_file_reservation` to win a conflict instead of coordinating in the bead's thread.
 - ❌ Picking the next bead by convenience instead of asking `br ready --json`.
 - ❌ Using ad-hoc chat / scrollback for coordination that belongs in a `[know-now-NN]` agent-mail thread.
 - ❌ Creating a feature branch. All work lands on `main`; conflicts are prevented by mcp-agent-mail reservations (§7.6).
-- ❌ Opening a pull request. There are no PRs in this repo; the reviewer-agent verdict in the bead thread is the review of record (§7.6, §7.8).
+- ❌ Opening a pull request. There are no PRs in this repo; commits land directly on `main` (§7.6).
 - ❌ Force-pushing `main` (`git push --force` / `--force-with-lease`) without explicit maintainer approval. There is no upstream branch to recover from.
 - ❌ `git add -A` / `git add .` / `git commit -a`. Stage only the paths you reserved (§7.6, §7.7).
 - ❌ Bundling another agent's unstaged work-in-progress into your commit by accident.
@@ -597,10 +476,8 @@ If you are an AI agent working in this repo:
 - **Reserve files before editing.** If you hit a reservation conflict, send a thread message and pick another bead — never `force_release_file_reservation` to win a conflict.
 - **Read the PRD before proposing architectural changes.** It is long but comprehensive. Use the section index in §3 to jump.
 - **Don't fabricate behavior.** If the codebase doesn't yet have a CLI, don't invent commands; check what exists.
-- **Don't bypass the workflow.** `br` + `bv` + mcp-agent-mail + BMAD review-before-commit are how this repo operates. If a tool isn't available locally, ask the user — don't skip the step.
-- **Don't commit before the reviewer agent posts `Approved`** in the bead's thread (§7.8). The implementer never runs `bmad-bmm-code-review` on their own code — request it from a different agent (default identity `know-now-reviewer`) via mcp-agent-mail. Setting the bead to `review` + posting a Review-request + stopping is the correct end-of-implementation state.
-- **One role per session.** If you were launched as an implementer, do not also act as the reviewer (and vice versa). If asked to switch roles mid-session, decline and ask for a fresh session under the other identity.
-- **Work directly on `main`.** No feature branches, no PRs (§7.6). Stage only the paths you reserved, request review, then commit straight to `main` after `Approved`. Conflict prevention is mcp-agent-mail's job, not git's.
+- **Don't bypass the workflow.** `br` + `bv` + mcp-agent-mail are how this repo operates. If a tool isn't available locally, ask the user — don't skip the step.
+- **Work directly on `main`.** No feature branches, no PRs (§7.6). Stage only the paths you reserved and commit straight to `main` after your fresh-eyes self-review. Conflict prevention is mcp-agent-mail's job, not git's.
 - **When in doubt, prefer reading more code over guessing.** Check the architecture invariants in §4 before suggesting refactors.
 - **Confirm before destructive actions** (force-push, branch deletion, dropping fixtures, removing crates, regenerating large fixture sets, `force_release_file_reservation`) even when permissions allow.
 - **Use the PRD section IDs in your output** so reviewers can verify your reasoning quickly.
