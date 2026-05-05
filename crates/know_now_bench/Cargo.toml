@@ -1,0 +1,22 @@
+[package]
+name = "know_now_bench"
+version = "0.1.0"
+edition = "2021"
+license.workspace = true
+publish = false
+description = "Performance benchmarks for know-now (NFR-P1..P13)"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+know_now_cli = { path = "../know_now_cli" }
+know_now_core = { path = "../know_now_core" }
+know_now_validate = { path = "../know_now_validate" }
+know_now_contract = { path = "../know_now_contract" }
+tempfile = "3"
+
+[[bench]]
+name = "pipeline"
+harness = false
+
+[lints]
+workspace = true

@@ -27,6 +27,7 @@ members = [
   "crates/know_now_audit",
   "crates/know_now_catalog",
   "crates/know_now_fitness",
+  "crates/know_now_bench",
   "xtask",
 ]
 

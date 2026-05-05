@@ -423,11 +423,15 @@ jobs:
             exit "$status"
           fi
 
-      - name: Benchmark smoke (non-blocking until budget harness lands)
-        continue-on-error: true
+      - name: Benchmark gate (NFR-P1..P5, NFR-P10)
         run: |
           set -euo pipefail
-          cargo xtask bench
+          bench_args=(--runs 3)
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ contains(github.event.pull_request.labels.*.name, 'approved-regression') }}" = "true" ]; then
+            echo "approved-regression label detected: enabling --allow-regression."
+            bench_args+=(--allow-regression)
+          fi
+          cargo xtask bench "${bench_args[@]}"
 
       - name: Placeholder gates for phase-dependent checks
         run: |
@@ -447,6 +451,14 @@ jobs:
         with:
           name: fixture-diff-summary
           path: fixture-diff.json
+
+      - name: Upload benchmark report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-report
+          path: target/benchmarks/latest.json
+          if-no-files-found: error
 
   postgres-live:
     if: github.event_name != 'schedule'
@@ -533,6 +545,41 @@ jobs:
         with:
           name: coverage-summary
           path: coverage.json
+
+  nightly-benchmark-memory:
+    if: github.event_name == 'schedule'
+    name: Nightly Benchmark Memory Gate
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        run: |
+          set -euo pipefail
+          rustup set profile minimal
+          rustup toolchain install "$RUSTUP_TOOLCHAIN"
+          rustup default "$RUSTUP_TOOLCHAIN"
+
+      - name: Run benchmark memory gate (non-blocking)
+        run: cargo xtask bench --runs 1 --memory-check --allow-regression
+
+      - name: Upload nightly benchmark report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-benchmark-report
+          path: target/benchmarks/latest.json
+          if-no-files-found: warn
+
+      - name: Nightly Benchmark Summary
+        if: always()
+        run: |
+          {
+            echo "## Nightly Benchmark Memory Gate"
+            echo "- Command: \`cargo xtask bench --runs 1 --memory-check --allow-regression\`"
+            echo "- Job is non-blocking to preserve nightly signal while thresholds stabilize."
+          } >> "$GITHUB_STEP_SUMMARY"
 
   nightly-redaction-fuzz:
     if: github.event_name == 'schedule'
