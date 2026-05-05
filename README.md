@@ -36,17 +36,17 @@ See [`docs/user/demo.md`](docs/user/demo.md) for a guided five-minute walkthroug
 
 ## Repository status
 
-This repository is **Phase 1 complete; Phase 2A active**. The product specification is complete; the Rust workspace builds, metadata parsing, validation, deterministic generation pipeline, and CLI are functional.
+This repository is **Phase 3 complete; Phase 4 candidate evaluation per PRD §23.5**. All PRD §23.4 technical exit criteria are satisfied. Remaining gates before the 1.0.0 release tag: consulting/pilot validation (PRD §5.2) and the NFR performance benchmark CI gate (`know-now-bsf.1`).
 
 The canonical source of truth for product, architecture, and scope decisions is [`docs/PRD.md`](docs/PRD.md).
 
 | Phase | Status | Notes |
 | ----- | ------ | ----- |
-| 1 — architecture contract spike | complete | Workspace, parser, generator contract, writer, deterministic manifest, DDL + Markdown artifacts. |
-| 2A — Rust CLI MVP | active | First publicly usable CLI. |
-| 2B — dbt, quality, diagrams, validation | not started | |
-| 3 — change safety, dashboard, admin | not started | |
-| 4+ — collaboration, intelligence | not started | |
+| 1 — architecture contract spike | complete | Workspace, parser, generator contract, writer, deterministic manifest, baseline artifacts. |
+| 2A — Rust CLI MVP | complete | Public CLI command surface and lock/check flows landed. |
+| 2B — dbt, quality, diagrams, validation | complete | dbt generation/tests, quality contracts, ER diagrams, fixture generation, artifact validation. |
+| 3 — change safety, dashboard, admin | complete | All technical exit criteria met; pilot validation + 1.0.0 tag pending maintainer sign-off. |
+| 4+ — collaboration, intelligence | deferred / not started | Candidate scope tracked under `know-now-qas*` and `know-now-kn8*`. |
 
 See PRD §6 (Product phases) and §22 (Recommended build sequence).
 

@@ -18,7 +18,9 @@ For positioning, personas, scope by phase, and detailed architecture, read [`doc
 
 ## 2. Repository status
 
-The repository is **Phase 2B complete; Phase 3 next** (PRD §23.3 exit criteria met at `7619a2c`). All Phase 1 and Phase 2A capabilities remain intact. Phase 2B adds: dbt project generation with staging/mart models, sources, schema, and dbt-native tests (relationships, accepted_values, is_valid_email, max_length, not_negative); provider-neutral quality contracts at `quality_contracts/<entity>.yml`; Mermaid ER diagram generation; deterministic synthetic fixture data; dbt toolchain adapter with 5 validation modes (none/dbt/dbt-core/dbt-fusion/docker) and capability-based identity detection; post-generation artifact validation (SQL, dbt SQL with Jinja awareness, YAML, JSON, Mermaid, Markdown links); Fixtures added to `--target all`. The Phase 2B test suite adds 25 snapshot tests across 7 crates, 8 new CLI integration tests, and brings the workspace total to 773+ tests (excluding the pre-existing `inv02` architecture fitness issue).
+The repository is **Phase 3 complete; Phase 4 candidate evaluation per §23.5**. All PRD §23.4 technical exit criteria are satisfied: diff/issues workflows, incremental generation, doctor, explain, support bundle, admin scan, approved-version catalog, dashboard views (entity list/detail/graph/docs/manifest/health/review/traceability), safe server defaults, restricted template packs, policy validation + drift, stakeholder review export, and comprehensive E2E test suites across CLI/server/dashboard. The workspace has 1009+ tests passing (excluding the pre-existing `inv02` transitive-parser-dep fitness issue tracked for resolution).
+
+Remaining gates before 1.0.0 tag: (1) consulting/pilot validation (PRD §5.2, §23.4 criterion 16), (2) `know-now-bsf.1` NFR performance benchmark suite + CI regression gate. Phase 4 entry-criteria evaluation (PRD §23.5) may begin once the maintainer confirms pilot sign-off.
 
 Treat any code you find as authoritative over any doc that disagrees with it.
 
