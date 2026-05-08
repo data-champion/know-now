@@ -5,12 +5,15 @@
 //! + runtime flag.
 
 mod api;
+pub mod launch_info;
 mod launch_token;
 mod routes;
 mod security;
 mod session;
+mod static_dashboard;
 
 use std::net::{IpAddr, SocketAddr};
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use axum::Router;
@@ -23,7 +26,10 @@ pub struct ServerConfig {
     pub host: IpAddr,
     pub port: u16,
     pub allow_generate: bool,
-    pub project_root: std::path::PathBuf,
+    pub project_root: PathBuf,
+    /// When true, write `<project_root>/.knownow/launch.json` on start and remove
+    /// it on shutdown. The CLI's `serve` command sets this; tests do not.
+    pub persist_launch_info: bool,
 }
 
 impl ServerConfig {
@@ -43,12 +49,16 @@ pub struct AppState {
 pub struct ServerHandle {
     pub url: String,
     pub launch_url: String,
+    launch_info_path: Option<PathBuf>,
     shutdown_tx: tokio::sync::oneshot::Sender<()>,
     join_handle: tokio::task::JoinHandle<()>,
 }
 
 impl ServerHandle {
     pub fn shutdown(self) {
+        if let Some(path) = self.launch_info_path.as_ref() {
+            launch_info::remove_launch_info(path);
+        }
         let _ = self.shutdown_tx.send(());
     }
 
@@ -72,6 +82,18 @@ pub async fn start_server(config: ServerConfig) -> std::io::Result<ServerHandle>
     let base_url = format!("http://{local_addr}");
     let launch_url = format!("{base_url}{launch_path}");
 
+    let launch_info_path = if config.persist_launch_info {
+        let info = launch_info::LaunchInfo::new(
+            local_addr.ip(),
+            local_addr.port(),
+            token.value().to_owned(),
+            launch_url.clone(),
+        );
+        Some(launch_info::write_launch_info(&config.project_root, &info)?)
+    } else {
+        None
+    };
+
     let state = AppState {
         config: Arc::new(config),
         launch_token: Arc::new(token),
@@ -94,6 +116,7 @@ pub async fn start_server(config: ServerConfig) -> std::io::Result<ServerHandle>
     Ok(ServerHandle {
         url: base_url,
         launch_url,
+        launch_info_path,
         shutdown_tx,
         join_handle,
     })
@@ -104,6 +127,7 @@ fn build_app(state: AppState, addr: SocketAddr) -> Router {
 
     routes::router(state.clone())
         .merge(api::router())
+        .merge(static_dashboard::router())
         .layer(security::cors_layer(&origin))
         .layer(security::x_content_type_options())
         .layer(security::x_frame_options())

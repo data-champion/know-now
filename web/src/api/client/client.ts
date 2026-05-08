@@ -105,21 +105,52 @@ export class KnowNowClient {
     });
 
     if (!response.ok) {
-      throw new ApiError(response.status, path);
+      let metadataError: MetadataErrorResponse | undefined;
+      if (response.status === 422) {
+        try {
+          const body = (await response.json()) as { kind?: string } & Partial<MetadataErrorResponse>;
+          if (body.kind === "metadata_error") {
+            metadataError = body as MetadataErrorResponse;
+          }
+        } catch {
+          // body wasn't JSON or didn't match the shape; fall through
+        }
+      }
+      throw new ApiError(response.status, path, metadataError);
     }
 
     return response.json() as Promise<T>;
   }
 }
 
+export interface MetadataErrorEntry {
+  file: string;
+  line?: number;
+  column?: number;
+  code: string;
+  message: string;
+}
+
+export interface MetadataErrorResponse {
+  kind: "metadata_error";
+  summary: string;
+  errors: MetadataErrorEntry[];
+}
+
 export class ApiError extends Error {
   readonly status: number;
   readonly path: string;
+  readonly metadataError: MetadataErrorResponse | undefined;
 
-  constructor(status: number, path: string) {
+  constructor(
+    status: number,
+    path: string,
+    metadataError?: MetadataErrorResponse,
+  ) {
     super(`API request failed: ${path} returned ${String(status)}`);
     this.name = "ApiError";
     this.status = status;
     this.path = path;
+    this.metadataError = metadataError;
   }
 }

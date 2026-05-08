@@ -22,13 +22,13 @@ test.describe("WCAG 2.2 AA — E2E accessibility", () => {
 
   test("all nav tabs are keyboard-focusable", async ({ page }) => {
     await page.goto("/");
-    const tabs = page.locator(".kn-nav__tab");
+    const tabs = page.locator(".kn-sidebar__item");
     const count = await tabs.count();
     expect(count).toBeGreaterThan(0);
 
     for (let i = 0; i < count; i++) {
       const tab = tabs.nth(i);
-      await expect(tab).toHaveAttribute("class", /kn-nav__tab/);
+      await expect(tab).toHaveAttribute("class", /kn-sidebar__item/);
     }
   });
 

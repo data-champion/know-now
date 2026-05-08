@@ -9,9 +9,16 @@ export default defineConfig({
   reporter: [["html", { open: "never" }]],
   timeout: 30_000,
   use: {
-    baseURL: "http://127.0.0.1:3827",
+    baseURL: "http://127.0.0.1:5180",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
+  },
+  webServer: {
+    command:
+      "pnpm build && pnpm preview --host 127.0.0.1 --port 5180 --strictPort",
+    url: "http://127.0.0.1:5180",
+    reuseExistingServer: !process.env["CI"],
+    timeout: 120_000,
   },
   projects: [
     {

@@ -1,7 +1,10 @@
 import { useCallback, useState } from "react";
+import { marked } from "marked";
 import type { DocFile, DocsContentResponse, DocsListResponse } from "../api/client";
 import { KnowNowClient } from "../api/client";
 import { useApi } from "../hooks/useApi";
+
+marked.setOptions({ gfm: true, breaks: false });
 
 export function DocsViewer() {
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null);
@@ -95,70 +98,11 @@ function DocContent({ path, docs }: { path: string; docs: DocFile[] }) {
 }
 
 function MarkdownRenderer({ content }: { content: string }) {
-  const html = markdownToHtml(content);
+  const html = marked.parse(content, { async: false });
   return (
     <div
       className="kn-docs__rendered"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
-}
-
-function markdownToHtml(md: string): string {
-  const lines = md.split("\n");
-  const output: string[] = [];
-  let inCodeBlock = false;
-  let inList = false;
-
-  for (const line of lines) {
-    if (line.startsWith("```")) {
-      if (inCodeBlock) {
-        output.push("</code></pre>");
-        inCodeBlock = false;
-      } else {
-        if (inList) { output.push("</ul>"); inList = false; }
-        output.push("<pre><code>");
-        inCodeBlock = true;
-      }
-      continue;
-    }
-
-    if (inCodeBlock) {
-      output.push(escapeHtml(line));
-      continue;
-    }
-
-    if (line.startsWith("# ")) {
-      if (inList) { output.push("</ul>"); inList = false; }
-      output.push(`<h1>${escapeHtml(line.slice(2))}</h1>`);
-    } else if (line.startsWith("## ")) {
-      if (inList) { output.push("</ul>"); inList = false; }
-      output.push(`<h2>${escapeHtml(line.slice(3))}</h2>`);
-    } else if (line.startsWith("### ")) {
-      if (inList) { output.push("</ul>"); inList = false; }
-      output.push(`<h3>${escapeHtml(line.slice(4))}</h3>`);
-    } else if (line.startsWith("- ") || line.startsWith("* ")) {
-      if (!inList) { output.push("<ul>"); inList = true; }
-      output.push(`<li>${escapeHtml(line.slice(2))}</li>`);
-    } else if (line.trim() === "") {
-      if (inList) { output.push("</ul>"); inList = false; }
-      output.push("");
-    } else {
-      if (inList) { output.push("</ul>"); inList = false; }
-      output.push(`<p>${escapeHtml(line)}</p>`);
-    }
-  }
-
-  if (inList) output.push("</ul>");
-  if (inCodeBlock) output.push("</code></pre>");
-
-  return output.join("\n");
-}
-
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }

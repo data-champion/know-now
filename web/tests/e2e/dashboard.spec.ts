@@ -5,7 +5,9 @@ test.describe("Dashboard E2E", () => {
     test("navigating to root without session returns 401 on API", async ({
       page,
     }) => {
-      const response = await page.request.get("/api/v1/version");
+      const response = await page.request.get(
+        "http://127.0.0.1:3827/api/v1/version",
+      );
       expect(response.status()).toBe(401);
     });
   });

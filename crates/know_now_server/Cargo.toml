@@ -6,6 +6,7 @@ license.workspace = true
 
 [features]
 allow-generate = []
+serve-dashboard = ["dep:rust-embed", "dep:mime_guess"]
 
 [dependencies]
 axum = { version = "0.8", features = ["macros"] }
@@ -15,6 +16,8 @@ hyper = "1"
 know_now_core = { version = "0.1.0", path = "../know_now_core" }
 know_now_metadata = { version = "0.1.0", path = "../know_now_metadata" }
 know_now_writer = { version = "0.1.0", path = "../know_now_writer" }
+mime_guess = { version = "2", optional = true }
+rust-embed = { version = "8", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal"] }

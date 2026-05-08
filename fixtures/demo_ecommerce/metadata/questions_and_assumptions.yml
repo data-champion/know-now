@@ -1,32 +1,16 @@
 open_questions:
   - id: q_customer_lifetime_value_refunds
-    related_objects: [ent_customer, ent_order, ent_return]
     question: Should customer lifetime value include refunded orders?
-    status: needs_stakeholder_confirmation
-    owner: marco
-    due: 2026-06-15
 
   - id: q_segment_membership_source_of_truth
-    related_objects: [ent_customer_segment, rel_customer_segment]
     question: Is customer segment membership mastered in CRM or ERP?
-    status: blocking
-    owner: priya
-    due: 2026-06-10
 
   - id: q_inventory_snapshot_sla
-    related_objects: [ent_inventory, src_tbl_erp_inventory]
     question: Is the inventory snapshot SLA 12h or 24h for all regions?
-    status: open
-    owner: sanne
-    due: 2026-06-20
 
 assumptions:
   - id: asm_order_currency_scope
-    related_objects: [ent_order, attr_order_total_amount]
     statement: Order totals are stored in the transaction currency and not normalized to a base currency.
-    confidence: medium
 
   - id: asm_customer_country_code_iso
-    related_objects: [ent_customer, attr_customer_country_code, ent_address, attr_address_country_code]
     statement: Country code values conform to ISO-3166 alpha-2.
-    confidence: high
