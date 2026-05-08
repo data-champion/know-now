@@ -1,19 +1,9 @@
 sources:
-  - id: src_shopify
-    name: shopify
-    type: application_export
-    freshness:
-      expected_interval: 24h
-      warn_after: 36h
-      error_after: 72h
+  - name: shopify
+    kind: application_export
     tables:
-      - id: src_tbl_shopify_customers
-        name: customers
-        target_entity: customer
-        grain: one_row_per_customer
-        load_pattern: incremental
-        incremental_key: updated_at
-        transformation_intent: staging_to_entity
+      - name: customers
+        entity: customer
         columns:
           - source: id
             target: customer_id
@@ -26,13 +16,8 @@ sources:
           - source: updated_at
             target: updated_at
 
-      - id: src_tbl_shopify_orders
-        name: orders
-        target_entity: order
-        grain: one_row_per_order
-        load_pattern: incremental
-        incremental_key: updated_at
-        transformation_intent: staging_to_entity
+      - name: orders
+        entity: order
         columns:
           - source: id
             target: order_id
@@ -47,13 +32,8 @@ sources:
           - source: updated_at
             target: updated_at
 
-      - id: src_tbl_shopify_returns
-        name: returns
-        target_entity: return
-        grain: one_row_per_return
-        load_pattern: incremental
-        incremental_key: processed_at
-        transformation_intent: staging_to_entity
+      - name: returns
+        entity: return
         columns:
           - source: id
             target: return_id
@@ -68,20 +48,11 @@ sources:
           - source: processed_at
             target: processed_at
 
-  - id: src_erp
-    name: erp
-    type: warehouse_extract
-    freshness:
-      expected_interval: 12h
-      warn_after: 18h
-      error_after: 36h
+  - name: erp
+    kind: warehouse_extract
     tables:
-      - id: src_tbl_erp_products
-        name: products
-        target_entity: product
-        grain: one_row_per_product
-        load_pattern: full_refresh
-        transformation_intent: staging_to_entity
+      - name: products
+        entity: product
         columns:
           - source: product_uuid
             target: product_id
@@ -94,12 +65,8 @@ sources:
           - source: category
             target: category_code
 
-      - id: src_tbl_erp_suppliers
-        name: suppliers
-        target_entity: supplier
-        grain: one_row_per_supplier
-        load_pattern: full_refresh
-        transformation_intent: staging_to_entity
+      - name: suppliers
+        entity: supplier
         columns:
           - source: supplier_uuid
             target: supplier_id
@@ -112,13 +79,8 @@ sources:
           - source: country_code
             target: country_code
 
-      - id: src_tbl_erp_inventory
-        name: inventory_snapshot
-        target_entity: inventory
-        grain: one_row_per_product_per_day
-        load_pattern: incremental
-        incremental_key: snapshot_date
-        transformation_intent: staging_to_entity
+      - name: inventory_snapshot
+        entity: inventory
         columns:
           - source: snapshot_uuid
             target: inventory_id

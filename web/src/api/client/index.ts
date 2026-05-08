@@ -33,4 +33,9 @@ export type {
   VersionResponse,
 } from "./types";
 
-export { KnowNowClient } from "./client";
+export {
+  ApiError,
+  KnowNowClient,
+  type MetadataErrorEntry,
+  type MetadataErrorResponse,
+} from "./client";

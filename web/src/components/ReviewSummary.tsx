@@ -7,6 +7,8 @@ import type {
 } from "../api/client";
 import { KnowNowClient } from "../api/client";
 import { useApi } from "../hooks/useApi";
+import { Card } from "./ui/Card";
+import { PageHeader } from "./ui/PageHeader";
 
 type ReviewTab = "summary" | "questions" | "approval";
 
@@ -22,34 +24,45 @@ export function ReviewSummary() {
   const [tab, setTab] = useState<ReviewTab>("summary");
 
   return (
-    <section className="kn-review" aria-label="Review">
-      <div className="kn-review__tabs">
-        <button
-          className={`kn-nav__tab${tab === "summary" ? " kn-nav__tab--active" : ""}`}
-          onClick={() => { setTab("summary"); }}
-        >
-          Summary
-        </button>
-        <button
-          className={`kn-nav__tab${tab === "questions" ? " kn-nav__tab--active" : ""}`}
-          onClick={() => { setTab("questions"); }}
-        >
-          Open Questions
-        </button>
-        <button
-          className={`kn-nav__tab${tab === "approval" ? " kn-nav__tab--active" : ""}`}
-          onClick={() => { setTab("approval"); }}
-        >
-          Change Approval
-        </button>
-      </div>
+    <div className="kn-page">
+      <div className="kn-page__inner">
+        <PageHeader
+          title="Review"
+          description="Stakeholder summary, open questions, and change approval."
+        />
 
-      <div className="kn-review__content">
+        <div className="kn-review__tabs" role="tablist" aria-label="Review sections">
+          <button
+            role="tab"
+            aria-selected={tab === "summary"}
+            className={`kn-nav__tab${tab === "summary" ? " kn-nav__tab--active" : ""}`}
+            onClick={() => { setTab("summary"); }}
+          >
+            Summary
+          </button>
+          <button
+            role="tab"
+            aria-selected={tab === "questions"}
+            className={`kn-nav__tab${tab === "questions" ? " kn-nav__tab--active" : ""}`}
+            onClick={() => { setTab("questions"); }}
+          >
+            Open Questions
+          </button>
+          <button
+            role="tab"
+            aria-selected={tab === "approval"}
+            className={`kn-nav__tab${tab === "approval" ? " kn-nav__tab--active" : ""}`}
+            onClick={() => { setTab("approval"); }}
+          >
+            Change Approval
+          </button>
+        </div>
+
         {tab === "summary" && <SummaryView />}
         {tab === "questions" && <QuestionsView />}
         {tab === "approval" && <ApprovalView />}
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -93,54 +106,56 @@ function SummaryView() {
 
   return (
     <div className="kn-review__summary">
-      <div className="kn-review__actions">
-        <button className="kn-btn" onClick={exportMarkdown}>
-          Export Markdown
-        </button>
-        <button
-          className="kn-btn kn-btn--secondary"
-          onClick={() => {
-            void navigator.clipboard.writeText(window.location.origin + window.location.pathname);
-          }}
-        >
-          Copy Stakeholder Link
-        </button>
-      </div>
-
-      <div className="kn-review__stats">
-        <div className="kn-review__stat">
-          <span className="kn-review__stat-value">{String(entities.length)}</span>
-          <span className="kn-review__stat-label">Entities</span>
+      <Card title="Overview" actions={
+        <>
+          <button className="kn-btn" onClick={exportMarkdown}>Export Markdown</button>
+          <button
+            className="kn-btn kn-btn--secondary"
+            onClick={() => {
+              void navigator.clipboard.writeText(window.location.origin + window.location.pathname);
+            }}
+          >
+            Copy Stakeholder Link
+          </button>
+        </>
+      }>
+        <div className="kn-review__stats">
+          <div className="kn-review__stat">
+            <span className="kn-review__stat-value">{String(entities.length)}</span>
+            <span className="kn-review__stat-label">Entities</span>
+          </div>
+          <div className="kn-review__stat">
+            <span className="kn-review__stat-value">{String(relationships.length)}</span>
+            <span className="kn-review__stat-label">Relationships</span>
+          </div>
+          <div className="kn-review__stat">
+            <span className="kn-review__stat-value">{String(questions.length)}</span>
+            <span className="kn-review__stat-label">Open Questions</span>
+          </div>
         </div>
-        <div className="kn-review__stat">
-          <span className="kn-review__stat-value">{String(relationships.length)}</span>
-          <span className="kn-review__stat-label">Relationships</span>
-        </div>
-        <div className="kn-review__stat">
-          <span className="kn-review__stat-value">{String(questions.length)}</span>
-          <span className="kn-review__stat-label">Open Questions</span>
-        </div>
-      </div>
+      </Card>
 
-      <h3>Entities</h3>
-      <ul className="kn-review__list">
-        {entities.map((e) => (
-          <li key={e.id ?? e.name}>
-            <strong>{e.name}</strong>
-            {e.description && <span className="kn-review__desc"> — {e.description}</span>}
-          </li>
-        ))}
-      </ul>
+      <Card title="Entities">
+        <ul className="kn-review__list">
+          {entities.map((e) => (
+            <li key={e.id ?? e.name}>
+              <strong>{e.name}</strong>
+              {e.description && <span className="kn-review__desc"> — {e.description}</span>}
+            </li>
+          ))}
+        </ul>
+      </Card>
 
-      <h3>Relationships</h3>
-      <ul className="kn-review__list">
-        {relationships.map((r) => (
-          <li key={r.id ?? `${r.from_entity}-${r.to_entity}`}>
-            {r.from_entity} → {r.to_entity}
-            {r.cardinality && <span className="kn-review__desc"> ({r.cardinality})</span>}
-          </li>
-        ))}
-      </ul>
+      <Card title="Relationships">
+        <ul className="kn-review__list">
+          {relationships.map((r) => (
+            <li key={r.id ?? `${r.from_entity}-${r.to_entity}`}>
+              {r.from_entity} → {r.to_entity}
+              {r.cardinality && <span className="kn-review__desc"> ({r.cardinality})</span>}
+            </li>
+          ))}
+        </ul>
+      </Card>
     </div>
   );
 }
@@ -163,20 +178,19 @@ function QuestionsView() {
   );
 
   return (
-    <div className="kn-review__questions">
-      <div className="kn-review__filter">
-        <select
-          aria-label="Filter by priority"
-          value={priorityFilter}
-          onChange={(e) => { setPriorityFilter(e.target.value); }}
-          className="kn-domain-filter"
-        >
-          <option value="">All priorities</option>
-          {priorities.map((p) => (
-            <option key={p} value={p ?? ""}>{p}</option>
-          ))}
-        </select>
-      </div>
+    <Card title="Open Questions" actions={
+      <select
+        aria-label="Filter by priority"
+        value={priorityFilter}
+        onChange={(e) => { setPriorityFilter(e.target.value); }}
+        className="kn-domain-filter"
+      >
+        <option value="">All priorities</option>
+        {priorities.map((p) => (
+          <option key={p} value={p ?? ""}>{p}</option>
+        ))}
+      </select>
+    }>
       <table className="kn-review__table" aria-label="Open questions register">
         <thead>
           <tr>
@@ -197,7 +211,7 @@ function QuestionsView() {
           ))}
         </tbody>
       </table>
-    </div>
+    </Card>
   );
 }
 
@@ -213,7 +227,7 @@ function ApprovalView() {
   }, []);
 
   return (
-    <div className="kn-review__approval">
+    <Card title="Change Approval">
       <p className="kn-health__muted">
         Set review status for each entity. State is stored locally.
       </p>
@@ -247,6 +261,6 @@ function ApprovalView() {
           })}
         </tbody>
       </table>
-    </div>
+    </Card>
   );
 }

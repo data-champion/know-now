@@ -14,6 +14,7 @@ pub mod policy;
 pub mod review;
 pub mod schema;
 pub mod serve;
+pub mod session;
 pub mod support;
 pub mod validate;
 pub mod version;

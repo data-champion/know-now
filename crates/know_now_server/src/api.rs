@@ -6,11 +6,11 @@ use axum::response::{IntoResponse, Response};
 use axum::routing::get;
 use axum::Router;
 use axum_extra::extract::cookie::CookieJar;
-use know_now_core::project_loader;
+use know_now_core::project_loader::{self, LoadError};
 use know_now_metadata::authoring::AuthoringMetadata;
 use know_now_metadata::budgets::ParserBudgets;
 use know_now_writer::manifest::ManifestV1;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::AppState;
 
@@ -45,24 +45,85 @@ fn require_session(state: &AppState, jar: &CookieJar) -> Result<(), Response> {
     }
 }
 
+#[derive(Debug, Serialize)]
+struct MetadataErrorEntry {
+    file: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    line: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    column: Option<u32>,
+    code: String,
+    message: String,
+}
+
+#[derive(Debug, Serialize)]
+struct MetadataErrorResponse {
+    kind: &'static str,
+    summary: String,
+    errors: Vec<MetadataErrorEntry>,
+}
+
 #[allow(clippy::result_large_err)]
 fn load_metadata(project_root: &Path) -> Result<AuthoringMetadata, Response> {
     let metadata_dir = project_root.join("metadata");
     if !metadata_dir.is_dir() {
+        let body = MetadataErrorResponse {
+            kind: "metadata_error",
+            summary: format!(
+                "no metadata/ directory found at {}",
+                project_root.display()
+            ),
+            errors: vec![],
+        };
         return Err((
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "no metadata/ directory found",
+            StatusCode::UNPROCESSABLE_ENTITY,
+            axum::Json(body),
         )
             .into_response());
     }
     project_loader::load_project(&metadata_dir, &ParserBudgets::default())
         .map(|p| p.metadata)
-        .map_err(|e| {
-            (
+        .map_err(|e| match e {
+            LoadError::Parse(parse_errors) => {
+                let entries: Vec<_> = parse_errors
+                    .iter()
+                    .map(|err| MetadataErrorEntry {
+                        file: err.location.file.display().to_string(),
+                        line: err.location.line,
+                        column: err.location.column,
+                        code: err.kind.code().to_owned(),
+                        message: err.kind.to_string(),
+                    })
+                    .collect();
+                let body = MetadataErrorResponse {
+                    kind: "metadata_error",
+                    summary: format!(
+                        "Project metadata could not be loaded: {} parse error(s)",
+                        entries.len()
+                    ),
+                    errors: entries,
+                };
+                (StatusCode::UNPROCESSABLE_ENTITY, axum::Json(body)).into_response()
+            }
+            LoadError::VersionMismatch { .. } => {
+                let body = MetadataErrorResponse {
+                    kind: "metadata_error",
+                    summary: e.to_string(),
+                    errors: vec![MetadataErrorEntry {
+                        file: String::new(),
+                        line: None,
+                        column: None,
+                        code: "META-VER-MISMATCH".to_owned(),
+                        message: e.to_string(),
+                    }],
+                };
+                (StatusCode::UNPROCESSABLE_ENTITY, axum::Json(body)).into_response()
+            }
+            LoadError::Io(io_err) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                format!("failed to load project: {e}"),
+                format!("I/O error while loading project: {io_err}"),
             )
-                .into_response()
+                .into_response(),
         })
 }
 

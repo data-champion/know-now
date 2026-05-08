@@ -12,3 +12,7 @@ web/playwright-report/
 
 # Docker Compose user override (created from docker-compose.override.yml.example)
 docker-compose.override.yml
+
+target
+**/.knownow
+**/generated

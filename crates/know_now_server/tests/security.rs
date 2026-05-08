@@ -9,6 +9,7 @@ fn localhost_config() -> ServerConfig {
         port: 0,
         allow_generate: false,
         project_root: PathBuf::from("/tmp"),
+        persist_launch_info: false,
     }
 }
 
@@ -314,6 +315,7 @@ fn a1_non_localhost_detected() {
         port: 0,
         allow_generate: false,
         project_root: PathBuf::from("/tmp"),
+        persist_launch_info: false,
     };
     assert!(!config.is_localhost());
 }

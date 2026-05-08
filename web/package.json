@@ -10,12 +10,14 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "lint": "eslint src/"
   },
   "dependencies": {
+    "marked": "^18.0.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { KnowNowClient } from "../api/client";
 
 let client: KnowNowClient | null = null;
@@ -14,17 +14,15 @@ export function useApi<T>(fetcher: (client: KnowNowClient) => Promise<T>) {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(true);
-  const fetcherRef = useRef(fetcher);
-  fetcherRef.current = fetcher;
 
   const load = useCallback(() => {
     setLoading(true);
     setError(null);
-    fetcherRef.current(getClient())
+    fetcher(getClient())
       .then(setData)
       .catch(setError)
       .finally(() => { setLoading(false); });
-  }, []);
+  }, [fetcher]);
 
   useEffect(() => {
     load();

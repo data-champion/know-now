@@ -1,3 +1,4 @@
+use std::io::IsTerminal;
 use std::net::IpAddr;
 
 use know_now_server::ServerConfig;
@@ -21,6 +22,10 @@ pub struct ServeArgs {
     /// Required with --allow-generate when --host is not localhost
     #[arg(long)]
     pub allow_generate_on_network: bool,
+
+    /// Do not auto-open the dashboard in a browser at startup
+    #[arg(long)]
+    pub no_browser: bool,
 }
 
 pub fn run(ctx: &CommandContext, args: &ServeArgs) -> anyhow::Result<()> {
@@ -29,6 +34,7 @@ pub fn run(ctx: &CommandContext, args: &ServeArgs) -> anyhow::Result<()> {
         port: args.port,
         allow_generate: args.allow_generate,
         project_root: ctx.project_root.clone(),
+        persist_launch_info: true,
     };
 
     if !config.is_localhost() {
@@ -45,6 +51,8 @@ pub fn run(ctx: &CommandContext, args: &ServeArgs) -> anyhow::Result<()> {
         );
     }
 
+    let auto_open = should_auto_open(args.no_browser);
+
     let rt = tokio::runtime::Runtime::new()?;
     rt.block_on(async {
         let handle = know_now_server::start_server(config).await?;
@@ -52,10 +60,28 @@ pub fn run(ctx: &CommandContext, args: &ServeArgs) -> anyhow::Result<()> {
         println!("know-now server running at {}", handle.url);
         println!("Open in browser: {}", handle.launch_url);
 
+        if auto_open {
+            if let Err(e) = opener::open(&handle.launch_url) {
+                eprintln!(
+                    "warning: failed to auto-open browser ({e}); navigate to the URL above manually"
+                );
+            }
+        }
+
         tokio::signal::ctrl_c().await.ok();
         println!("\nShutting down...");
         handle.shutdown();
 
         Ok(())
     })
+}
+
+fn should_auto_open(no_browser_flag: bool) -> bool {
+    if no_browser_flag {
+        return false;
+    }
+    if std::env::var_os("CI").is_some() {
+        return false;
+    }
+    std::io::stdout().is_terminal()
 }

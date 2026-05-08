@@ -9,6 +9,7 @@ fn localhost_config() -> ServerConfig {
         port: 0,
         allow_generate: false,
         project_root: PathBuf::from("/tmp"),
+        persist_launch_info: false,
     }
 }
 
@@ -18,6 +19,7 @@ fn project_config(root: PathBuf) -> ServerConfig {
         port: 0,
         allow_generate: false,
         project_root: root,
+        persist_launch_info: false,
     }
 }
 
@@ -55,6 +57,16 @@ open_questions:
     )
     .unwrap();
     dir
+}
+
+fn persisted_project_config(root: PathBuf) -> ServerConfig {
+    ServerConfig {
+        host: IpAddr::V4(Ipv4Addr::LOCALHOST),
+        port: 0,
+        allow_generate: false,
+        project_root: root,
+        persist_launch_info: true,
+    }
 }
 
 async fn authenticated_client(
@@ -335,6 +347,146 @@ async fn api_open_questions_returns_list() {
     let body: serde_json::Value = resp.json().await.unwrap();
     let questions = body["open_questions"].as_array().unwrap();
     assert_eq!(questions.len(), 1);
+
+    handle.shutdown();
+}
+
+// ─── Launch info persistence ─────────────────────────────────────────────────
+
+#[tokio::test]
+async fn launch_info_written_when_persist_true_then_removed_on_shutdown() {
+    let project = tempfile::tempdir().unwrap();
+    let handle = start_server(persisted_project_config(project.path().to_path_buf()))
+        .await
+        .unwrap();
+
+    let info_path = project.path().join(".knownow").join("launch.json");
+    assert!(
+        info_path.exists(),
+        "launch.json should be written when persist_launch_info=true"
+    );
+
+    let info: know_now_server::launch_info::LaunchInfo =
+        serde_json::from_slice(&std::fs::read(&info_path).unwrap()).unwrap();
+    assert_eq!(info.url, handle.launch_url);
+    assert!(handle.launch_url.contains(&info.token));
+
+    handle.shutdown();
+    assert!(
+        !info_path.exists(),
+        "launch.json should be removed on graceful shutdown"
+    );
+}
+
+#[tokio::test]
+async fn launch_info_not_written_when_persist_false() {
+    let project = tempfile::tempdir().unwrap();
+    let handle = start_server(project_config(project.path().to_path_buf()))
+        .await
+        .unwrap();
+
+    let info_path = project.path().join(".knownow").join("launch.json");
+    assert!(
+        !info_path.exists(),
+        "launch.json must not be written when persist_launch_info=false"
+    );
+
+    handle.shutdown();
+}
+
+#[tokio::test]
+async fn launch_info_token_round_trips_through_open() {
+    let project = tempfile::tempdir().unwrap();
+    let handle = start_server(persisted_project_config(project.path().to_path_buf()))
+        .await
+        .unwrap();
+
+    let info: know_now_server::launch_info::LaunchInfo =
+        serde_json::from_slice(&std::fs::read(project.path().join(".knownow/launch.json")).unwrap())
+            .unwrap();
+
+    let client = reqwest::Client::builder()
+        .redirect(reqwest::redirect::Policy::none())
+        .cookie_store(true)
+        .build()
+        .unwrap();
+    let resp = client
+        .get(format!(
+            "{}/__open?launch_token={}",
+            handle.url, info.token
+        ))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(resp.status(), 303);
+
+    handle.shutdown();
+}
+
+// ─── Structured metadata-error responses ─────────────────────────────────────
+
+#[tokio::test]
+async fn metadata_parse_error_returns_422_with_structured_body() {
+    let dir = tempfile::tempdir().unwrap();
+    let meta = dir.path().join("metadata");
+    std::fs::create_dir(&meta).unwrap();
+    // Trigger META-PAR-DESER: `not_a_real_field` is unknown on the project schema.
+    std::fs::write(
+        meta.join("project.yml"),
+        r#"version: "1.0"
+project:
+  name: bad
+  owner: x
+  not_a_real_field: oops
+"#,
+    )
+    .unwrap();
+
+    let handle = start_server(project_config(dir.path().to_path_buf()))
+        .await
+        .unwrap();
+    let client = authenticated_client(&handle).await;
+
+    let resp = client
+        .get(format!("{}/api/v1/entities", handle.url))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(resp.status(), 422);
+
+    let body: serde_json::Value = resp.json().await.unwrap();
+    assert_eq!(body["kind"], "metadata_error");
+    assert!(body["summary"].as_str().unwrap().contains("parse error"));
+    let errors = body["errors"].as_array().unwrap();
+    assert!(!errors.is_empty(), "expected at least one error entry");
+    let first = &errors[0];
+    assert_eq!(first["code"], "META-PAR-DESER");
+    assert!(first["file"].as_str().unwrap().ends_with("project.yml"));
+    assert!(first["message"].as_str().unwrap().contains("not_a_real_field"));
+
+    handle.shutdown();
+}
+
+#[tokio::test]
+async fn missing_metadata_dir_returns_422() {
+    let dir = tempfile::tempdir().unwrap();
+    let handle = start_server(project_config(dir.path().to_path_buf()))
+        .await
+        .unwrap();
+    let client = authenticated_client(&handle).await;
+
+    let resp = client
+        .get(format!("{}/api/v1/entities", handle.url))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(resp.status(), 422);
+    let body: serde_json::Value = resp.json().await.unwrap();
+    assert_eq!(body["kind"], "metadata_error");
+    assert!(body["summary"]
+        .as_str()
+        .unwrap()
+        .contains("no metadata/ directory"));
 
     handle.shutdown();
 }

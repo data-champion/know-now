@@ -1,38 +1,31 @@
 domains:
   - id: dom_commercial
     name: commercial
-    display_name: Commercial
     owner: sales_ops
     description: Customer, order, return, and lifecycle concepts.
 
   - id: dom_operations
     name: operations
-    display_name: Operations
     owner: operations_analytics
     description: Product catalog, suppliers, and inventory coverage.
 
 modules:
   - id: mod_customers
-    domain: commercial
     name: customers
     description: Customer profiles, identity, and segmentation context.
 
   - id: mod_orders
-    domain: commercial
     name: orders
     description: Order lifecycle and commercial transaction state.
 
   - id: mod_returns
-    domain: commercial
     name: returns
     description: Return and refund process tracking.
 
   - id: mod_catalog
-    domain: operations
     name: catalog
     description: Product taxonomy and commercial attributes.
 
   - id: mod_supply
-    domain: operations
     name: supply
     description: Supplier and inventory operations context.

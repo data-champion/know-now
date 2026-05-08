@@ -22,6 +22,15 @@ export function EntityList({ onSelect, selectedId }: EntityListProps) {
   const entities: Entity[] = entitiesResp?.entities ?? [];
   const domains: Domain[] = domainsResp?.domains ?? [];
 
+  const domainLabel = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const d of domains) {
+      if (d.id) map.set(d.id, d.name);
+      map.set(d.name, d.name);
+    }
+    return (key: string) => map.get(key) ?? key;
+  }, [domains]);
+
   const filtered = useMemo(() => {
     const term = search.toLowerCase();
     return entities.filter((e) => {
@@ -72,7 +81,7 @@ export function EntityList({ onSelect, selectedId }: EntityListProps) {
           >
             <span className="kn-entity-list__name">{entity.name}</span>
             {entity.domain && (
-              <span className="kn-entity-list__domain">{entity.domain}</span>
+              <span className="kn-entity-list__domain">{domainLabel(entity.domain)}</span>
             )}
             {entity.description && (
               <span className="kn-entity-list__desc">{entity.description}</span>
@@ -102,7 +111,7 @@ function DomainFilter({
     >
       <option value="">All domains</option>
       {domains.map((d) => (
-        <option key={d.id ?? d.name} value={d.name}>
+        <option key={d.id ?? d.name} value={d.id ?? d.name}>
           {d.name}
         </option>
       ))}
